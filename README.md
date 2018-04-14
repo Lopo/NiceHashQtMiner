@@ -1,0 +1,2 @@
+# NiceHashQtMiner
+NiceHash Qt Miner
