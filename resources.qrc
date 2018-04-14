@@ -1,0 +1,10 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file alias="info_black_18">resources/info_black_18.png</file>
+    <file alias="info_black_36">resources/info_black_36.png</file>
+    <file alias="logo">resources/logo.ico</file>
+    <file alias="NHM_Cash_Register_Bitcoin_transparent">resources/NHM_Cash_Register_Bitcoin_transparent.png</file>
+    <file alias="NHM_help_50px">resources/NHM_help_50px.png</file>
+    <file alias="NHM_logo_xsmall_light">resources/NHM_logo_xsmall_light.png</file>
+</qresource>
+</RCC>

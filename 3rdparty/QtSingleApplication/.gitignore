@@ -1,0 +1,7 @@
+!.gitignore
+lib
+.qmake.stash
+config.pri
+Makefile
+buildlib/*
+!buildlib/buildlib.pro
