@@ -24,7 +24,7 @@ public:
 	static void UpdatePayingForAlgo(Enums::AlgorithmType algo, double paying);
 	static void UpdateStableAlgorithms(QList<Enums::AlgorithmType> algorithms);
 
-	static bool TryGetSma(Enums::AlgorithmType algo, NiceHashSma* sma);
+	static bool TryGetSma(Enums::AlgorithmType algo, NiceHashSma& sma);
 	static bool TryGetPaying(Enums::AlgorithmType algo, double& paying);
 
 	static bool IsAlgorithmStable(Enums::AlgorithmType algo);

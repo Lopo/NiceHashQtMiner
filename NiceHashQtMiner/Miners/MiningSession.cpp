@@ -36,7 +36,7 @@ MiningSession::MiningSession(QList<ComputeDevice*>* devices, IMainFormRatesComun
 	_miningLocation=miningLocation;
 
 	_switchingManager=new AlgorithmSwitchingManager;
-	connect(_switchingManager, SIGNAL(SmaCheck()), this, SLOT(SwichMostProfitableGroupUpMethod()));
+	connect(_switchingManager, SIGNAL(SmaCheck(SmaUpdateEventArgs)), this, SLOT(SwichMostProfitableGroupUpMethod(SmaUpdateEventArgs)));
 
 	_btcAdress=btcAdress;
 	_worker=worker;

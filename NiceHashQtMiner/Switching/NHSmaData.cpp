@@ -134,18 +134,18 @@ Q_ASSERT(l);
  * @param sma Variable to place SMA in
  * @return True iff we know about this algo
  */
-bool NHSmaData::TryGetSma(Enums::AlgorithmType algo, NiceHashSma* sma)
+bool NHSmaData::TryGetSma(Enums::AlgorithmType algo, NiceHashSma& sma)
 {
 	CheckInit();
 	bool l=_currentSmaMtx.tryLock();
 Q_ASSERT(l);
 		if (_currentSma->contains(algo)) {
-			sma=_currentSma->value(algo);
+			sma=*_currentSma->value(algo);
 			return true;
 			}
 	_currentSmaMtx.unlock();
 
-	sma=nullptr;
+//	sma=nullptr;
 	return false;
 }
 
@@ -159,9 +159,9 @@ Q_ASSERT(l);
 bool NHSmaData::TryGetPaying(Enums::AlgorithmType algo, double& paying)
 {
 	CheckInit();
-	NiceHashSma* sma;
+	NiceHashSma sma;
 	if (TryGetSma(algo, sma)) {
-		paying=sma->Paying;
+		paying=sma.Paying;
 		return true;
 		}
 

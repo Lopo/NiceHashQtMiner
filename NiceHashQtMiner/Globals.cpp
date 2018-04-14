@@ -18,13 +18,13 @@ int Globals::FirstNetworkCheckTimeoutTries=10;
 
 QString Globals::GetLocationURL(Enums::AlgorithmType algorithmType, QString miningLocation, Enums::NhmConectionType connectionType)
 {
-	NiceHashSma* sma;
+	NiceHashSma sma;
 	if (!NHSmaData::TryGetSma(algorithmType, sma)) {
 		return "";
 		}
 
-	QString name=sma->Name;
-	int nPort=sma->Port;
+	QString name=sma.Name;
+	int nPort=sma.Port;
 	int sslPort=30000+nPort;
 
 	// NHMConnection.NONE
