@@ -180,7 +180,7 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 	switch (deviceGroupType) {
 		case Enums::DeviceGroupType::CPU:
 			return new QMap<Enums::MinerBaseType, QList<Algorithm*>*>({
-				{
+/*				{
 					Enums::MinerBaseType::XmrStackCPU,
 					new QList<Algorithm*>({
 						new Algorithm(Enums::MinerBaseType::XmrStackCPU, Enums::AlgorithmType::CryptoNight, "cryptonight"),
@@ -192,7 +192,7 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 					new QList<Algorithm*>({
 						new Algorithm(Enums::MinerBaseType::Xmrig, Enums::AlgorithmType::CryptoNight, "")
 						})
-					}
+					}*/
 				});
 #if WITH_AMD
 		case Enums::DeviceGroupType::AMD_OpenCL:
@@ -215,9 +215,9 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 				a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::Lbry, "lbry");
 				a->ExtraLaunchParameters=defaultParam+QStringList({"--xintensity", "512", "--worksize", "128", "--gpu-threads", "2"});
 				l->append(a);
-				a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::CryptoNight, "cryptonight");
-				a->ExtraLaunchParameters=defaultParam+QStringList({"--rawintensity", "512", "-w", "4", "-g", "2"});
-				l->append(a);
+//				a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::CryptoNight, "cryptonight");
+//				a->ExtraLaunchParameters=defaultParam+QStringList({"--rawintensity", "512", "-w", "4", "-g", "2"});
+//				l->append(a);
 				a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::Pascal, "pascal");
 				a->ExtraLaunchParameters=defaultParam+QStringList({"--intensity", "21", "-w", "64", "-g", "2"});
 				l->append(a);
@@ -231,7 +231,7 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 			ret->insert(
 				Enums::MinerBaseType::Claymore,
 				new QList<Algorithm*>({
-					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::CryptoNight, "cryptonight"),
+//					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::CryptoNight, "cryptonight"),
 					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::CryptoNightV7, "cryptonightv7"),
 					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::Equihash, "equihash"),
 					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, ""),
@@ -243,12 +243,12 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Blake2s)
 					})
 				);
-			ret->insert(
-				Enums::MinerBaseType::Claymore_old,
-				new QList<Algorithm*>({
-					new Algorithm(Enums::MinerBaseType::Claymore_old, Enums::AlgorithmType::CryptoNight, "old")
-					})
-				);
+//			ret->insert(
+//				Enums::MinerBaseType::Claymore_old,
+//				new QList<Algorithm*>({
+//					new Algorithm(Enums::MinerBaseType::Claymore_old, Enums::AlgorithmType::CryptoNight, "old")
+//					})
+//				);
 			ret->insert(
 				Enums::MinerBaseType::OptiminerAMD,
 				new QList<Algorithm*>({
@@ -279,12 +279,12 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::NeoScrypt, "neoscrypt"),
 						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Lyra2REv2, "lyra2v2"),
 						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Decred, "decred"),
-						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::CryptoNight, "cryptonight"),
+//						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::CryptoNight, "cryptonight"),
 						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Lbry, "lbry"),
 						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::X11Gost, "sib"),
 						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Blake2s, "blake2s"),
 						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Sia, "sia"),
-						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Nist5, "nist5"),
+//						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Nist5, "nist5"),
 						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Keccak, "keccak"),
 						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Skunk, "skunk")
 						})
@@ -293,7 +293,7 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 					Enums::MinerBaseType::ccminer_alexis,
 					new QList<Algorithm*>({
 						new Algorithm(Enums::MinerBaseType::ccminer_alexis, Enums::AlgorithmType::X11Gost, "sib"),
-						new Algorithm(Enums::MinerBaseType::ccminer_alexis, Enums::AlgorithmType::Nist5, "nist5"),
+//						new Algorithm(Enums::MinerBaseType::ccminer_alexis, Enums::AlgorithmType::Nist5, "nist5"),
 						new Algorithm(Enums::MinerBaseType::ccminer_alexis, Enums::AlgorithmType::Keccak, "keccak"),
 						new Algorithm(Enums::MinerBaseType::ccminer_alexis, Enums::AlgorithmType::Decred, "decred"),
 						new Algorithm(Enums::MinerBaseType::ccminer_alexis, Enums::AlgorithmType::Blake256r8_UNUSED, "blakecoin"),
@@ -392,7 +392,7 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 			if (deviceGroupType==Enums::DeviceGroupType::NVIDIA_2_1) {
 				toRemoveAlgoTypes.append({
 					Enums::AlgorithmType::DaggerHashimoto,
-					Enums::AlgorithmType::CryptoNight,
+//					Enums::AlgorithmType::CryptoNight,
 					Enums::AlgorithmType::CryptoNightV7,
 					Enums::AlgorithmType::Pascal,
 					Enums::AlgorithmType::X11Gost

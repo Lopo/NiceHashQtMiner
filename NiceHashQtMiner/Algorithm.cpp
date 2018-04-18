@@ -54,7 +54,7 @@ QString Algorithm::CurPayingRate()
 		payingRate+=BenchmarkSpeed*paying*0.000000001;
 		}
 	double secondaryPaying;
-	if (SecondaryBenchmarkSpeed>0 && IsDual() && NHSmaData::TryGetPaying(NiceHashID, secondaryPaying)) {
+	if (SecondaryBenchmarkSpeed>0 && IsDual() && NHSmaData::TryGetPaying(SecondaryNiceHashID, secondaryPaying)) {
 		payingRate+=SecondaryBenchmarkSpeed*secondaryPaying*0.000000001;
 		}
 	rate=QString::number(payingRate, 'f', 8);

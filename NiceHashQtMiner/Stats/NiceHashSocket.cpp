@@ -137,11 +137,16 @@ bool NiceHashSocket::AttemptReconnect()
 		_connectionEstablished=true;
 		}
 	for (int i=0; i<retries; i++) {
-		_webSocket->open(_webSocket->requestUrl());
-		QThread::msleep(100);
-		if (IsAlive()) {
-			_attemptingReconnect=false;
-			return true;
+		try {
+			_webSocket->open(_webSocket->requestUrl());
+			QThread::msleep(100);
+			if (IsAlive()) {
+				_attemptingReconnect=false;
+				return true;
+				}
+			}
+		catch (QException e) {
+			Helpers::ConsolePrint("SOCKET", QString("Error while attempting reconnect: %1").arg(e.what()));
 			}
 		QThread::msleep(1000);
 		}
