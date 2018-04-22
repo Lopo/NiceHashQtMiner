@@ -24,12 +24,13 @@ NiceHash Qt Miner is a try for Linux port of [NiceHash Miner Legacy](https://git
 
 ## Usage
 Compile/copy miners to appropriate dirs, some examples (I'll test and fill the following table later):
-|dir|miner|
-|---|-----|
-|bin/bin/excavator|[Excavator](https://github.com/nicehash/excavator)|
-|bin/bin/xmrig|[XMRig](https://github.com/xmrig/xmrig)|
-|bin/bin/bin_3rdparty/claymore_dual|[Claymore](https://mega.nz/#F!O4YA2JgD!n2b4iSHQDruEsYUvTQP5_w)
-|bin/bin/ccminer_x11gost|[ccminer_alexis](https://github.com/nicehash/ccminer-x11gost/tree/windows)|
+
+dir | miner
+------------ | -------------
+bin/bin/excavator | [Excavator](https://github.com/nicehash/excavator)
+bin/bin/xmrig | [XMRig](https://github.com/xmrig/xmrig)
+bin/bin/bin_3rdparty/claymore_dual | [Claymore](https://mega.nz/#F!O4YA2JgD!n2b4iSHQDruEsYUvTQP5_w)
+bin/bin/ccminer_x11gost | [ccminer_alexis](https://github.com/nicehash/ccminer-x11gost/tree/windows)
 
 Then just run bin/NiceHashQtminer and use the same way as NHML
 
