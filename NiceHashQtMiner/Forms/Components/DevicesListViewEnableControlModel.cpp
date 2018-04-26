@@ -1,5 +1,6 @@
 #include "Forms/Components/DevicesListViewEnableControlModel.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
+#include <QIcon>
 
 
 DevicesListViewEnableControlModel::DevicesListViewEnableControlModel(QObject *parent)
@@ -15,7 +16,7 @@ int DevicesListViewEnableControlModel::columnCount(const QModelIndex&/* parent*/
 	return 1;
 }
 
-QVariant DevicesListViewEnableControlModel::data(const QModelIndex& index, int role) const
+QVariant DevicesListViewEnableControlModel::data(const QModelIndex& index, int role/*=Qt::DisplayRole*/) const
 {
 	if (!index.isValid()) {
 		return QVariant();
@@ -27,7 +28,16 @@ QVariant DevicesListViewEnableControlModel::data(const QModelIndex& index, int r
 	switch (role) {
 		case Qt::DisplayRole: // 0
 			return _data.at(row).Tag->GetFullName();
-//		case Qt::DecorationRole: // 1
+		case Qt::DecorationRole: // 1
+			switch (_data.at(row).Tag->DeviceType) {
+				case Enums::DeviceType::CPU:
+					return QIcon(":/cpu");
+				case Enums::DeviceType::NVIDIA:
+					return QIcon(":/nvidia");
+				case Enums::DeviceType::AMD:
+					return QIcon(":/amd");
+				}
+			return QVariant();
 		case Qt::EditRole: // 2
 			return QVariant::fromValue<ComputeDevice*>(_data.at(row).Tag);
 //		case Qt::FontRole: // 6

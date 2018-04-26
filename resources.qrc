@@ -6,5 +6,8 @@
     <file alias="NHM_Cash_Register_Bitcoin_transparent">resources/NHM_Cash_Register_Bitcoin_transparent.png</file>
     <file alias="NHM_help_50px">resources/NHM_help_50px.png</file>
     <file alias="NHM_logo_xsmall_light">resources/NHM_logo_xsmall_light.png</file>
+    <file alias="amd">resources/amd-red.ico</file>
+    <file alias="nvidia">resources/nvidia.ico</file>
+    <file alias="cpu">resources/cpu-icon-13.jpg</file>
 </qresource>
 </RCC>
