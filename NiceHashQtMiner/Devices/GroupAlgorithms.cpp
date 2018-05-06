@@ -388,6 +388,8 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 						Enums::MinerBaseType::dtsm
 						});
 					break;
+				default: // make compiler happy
+					break;
 				}
 			if (deviceGroupType==Enums::DeviceGroupType::NVIDIA_2_1) {
 				toRemoveAlgoTypes.append({

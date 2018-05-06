@@ -103,7 +103,7 @@ std::string CudaDetection::getVendorString(nvmlPciInfo_t& nvmlPciInfo)
 void CudaDetection::PrintDevicesJson()
 {
 	cout << "[" << endl;
-	for (int i=0; i<_cudaDevices.size()-1; ++i) {
+	for (size_t i=0; i<_cudaDevices.size()-1; ++i) {
 		json_print(_cudaDevices[i]);
 		cout << "," << endl;
 		}
@@ -134,7 +134,7 @@ void CudaDetection::json_print(CudaDevice& dev)
 void CudaDetection::PrintDevicesJson_d()
 {
 	cout << "[";
-	for (int i=0; i<_cudaDevices.size()-1; ++i) {
+	for (size_t i=0; i<_cudaDevices.size()-1; ++i) {
 		json_print_d(_cudaDevices[i]);
 		cout << ",";
 		}
