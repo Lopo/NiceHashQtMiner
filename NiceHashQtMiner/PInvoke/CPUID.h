@@ -1,10 +1,8 @@
-#ifndef CPUID_H
-#define CPUID_H
+#ifndef PINVOKE_CPUID_H_
+#define PINVOKE_CPUID_H_
 
-#include <QLibrary>
 #include <QString>
-#define HAVE_STDINT_H
-#include <libcpuid/libcpuid.h>
+//#include <QLibrary>
 
 
 namespace NiceHashQtMiner {
@@ -28,9 +26,9 @@ public:
 	static void AdjustAffinity(int pid, ulong mask);
 
 private:
-	static QLibrary* lib;
+//	static QLibrary* lib;
 };
 
 }
 
-#endif // CPUID_H
+#endif
