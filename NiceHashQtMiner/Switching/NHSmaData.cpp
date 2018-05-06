@@ -55,8 +55,7 @@ void NHSmaData::InitializeIfNeeded()
 void NHSmaData::UpdateSmaPaying(QMap<Enums::AlgorithmType, double> newSma)
 {
 	CheckInit();
-	bool l=_currentSmaMtx.tryLock();
-Q_ASSERT(l);
+	_currentSmaMtx.lock();
 		foreach (Enums::AlgorithmType algo, newSma.keys()) {
 			if (_currentSma->contains(algo)) {
 				_currentSma->value(algo)->Paying=newSma.value(algo);
@@ -76,8 +75,7 @@ Q_ASSERT(l);
 void NHSmaData::UpdatePayingForAlgo(Enums::AlgorithmType algo, double paying)
 {
 	CheckInit();
-	bool l=_currentSmaMtx.tryLock();
-Q_ASSERT(l);
+	_currentSmaMtx.lock();
 		if (!_currentSma->contains(algo)) {
 			throw std::invalid_argument("Algo not setup in SMA");
 			}
@@ -99,8 +97,7 @@ void NHSmaData::UpdateStableAlgorithms(QList<Enums::AlgorithmType> algorithms)
 	sb << "Updating stable algorithms";
 	bool hasChange=false;
 
-	bool l=_stableAlgorithmsMtx.tryLock();
-Q_ASSERT(l);
+	_stableAlgorithmsMtx.lock();
 		QVector<Enums::AlgorithmType> algosEnumd=algorithms.toVector();
 		foreach (Enums::AlgorithmType algo, algosEnumd) {
 			if (!_stableAlgorithms->contains(algo)) {
@@ -137,8 +134,7 @@ Q_ASSERT(l);
 bool NHSmaData::TryGetSma(Enums::AlgorithmType algo, NiceHashSma& sma)
 {
 	CheckInit();
-	bool l=_currentSmaMtx.tryLock();
-Q_ASSERT(l);
+	_currentSmaMtx.lock();
 		if (_currentSma->contains(algo)) {
 			sma=*_currentSma->value(algo);
 			return true;
@@ -172,8 +168,7 @@ bool NHSmaData::TryGetPaying(Enums::AlgorithmType algo, double& paying)
 bool NHSmaData::IsAlgorithmStable(Enums::AlgorithmType algo)
 {
 	CheckInit();
-	bool l=_stableAlgorithmsMtx.tryLock();
-Q_ASSERT(l);
+	_stableAlgorithmsMtx.lock();
 		return _stableAlgorithms->contains(algo);
 	_stableAlgorithmsMtx.unlock();
 }
@@ -189,8 +184,7 @@ QMap<Enums::AlgorithmType, double>* NHSmaData::FilteredCurrentProfits(bool stabl
 	CheckInit();
 	QMap<Enums::AlgorithmType, double>* dict=new QMap<Enums::AlgorithmType, double>;
 
-	bool l=_currentSmaMtx.tryLock();
-Q_ASSERT(l);
+	_currentSmaMtx.lock();
 		foreach (Enums::AlgorithmType kvpKey, _currentSma->keys()) {
 			if (_stableAlgorithms->contains(kvpKey)==stable) {
 				dict->insert(kvpKey, _currentSma->value(kvpKey)->Paying);
