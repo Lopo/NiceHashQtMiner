@@ -41,16 +41,15 @@ QVariant DevicesListViewEnableControlModel::data(const QModelIndex& index, int r
 		case Qt::EditRole: // 2
 			return QVariant::fromValue<ComputeDevice*>(_data.at(row).Tag);
 //		case Qt::FontRole: // 6
-//		case Qt::BackgroundRole:
 //		case Qt::TextAlignmentRole: // 7
+		case Qt::BackgroundColorRole: // 8
+			return _data.at(row).color;
 //		case Qt::ForegroundRole: // 9
 		case Qt::CheckStateRole: // 10
 			if (!CheckBoxes) {
 				return QVariant();
 				}
 			return _data.at(row).Checked;
-		case Qt::BackgroundColorRole: // 8
-			return QVariant::fromValue<QColor>(_data.at(row).color);
 		}
 	return QVariant();
 }
@@ -77,20 +76,21 @@ bool DevicesListViewEnableControlModel::setData(const QModelIndex& index, const 
 	int row=index.row();
 	switch (role) {
 		case Qt::CheckStateRole:
-			{
-			Qt::CheckState state=value.value<Qt::CheckState>();
-			_data[row].Checked=state;
+			_data[row].Checked=value.value<Qt::CheckState>();
+			emit dataChanged(index, index, {role});
 			emit ItemChecked(row);
-			}
 			return true;
 		case Qt::BackgroundColorRole:
 			_data[row].color=value.value<QColor>();
+			emit dataChanged(index, index, {role});
 			return true;
 		case Qt::EditRole:
+			{
 			ComputeDevice* cd=value.value<ComputeDevice*>();
 			_data[row].Tag=cd;
 			_data[row].Checked= cd->Enabled? Qt::Checked : Qt::Unchecked;
-			emit dataChanged(index, index);
+			}
+			emit dataChanged(index, index, {role});
 			return true;
 		}
 	return false;

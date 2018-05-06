@@ -36,23 +36,19 @@ bool AlgorithmsListViewModel::setData(const QModelIndex& index, const QVariant& 
 	if (!index.isValid()) {
 		return false;
 		}
-	int row=index.row(),
-		col=index.column();
+	int row=index.row();
 	switch (role) {
 		case Qt::CheckStateRole:
-			{
-			Qt::CheckState state=value.value<Qt::CheckState>();
-			_data[row].Checked=state;
+			_data[row].Checked=value.value<Qt::CheckState>();
+			emit dataChanged(index, index, {role});
 			emit ItemChecked(row);
-			}
 			return true;
 		case Qt::BackgroundColorRole:
-			{
-			QColor c=value.value<QColor>();
 			_data[row].color=value.value<QColor>();
+			emit dataChanged(index, index, {role});
 			return true;
-			}
 		case Qt::EditRole:
+			int col=index.column();
 			if (col) {
 				_data[row].SubItems[col]=value.toString();
 				}
@@ -61,7 +57,7 @@ bool AlgorithmsListViewModel::setData(const QModelIndex& index, const QVariant& 
 				_data[row].Tag=algo;
 				_data[row].Checked= algo->Enabled? Qt::Checked : Qt::Unchecked;
 				}
-			emit dataChanged(index, index);
+			emit dataChanged(index, index, {role});
 			return true;
 		}
 	return false;
@@ -81,21 +77,19 @@ QVariant AlgorithmsListViewModel::data(const QModelIndex& index, int role) const
 	int col=index.column();
 	switch (role) {
 		case Qt::DisplayRole: // 0
-			{
 			return col? _data.at(row).SubItems.at(col) : QVariant();
-			}
-//		case Qt::FontRole:
-//		case Qt::BackgroundRole:
-//		case Qt::TextAlignmentRole:
+		case Qt::EditRole: // 2
+			return QVariant::fromValue<Algorithm*>(_data.at(row).Tag);
+//		case Qt::FontRole: // 6
+//		case Qt::TextAlignmentRole: // 7
+//		case Qt::BackgroundRole: // 8
+		case Qt::BackgroundColorRole: // 8
+			return _data.at(row).color;
 		case Qt::CheckStateRole: // 10
 			if (col || !CheckBoxes) {
 				return QVariant();
 				}
 			return _data.at(row).Checked;
-		case Qt::EditRole: // 2
-			return QVariant::fromValue<Algorithm*>(_data.at(row).Tag);
-		case Qt::BackgroundColorRole: // 8
-			return _data.at(row).color;
 		}
 	return QVariant();
 }
