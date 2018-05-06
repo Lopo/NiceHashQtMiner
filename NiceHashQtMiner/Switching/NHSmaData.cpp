@@ -55,13 +55,14 @@ void NHSmaData::InitializeIfNeeded()
 void NHSmaData::UpdateSmaPaying(QMap<Enums::AlgorithmType, double> newSma)
 {
 	CheckInit();
-	_currentSmaMtx.lock();
+	if (_currentSmaMtx.tryLock(1000)) {
 		foreach (Enums::AlgorithmType algo, newSma.keys()) {
 			if (_currentSma->contains(algo)) {
 				_currentSma->value(algo)->Paying=newSma.value(algo);
 				}
 			}
-	_currentSmaMtx.unlock();
+		_currentSmaMtx.unlock();
+		}
 
 	HasData_=true;
 }
@@ -75,12 +76,13 @@ void NHSmaData::UpdateSmaPaying(QMap<Enums::AlgorithmType, double> newSma)
 void NHSmaData::UpdatePayingForAlgo(Enums::AlgorithmType algo, double paying)
 {
 	CheckInit();
-	_currentSmaMtx.lock();
+	if (_currentSmaMtx.tryLock(1000)) {
 		if (!_currentSma->contains(algo)) {
 			throw std::invalid_argument("Algo not setup in SMA");
 			}
 		_currentSma->value(algo)->Paying=paying;
-	_currentSmaMtx.unlock();
+		_currentSmaMtx.unlock();
+		}
 
 	HasData_=true;
 }
@@ -97,7 +99,7 @@ void NHSmaData::UpdateStableAlgorithms(QList<Enums::AlgorithmType> algorithms)
 	sb << "Updating stable algorithms";
 	bool hasChange=false;
 
-	_stableAlgorithmsMtx.lock();
+	if (_stableAlgorithmsMtx.tryLock(1000)) {
 		QVector<Enums::AlgorithmType> algosEnumd=algorithms.toVector();
 		foreach (Enums::AlgorithmType algo, algosEnumd) {
 			if (!_stableAlgorithms->contains(algo)) {
@@ -117,7 +119,8 @@ void NHSmaData::UpdateStableAlgorithms(QList<Enums::AlgorithmType> algorithms)
 			hasChange=true;
 			break;;
 			}
-	_stableAlgorithmsMtx.unlock();
+		_stableAlgorithmsMtx.unlock();
+		}
 	if (!hasChange) {
 		sb << "\tNone changed";
 		}
@@ -134,12 +137,13 @@ void NHSmaData::UpdateStableAlgorithms(QList<Enums::AlgorithmType> algorithms)
 bool NHSmaData::TryGetSma(Enums::AlgorithmType algo, NiceHashSma& sma)
 {
 	CheckInit();
-	_currentSmaMtx.lock();
+	if (_currentSmaMtx.tryLock(1000)) {
 		if (_currentSma->contains(algo)) {
 			sma=*_currentSma->value(algo);
 			return true;
 			}
-	_currentSmaMtx.unlock();
+		_currentSmaMtx.unlock();
+		}
 
 //	sma=nullptr;
 	return false;
@@ -168,9 +172,10 @@ bool NHSmaData::TryGetPaying(Enums::AlgorithmType algo, double& paying)
 bool NHSmaData::IsAlgorithmStable(Enums::AlgorithmType algo)
 {
 	CheckInit();
-	_stableAlgorithmsMtx.lock();
+//	if (_stableAlgorithmsMtx.tryLock(1000)) {
 		return _stableAlgorithms->contains(algo);
-	_stableAlgorithmsMtx.unlock();
+//		_stableAlgorithmsMtx.unlock();
+//		}
 }
 
 /**
@@ -184,13 +189,14 @@ QMap<Enums::AlgorithmType, double>* NHSmaData::FilteredCurrentProfits(bool stabl
 	CheckInit();
 	QMap<Enums::AlgorithmType, double>* dict=new QMap<Enums::AlgorithmType, double>;
 
-	_currentSmaMtx.lock();
+	if (_currentSmaMtx.tryLock(1000)) {
 		foreach (Enums::AlgorithmType kvpKey, _currentSma->keys()) {
 			if (_stableAlgorithms->contains(kvpKey)==stable) {
 				dict->insert(kvpKey, _currentSma->value(kvpKey)->Paying);
 				}
 			}
-	_currentSmaMtx.unlock();
+		_currentSmaMtx.unlock();
+		}
 
 	return dict;
 }
