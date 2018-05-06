@@ -62,7 +62,7 @@ public:
 			QString SysFS_BusID;
 			QString modalias;
 			}; //done
-		static QList<VideoControllerData*>* AvailableVideoControllers;
+		static QList<VideoControllerData*>* AvaliableVideoControllers;
 
 		static class WindowsDisplayAdapters {
 //		private:

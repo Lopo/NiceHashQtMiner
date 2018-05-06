@@ -202,7 +202,7 @@ void ComputeDeviceManager::Query::QueryDevices(IMessageNotifier* messageNotifier
 	int nvidiaCount=0;
 	{
 		int amdCount=0;
-		foreach (VideoControllerData* vidCtrl, *AvailableVideoControllers) {
+		foreach (VideoControllerData* vidCtrl, *AvaliableVideoControllers) {
 #if WITH_NVIDIA
 			if (vidCtrl->Name.toLower().contains("nvidia") && CudaUnsupported::IsSupported(vidCtrl->Name)) {
 				nvidiaCount+=1;
@@ -311,7 +311,7 @@ void ComputeDeviceManager::Query::QueryDevices(IMessageNotifier* messageNotifier
 	MessageNotifier_=nullptr;
 }
 
-QList<ComputeDeviceManager::Query::VideoControllerData*>* ComputeDeviceManager::Query::AvailableVideoControllers=new QList<VideoControllerData*>;
+QList<ComputeDeviceManager::Query::VideoControllerData*>* ComputeDeviceManager::Query::AvaliableVideoControllers=new QList<VideoControllerData*>;
 /*
 QString ComputeDeviceManager::Query::WindowsDisplayAdapters::SafeGetProperty(QString key)
 {
@@ -320,7 +320,7 @@ QString ComputeDeviceManager::Query::WindowsDisplayAdapters::SafeGetProperty(QSt
 */
 void ComputeDeviceManager::Query::WindowsDisplayAdapters::QueryVideoControllers()
 {
-	QueryVideoControllers(AvailableVideoControllers, true);
+	QueryVideoControllers(AvaliableVideoControllers, true);
 }
 
 void ComputeDeviceManager::Query::WindowsDisplayAdapters::QueryVideoControllers(QList<ComputeDeviceManager::Query::VideoControllerData*>* avaliableVideoControllers, bool warningsEnabled)
@@ -364,14 +364,14 @@ void ComputeDeviceManager::Query::WindowsDisplayAdapters::QueryVideoControllers(
 		if (allVideoControllersOK && vidController->Status.toLower()!="ok") {
 			allVideoControllersOK=false;
 			}
-		AvailableVideoControllers->append(vidController);
+		avaliableVideoControllers->append(vidController);
 		}
 //	display_idx=hd_display_adapter(hd_data);
 //hd_dump_entry(hd_data, hd_get_device_by_idx(hd_data, display_idx), stdout);
 	hd_free_hd_list(hd);
 	hd_free_hd_data(hd_data);
 	free(hd_data);
-printf("hwinfo found cnt: %d\n", AvailableVideoControllers->count());
+//printf("hwinfo found cnt: %d\n", avaliableVideoControllers->count());
 #endif
 #if _udev_
 //libudev
@@ -393,7 +393,7 @@ printf("hwinfo found cnt: %d\n", AvailableVideoControllers->count());
 //udev_enumerate_add_match_subsystem(enumerate, "pci");
 //udev_enumerate_scan_devices(enumerate);
 //devices=udev_enumerate_get_list_entry(enumerate);
-	foreach (VideoControllerData* vcd, *AvailableVideoControllers) {
+	foreach (VideoControllerData* vcd, *avaliableVideoControllers) {
 printf("from %s\n", vcd->SysFS.toStdString().c_str());
 //		dev=udev_device_new_from_syspath(udev, vcd->SysFS.toStdString().c_str());
 dev=udev_device_new_from_subsystem_sysname(udev, "pci", vcd->SysFS_BusID.toStdString().c_str());
@@ -440,7 +440,7 @@ dev=udev_device_new_from_subsystem_sysname(udev, "pci", vcd->SysFS_BusID.toStdSt
 		path=udev_list_entry_get_name(dev_list_entry);
 //printf((QString("path=udev_list_entry_get_name: ")+path+"\n").toStdString().c_str());
 		dev=udev_device_new_from_syspath(udev, path);
-if (AvailableVideoControllers->first()->SysFS!=QString(udev_device_get_devpath(dev))) {
+if (avaliableVideoControllers->first()->SysFS!=QString(udev_device_get_devpath(dev))) {
 	udev_device_unref(dev);
 	continue;
 	}
@@ -504,7 +504,7 @@ if (AvailableVideoControllers->first()->SysFS!=QString(udev_device_get_devpath(d
 	if (warningsEnabled) {
 		if (ConfigManager.generalConfig->ShowDriverVersionWarning && !allVideoControllersOK) {
 			QString msg=International::GetText("QueryVideoControllers_NOT_ALL_OK_Msg");
-			foreach (VideoControllerData* vc, *AvailableVideoControllers) {
+			foreach (VideoControllerData* vc, *avaliableVideoControllers) {
 				if (vc->Status.toLower()!="ok") {
 					msg+="\n"+International::GetText("QueryVideoControllers_NOT_ALL_OK_Msg_Append").arg(vc->Name).arg(vc->Status).arg(vc->PNPDeviceID);
 					}
@@ -516,7 +516,7 @@ if (AvailableVideoControllers->first()->SysFS!=QString(udev_device_get_devpath(d
 
 bool ComputeDeviceManager::Query::WindowsDisplayAdapters::HasNvidiaVideoController()
 {
-	foreach (VideoControllerData* vctrl, *AvailableVideoControllers)
+	foreach (VideoControllerData* vctrl, *AvaliableVideoControllers)
 	{
 		if (vctrl->Name.toLower().contains("nvidia")) {
 			return true;
@@ -826,7 +826,7 @@ void ComputeDeviceManager::Query::Amd::QueryAmd()
 	QMap<QString, bool>* deviceDriverNoNeoscryptLyra2RE=new QMap<QString, bool>;
 	bool showWarningDialog=false;
 
-	foreach (VideoControllerData* vidContrllr, *AvailableVideoControllers) {
+	foreach (VideoControllerData* vidContrllr, *AvaliableVideoControllers) {
 		Helpers::ConsolePrint(Tag, "Checking AMD device (driver): "+vidContrllr->Name+" ("+vidContrllr->DriverVersion+")");
 
 		deviceDriverOld->insert(vidContrllr->Name, false);
@@ -933,7 +933,7 @@ void ComputeDeviceManager::Query::Amd::QueryAmd()
 											) {
 											QString pnpStr=""; // adapterInfo.strPNPString;
 											QString infSection="";
-											foreach (VideoControllerData* vCtrl, *AvailableVideoControllers) {
+											foreach (VideoControllerData* vCtrl, *AvaliableVideoControllers) {
 												if (vCtrl->PNPDeviceID==pnpStr) {
 													infSection=vCtrl->InfSection;
 													}
@@ -1062,7 +1062,7 @@ void ComputeDeviceManager::Query::Amd::QueryAmd()
 					// get video AMD controllers and sort them by RAM
 					// (find a way to get PCI BUS Numbers from PNPDeviceID)
 					QList<VideoControllerData*>* amdVideoControllers=new QList<VideoControllerData*>;
-					foreach (VideoControllerData* vcd, *AvailableVideoControllers) {
+					foreach (VideoControllerData* vcd, *AvaliableVideoControllers) {
 						if (vcd->Name.toLower().contains("amd")
 							|| vcd->Name.toLower().contains("radeon")
 							|| vcd->Name.toLower().contains("firepro")
