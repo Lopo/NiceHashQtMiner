@@ -26,7 +26,7 @@ NiceHash Qt Miner is a try for Linux port of [NiceHash Miner Legacy](https://git
 Compile/copy miners to appropriate dirs, some examples (I'll test and fill the following table later):
 
 dir | miner | notes
------------- | -------------
+----------- | ----------- | -----------
 bin/xmr-stak | [XMR-Stak](https://github.com/nicehash/xmr-stak) | fDevDonationLevel set to 0
 bin/xmrig | [XMRig](https://github.com/xmrig/xmrig) | kDefaultDonateLevel & kMinimumDonateLevel set to 0
 bin/ccminer_cryptonight | [ccminer](https://github.com/KlausT/ccminer-cryptonight) | untested
@@ -39,7 +39,6 @@ bin_3rdparty/dtsm | [dstm](https://bitcointalk.org/index.php?topic=2021765.0) |
 bin_3rdparty/ewbf | [EWBF](https://bitcointalk.org/index.php?topic=1707546) | 
 bin_3rdparty/optiminer_zcash | [OptiminerZcash](https://github.com/Optiminer/OptiminerZcash) | 
 bin_3rdparty/prospector | [Prospector](https://github.com/semtexzv/Prospector) | 
-
 bin/ccminer_x11gost | [ccminer_alexis](https://github.com/nicehash/ccminer-x11gost/tree/windows) | 
 
 Then just run bin/NiceHashQtminer and use the same way as NHML
