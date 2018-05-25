@@ -11,9 +11,9 @@ CpuComputeDevice::CpuComputeDevice(int id, QString group, QString name, int thre
 {
 	_Threads=threads;
 	_AffinityMask=affinityMask;
-	_Uuid=GetUuid(ID, GroupNames::GetGroupName(DeviceGroupType, ID), Name, DeviceGroupType);
+	Uuid_=GetUuid(ID, GroupNames::GetGroupName(DeviceGroupType, ID), Name, DeviceGroupType);
 	AlgorithmSettings=GroupAlgorithms::CreateForDeviceList(this);
-	_Index=ID;
+	Index_=ID;
 
 //	_cpuCounter=new PerformanceCounter;
 //	_cpuCounter->CategoryName="Processor";
@@ -28,8 +28,8 @@ float CpuComputeDevice::Load()
 //			return _cpuCounter.NextValue();
 //			}
 		}
-	catch (QException e) {
+	catch (QException& e) {
 		Helpers::ConsolePrint("CPUDIAG", QString(e.what()));
 		}
-	return 0;
+	return -1;
 }

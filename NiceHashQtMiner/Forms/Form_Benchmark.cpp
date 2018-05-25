@@ -16,6 +16,13 @@
 #include "Properties/Resources.h"
 
 
+QColor Form_Benchmark::DisabledColor=Qt::darkGray;
+QColor Form_Benchmark::BenchmarkedColor=QColor("#90EE90"); // lightGreen
+QColor Form_Benchmark::UnbenchmarkedColor=QColor("#ADD8E6"); // lightBlue
+
+QMutex Form_Benchmark::_runningBenchmarkThreadsMtx;
+
+
 Form_Benchmark::Form_Benchmark(QWidget *parent, Enums::BenchmarkPerformanceType benchmarkPerformanceType/*=Enums::BenchmarkPerformanceType::Standard*/, bool autostart/*=false*/)
 	: QDialog(parent)
 {
@@ -23,7 +30,7 @@ Form_Benchmark::Form_Benchmark(QWidget *parent, Enums::BenchmarkPerformanceType 
 	Resources resources;
 	setWindowIcon(resources.logo);
 
-	_StartMining=false;
+	StartMining_=false;
 
 	// clear prev pending statuses
 	foreach (ComputeDevice* dev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
@@ -37,9 +44,6 @@ Form_Benchmark::Form_Benchmark(QWidget *parent, Enums::BenchmarkPerformanceType 
 	// benchmark only unique devices
 	devicesListViewEnableControl1->SetIListItemCheckColorSetter(this);
 	devicesListViewEnableControl1->SetComputeDevices(ComputeDeviceManager.Avaliable.AllAvailableDevices);
-
-	// use this to track miner benchmark statuses
-	_benchmarkMiners=new QList<Miner*>;
 
 	InitLocale();
 
@@ -70,7 +74,7 @@ Form_Benchmark::Form_Benchmark(QWidget *parent, Enums::BenchmarkPerformanceType 
 		}
 
 	if (autostart) {
-		_exitWhenFinished=true;
+		ExitWhenFinished=true;
 		StartStopBtn_Click();
 		}
 }
@@ -109,22 +113,22 @@ void Form_Benchmark::InitializeComponent()
 	progressBarBenchmarkSteps->setObjectName("progressBarBenchmarkSteps");
 	progressBarBenchmarkSteps->setGeometry(162, 16, 161, 23);
 
-	radioButton_SelectUnbenchmarked=new QRadioButton(this);
-	radioButton_SelectUnbenchmarked->setObjectName("radioButton_SelectUnbenchmarked");
-	radioButton_SelectUnbenchmarked->setGeometry(21, 295, 260, 17);
-	radioButton_SelectUnbenchmarked->setText("Benchmark Selected Unbenchmarked Algorithms ");
-	radioButton_SelectUnbenchmarked->setChecked(true);
-	connect(radioButton_SelectUnbenchmarked, SIGNAL(toggled(bool)), this, SLOT(RadioButton_SelectedUnbenchmarked_CheckedChanged_1()));
+	radioButton_SelectedUnbenchmarked=new QRadioButton(this);
+	radioButton_SelectedUnbenchmarked->setObjectName("radioButton_SelectUnbenchmarked");
+	radioButton_SelectedUnbenchmarked->setGeometry(21, 294, 260, 17);
+	radioButton_SelectedUnbenchmarked->setText("Benchmark Selected Unbenchmarked Algorithms ");
+	radioButton_SelectedUnbenchmarked->setChecked(true);
+	connect(radioButton_SelectedUnbenchmarked, SIGNAL(toggled(bool)), this, SLOT(RadioButton_SelectedUnbenchmarked_CheckedChanged_1()));
 
 	radioButton_RE_SelectedUnbenchmarked=new QRadioButton(this);
 	radioButton_RE_SelectedUnbenchmarked->setObjectName("radioButton_RE_SelectedUnbenchmarked");
-	radioButton_RE_SelectedUnbenchmarked->setGeometry(21, 318, 192, 17);
+	radioButton_RE_SelectedUnbenchmarked->setGeometry(21, 317, 192, 17);
 	radioButton_RE_SelectedUnbenchmarked->setText("Benchmark All Selected Algorithms ");
 	connect(radioButton_RE_SelectedUnbenchmarked, SIGNAL(toggled(bool)), this, SLOT(RadioButton_RE_SelectedUnbenchmarked_CheckedChanged()));
 
 	checkBox_StartMiningAfterBenchmark=new QCheckBox(this);
 	checkBox_StartMiningAfterBenchmark->setObjectName("checkBox_StartMiningAfterBenchmark");
-	checkBox_StartMiningAfterBenchmark->setGeometry(350, 318, 161, 17);
+	checkBox_StartMiningAfterBenchmark->setGeometry(350, 317, 161, 17);
 	checkBox_StartMiningAfterBenchmark->setText("Start mining after benchmark");
 	connect(checkBox_StartMiningAfterBenchmark, SIGNAL(stateChanged(int)), this, SLOT(CheckBox_StartMiningAfterBenchmark_CheckedChanged()));
 
@@ -133,7 +137,7 @@ void Form_Benchmark::InitializeComponent()
 	algorithmsListView1->setGeometry(12, 133, 580, 155);
 	algorithmsListView1->BenchmarkCalculation=nullptr;
 	algorithmsListView1->ComunicationInterface=nullptr;
-	algorithmsListView1->setIsInBenchmark(false);
+	algorithmsListView1->IsInBenchmark(false);
 
 	benchmarkOptions1=new BenchmarkOptions(this);
 	benchmarkOptions1->setObjectName("benchmarkOptions1");
@@ -154,6 +158,82 @@ void Form_Benchmark::InitializeComponent()
 	setWindowTitle("Benchmark");
 	setFont(f);
 	connect(this, SIGNAL(closing(QCloseEvent*)), this, SLOT(FormBenchmark_New_FormClosing(QCloseEvent*)));
+}
+
+void Form_Benchmark::CalcBenchmarkDevicesAlgorithmQueue()
+{
+	_benchmarkAlgorithmsCount=0;
+	_benchmarkDevicesAlgorithmStatus=new QMap<QString, BenchmarkSettingsStatus>;
+	_benchmarkDevicesAlgorithmQueue=new QList<QPair<ComputeDevice*, QQueue<Algorithm*>*>*>;
+	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+		QQueue<Algorithm*>* algorithmQueue=new QQueue<Algorithm*>;
+		foreach (Algorithm* algo, *cDev->GetAlgorithmSettings()) {
+			if (ShoulBenchmark(algo)) {
+				algorithmQueue->enqueue(algo);
+				algo->SetBenchmarkPendingNoMsg();
+				}
+			else {
+				algo->ClearBenchmarkPending();
+				}
+			}
+
+		BenchmarkSettingsStatus status;
+		if (cDev->Enabled) {
+			_benchmarkAlgorithmsCount+=algorithmQueue->count();
+			status= algorithmQueue->count()? BenchmarkSettingsStatus::TODO : BenchmarkSettingsStatus::NONE;
+			_benchmarkDevicesAlgorithmQueue->append(new QPair<ComputeDevice*, QQueue<Algorithm*>*>(cDev, algorithmQueue));
+			}
+		else {
+			status= algorithmQueue->count()? BenchmarkSettingsStatus::DISABLED_TODO : BenchmarkSettingsStatus::DISABLED_NONE;
+			}
+		_benchmarkDevicesAlgorithmStatus->insert(cDev->Uuid(), status);
+		}
+
+	// GUI stuff
+	progressBarBenchmarkSteps->setMaximum(_benchmarkAlgorithmsCount);
+	progressBarBenchmarkSteps->setValue(0);
+	SetLabelBenchmarkSteps(0, _benchmarkAlgorithmsCount);
+	_benchmarkCurrentIndex=0;
+}
+
+void Form_Benchmark::AddToStatusCheck(ComputeDevice* device, Algorithm* algorithm)
+{
+	_statusCheckAlgos.insert(device, algorithm);
+}
+
+void Form_Benchmark::RemoveFromStatusCheck(ComputeDevice* device, Algorithm* algorithm)
+{
+	_statusCheckAlgos.remove(device);
+}
+
+void Form_Benchmark::EndBenchmarkForDevice(ComputeDevice* device, bool failedAlgos)
+{
+	_hasFailedAlgorithms=failedAlgos || _hasFailedAlgorithms;
+	_runningBenchmarkThreadsMtx.lock();
+		foreach (BenchmarkHandler* x, _runningBenchmarkThreads) {
+			if (x->Device==device) {
+				_runningBenchmarkThreads.removeAll(x);
+				}
+			}
+
+		if (_runningBenchmarkThreads.count()<=0) {
+			EndBenchmark();
+			}
+	_runningBenchmarkThreadsMtx.unlock();
+}
+
+void Form_Benchmark::SetCurrentStatus(ComputeDevice* device, Algorithm* algorithm, QString status)
+{
+	QMetaObject::invokeMethod(algorithmsListView1, "SetSpeedStatus", Q_ARG(ComputeDevice*, device), Q_ARG(Algorithm*, algorithm), Q_ARG(QString, status));
+}
+
+void Form_Benchmark::StepUpBenchmarkStepProgress()
+{
+	_benchmarkCurrentIndex++;
+	SetLabelBenchmarkSteps(_benchmarkCurrentIndex, _benchmarkAlgorithmsCount);
+	if (_benchmarkCurrentIndex<=progressBarBenchmarkSteps->maximum()) {
+		progressBarBenchmarkSteps->setValue(_benchmarkCurrentIndex);
+		}
 }
 
 void Form_Benchmark::LviSetColor(QAbstractTableModel* model, int row)
@@ -197,8 +277,10 @@ void Form_Benchmark::CopyBenchmarks()
 
 void Form_Benchmark::BenchmarkingTimer_Tick()
 {
-	if (_inBenchmark) {
-		algorithmsListView1->SetSpeedStatus(_currentDevice, _currentAlgorithm, GetDotsWaitString());
+	if (InBenchmark()) {
+		foreach (ComputeDevice* key, _statusCheckAlgos.keys()) {
+			algorithmsListView1->SetSpeedStatus(key, _statusCheckAlgos.value(key), GetDotsWaitString());
+			}
 		}
 }
 
@@ -217,19 +299,19 @@ void Form_Benchmark::InitLocale()
 	StartStopBtn->setText(International::GetText("SubmitResultDialog_StartBtn"));
 	CloseBtn->setText(International::GetText("SubmitResultDialog_CloseBtn"));
 
-	// @todo fix locale for benchmark enabled label
+	// TODO fix locale for benchmark enabled label
 	devicesListViewEnableControl1->InitLocale();
 	benchmarkOptions1->InitLocale();
 	algorithmsListView1->InitLocale();
 	groupBoxBenchmarkProgress->setTitle(International::GetText("FormBenchmark_Benchmark_GroupBoxStatus"));
-	radioButton_SelectUnbenchmarked->setText(International::GetText("FormBenchmark_Benchmark_All_Selected_Unbenchmarked"));
+	radioButton_SelectedUnbenchmarked->setText(International::GetText("FormBenchmark_Benchmark_All_Selected_Unbenchmarked"));
 	radioButton_RE_SelectedUnbenchmarked->setText(International::GetText("FormBenchmark_Benchmark_All_Selected_ReUnbenchmarked"));
 	checkBox_StartMiningAfterBenchmark->setText(International::GetText("Form_Benchmark_checkbox_StartMiningAfterBenchmark"));
 }
 
 void Form_Benchmark::StartStopBtn_Click()
 {
-	if (_inBenchmark) {
+	if (InBenchmark()) {
 		StopButonClick();
 		BenchmarkStoppedGuiSettings();
 		}
@@ -240,7 +322,7 @@ void Form_Benchmark::StartStopBtn_Click()
 
 void Form_Benchmark::StopBenchmark()
 {
-	if (_inBenchmark) {
+	if (InBenchmark()) {
 		StopButonClick();
 		BenchmarkStoppedGuiSettings();
 		}
@@ -249,40 +331,37 @@ void Form_Benchmark::StopBenchmark()
 void Form_Benchmark::BenchmarkStoppedGuiSettings()
 {
 	StartStopBtn->setText(International::GetText("Form_Benchmark_buttonStartBenchmark"));
-	// clear benchmark pending status
-	if (_currentAlgorithm!=nullptr) {
-		_currentAlgorithm->ClearBenchmarkPending();
-		}
 	QPair<ComputeDevice*, QQueue<Algorithm*>*>* deviceAlgosTuple;
 	foreach (deviceAlgosTuple, *_benchmarkDevicesAlgorithmQueue) {
 		foreach (Algorithm* algo, *deviceAlgosTuple->second) {
 			algo->ClearBenchmarkPending();
 			}
+		algorithmsListView1->RepaintStatus(deviceAlgosTuple->first->Enabled, deviceAlgosTuple->first->Uuid());
 		}
+
 	ResetBenchmarkProgressStatus();
 	CalcBenchmarkDevicesAlgorithmQueue();
 	benchmarkOptions1->setEnabled(true);
 
-	algorithmsListView1->setIsInBenchmark(false);
+	algorithmsListView1->IsInBenchmark(false);
 	devicesListViewEnableControl1->setIsInBenchmark(false);
-	if (_currentDevice!=nullptr) {
-		algorithmsListView1->RepaintStatus(_currentDevice->Enabled, _currentDevice->Uuid());
-		}
+
 	CloseBtn->setEnabled(true);
 }
 
-// @todo add list for safety and kill all miners
+// TODO add list for safety and kill all miners
 void Form_Benchmark::StopButonClick()
 {
 	_benchmarkingTimer->stop();
-	_inBenchmark=false;
+	InBenchmark_=false;
 	Helpers::ConsolePrint("FormBenchmark", "StopButtonClick() benchmark routine stopped");
 	// copy benchmarked
-	if (_currentMiner!=nullptr) {
-		_currentMiner->BenchmarkSignalQuit=true;
-		_currentMiner->InvokeBenchmarkSignalQuit();
-		}
-	if (_exitWhenFinished) {
+	_runningBenchmarkThreadsMtx.lock();
+		foreach (BenchmarkHandler* handler, _runningBenchmarkThreads) {
+			handler->InvokeQuit();
+			}
+	_runningBenchmarkThreadsMtx.unlock();
+	if (ExitWhenFinished) {
 		close();
 		}
 }
@@ -319,12 +398,17 @@ bool Form_Benchmark::StartButonClick()
 			}
 	}
 
-	// current failed new list
-	_benchmarkFailedAlgoPerDev=new QList<DeviceAlgo*>;
-	// disable gui controls
+	_hasFailedAlgorithms=false;
+	_statusCheckAlgos.clear();
+//	if (_runningBenchmarkThreadsMtx.tryLock(1000)) {
+		_runningBenchmarkThreads.clear();
+//		_runningBenchmarkThreadsMtx.unlock();
+//		}
+
+		// disable gui controls
 	benchmarkOptions1->setEnabled(false);
 	CloseBtn->setEnabled(false);
-	algorithmsListView1->setIsInBenchmark(true);
+	algorithmsListView1->IsInBenchmark(true);
 	devicesListViewEnableControl1->setIsInBenchmark(true);
 	// set benchmark pending status
 	QPair<ComputeDevice*, QQueue<Algorithm*>*>* deviceAlgosTuple;
@@ -332,9 +416,9 @@ bool Form_Benchmark::StartButonClick()
 		foreach (Algorithm* algo, *deviceAlgosTuple->second) {
 			algo->SetBenchmarkPending();
 			}
-		}
-	if (_currentDevice!=nullptr) {
-		algorithmsListView1->RepaintStatus(_currentDevice->Enabled, _currentDevice->Uuid());
+		if (deviceAlgosTuple->first!=nullptr) {
+			algorithmsListView1->RepaintStatus(deviceAlgosTuple->first->Enabled, deviceAlgosTuple->first->Uuid());
+			}
 		}
 
 	StartBenchmark();
@@ -342,43 +426,9 @@ bool Form_Benchmark::StartButonClick()
 	return true;
 }
 
-void Form_Benchmark::CalcBenchmarkDevicesAlgorithmQueue()
-{
-	_benchmarkAlgorithmsCount=0;
-	_benchmarkDevicesAlgorithmStatus=new QMap<QString, BenchmarkSettingsStatus>;
-	_benchmarkDevicesAlgorithmQueue=new QList<QPair<ComputeDevice*, QQueue<Algorithm*>*>*>;
-	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
-		QQueue<Algorithm*>* algorithmQueue=new QQueue<Algorithm*>;
-		foreach (Algorithm* algo, *cDev->GetAlgorithmSettings()) {
-			if (ShoulBenchmark(algo)) {
-				algorithmQueue->enqueue(algo);
-				algo->SetBenchmarkPendingNoMsg();
-				}
-			else {
-				algo->ClearBenchmarkPending();
-				}
-			}
-
-		BenchmarkSettingsStatus status=BenchmarkSettingsStatus::NONE;
-		if (cDev->Enabled) {
-			_benchmarkAlgorithmsCount+=algorithmQueue->count();
-			status= algorithmQueue->count()? BenchmarkSettingsStatus::TODO : BenchmarkSettingsStatus::NONE;
-			_benchmarkDevicesAlgorithmQueue->append(new QPair<ComputeDevice*, QQueue<Algorithm*>*>(cDev, algorithmQueue));
-			}
-		else {
-			status= algorithmQueue->count()? BenchmarkSettingsStatus::DISABLED_TODO : BenchmarkSettingsStatus::DISABLED_NONE;
-			}
-		_benchmarkDevicesAlgorithmStatus->insert(cDev->Uuid(), status);
-		}
-	// GUI stuff
-	progressBarBenchmarkSteps->setMaximum(_benchmarkAlgorithmsCount);
-	progressBarBenchmarkSteps->setValue(0);
-	SetLabelBenchmarkSteps(0, _benchmarkAlgorithmsCount);
-}
-
 bool Form_Benchmark::ShoulBenchmark(Algorithm* algorithm)
 {
-	bool isBenchmarked=algorithm->BenchmarkSpeed>0;
+	bool isBenchmarked=!algorithm->BenchmarkNeeded();
 	if (_algorithmOption==Enums::AlgorithmBenchmarkSettingsType::SelectedUnbenchmarkedAlgorithms
 		&& !isBenchmarked
 		&& algorithm->Enabled
@@ -400,101 +450,30 @@ bool Form_Benchmark::ShoulBenchmark(Algorithm* algorithm)
 
 void Form_Benchmark::StartBenchmark()
 {
-	_inBenchmark=true;
-	_benchmarkCurrentIndex=-1;
-	NextBenchmark();
-}
-
-void Form_Benchmark::NextBenchmark()
-{
-	if (_benchmarkCurrentIndex>-1) {
-		StepUpBenchmarkStepProgress();
-		}
-	++_benchmarkCurrentIndex;
-	if (_benchmarkCurrentIndex>=_benchmarkAlgorithmsCount) {
-		EndBenchmark();
-		return;
-		}
-
-	QPair<ComputeDevice*, QQueue<Algorithm*>*>* currentDeviceAlgosTuple=nullptr;
-	QQueue<Algorithm*>* algorithmBenchmarkQueue=nullptr;
-	while (_benchmarkDevicesAlgorithmQueue->count()>0) {
-		currentDeviceAlgosTuple=_benchmarkDevicesAlgorithmQueue->at(0);
-		_currentDevice=currentDeviceAlgosTuple->first;
-		algorithmBenchmarkQueue=currentDeviceAlgosTuple->second;
-		if (algorithmBenchmarkQueue->count()) {
-			_currentAlgorithm=algorithmBenchmarkQueue->dequeue();
-			break;
+	InBenchmark_=true;
+	_runningBenchmarkThreadsMtx.lock();
+		QPair<ComputeDevice*, QQueue<Algorithm*>*>* pair;
+		foreach (pair, *_benchmarkDevicesAlgorithmQueue) {
+			_runningBenchmarkThreads.append(new BenchmarkHandler(pair->first, *pair->second, this, benchmarkOptions1->PerformanceType()));
 			}
-		_benchmarkDevicesAlgorithmQueue->removeAt(0);
-		}
-
-	if (_currentDevice!=nullptr && _currentAlgorithm!=nullptr) {
-		_currentMiner=MinerFactory::CreateMiner(_currentDevice, _currentAlgorithm);
-		if (_currentAlgorithm->MinerBaseType==Enums::MinerBaseType::XmrStackCPU
-			&& (_currentAlgorithm->NiceHashID==Enums::AlgorithmType::CryptoNight || _currentAlgorithm->NiceHashID==Enums::AlgorithmType::CryptoNightV7)
-			&& _currentAlgorithm->ExtraLaunchParameters.isEmpty()
-			&& !_currentAlgorithm->ExtraLaunchParameters.contains("enable_ht=true")
-			) {
-			_cpuBenchmarkStatus=new CpuBenchmarkStatus(Globals::ThreadsPerCpu);
-			_currentAlgorithm->LessThreads=_cpuBenchmarkStatus->LessThreads();
+		// Don't start until list is populated
+		foreach (BenchmarkHandler* thread, _runningBenchmarkThreads) {
+			thread->Start();
 			}
-		else {
-//			if (_cpuBenchmarkStatus!=nullptr) {delete _cpuBenchmarkStatus;}
-			_cpuBenchmarkStatus=nullptr;
-			}
-		if (_currentAlgorithm->MinerBaseType==Enums::MinerBaseType::Claymore
-			&& _currentAlgorithm->NiceHashID==Enums::AlgorithmType::Equihash
-			&& !_currentAlgorithm->ExtraLaunchParameters.isEmpty()
-			&& !_currentAlgorithm->ExtraLaunchParameters.contains("-asm")
-			) {
-			_claymoreZcashStatus=new ClaymoreZcashStatus(_currentAlgorithm->ExtraLaunchParameters);
-			_currentAlgorithm->ExtraLaunchParameters=_claymoreZcashStatus->GetTestExtraParams();
-			}
-		else {
-//			if (_claymoreZcashStatus!=nullptr) {delete _claymoreZcashStatus;}
-			_claymoreZcashStatus=nullptr;
-			}
-		}
+	_runningBenchmarkThreadsMtx.unlock();
 
-	if (_currentMiner!=nullptr && _currentAlgorithm!=nullptr) {
-		_benchmarkMiners->append(_currentMiner);
-		_currentAlgoName=AlgorithmNiceHashNames::GetName(_currentAlgorithm->NiceHashID);
-		_currentMiner->InitBenchmarkSetup(new MiningPair(_currentDevice, _currentAlgorithm));
-
-		if (_currentDevice!=nullptr) {
-			int time=ConfigManager.generalConfig->BenchmarkTimeLimits->GetBenchmarktime(benchmarkOptions1->PerformanceType(), _currentDevice->DeviceGroupType);
-			if (_cpuBenchmarkStatus!=nullptr) {
-				_cpuBenchmarkStatus->Time=time;
-				}
-			if (_claymoreZcashStatus!=nullptr) {
-				_claymoreZcashStatus->Time=time;
-				}
-
-			// dagger about 4 minutes
-//			int showWaitTime= _currentAlgorithm->NiceHashID==Enums::AlgorithmType::DaggerHashimoto? 4*60 : time;
-
-			_dotCount=0;
-			_benchmarkingTimer->start();
-
-			_currentMiner->BenchmarkStart(time, this);
-			}
-		algorithmsListView1->SetSpeedStatus(_currentDevice, _currentAlgorithm, GetDotsWaitString());
-		}
-	else {
-		NextBenchmark();
-		}
+	_benchmarkingTimer->start();
 }
 
 void Form_Benchmark::EndBenchmark()
 {
 	_benchmarkingTimer->stop();
-	_inBenchmark=false;
+	InBenchmark_=false;
 	Helpers::ConsolePrint("FormBenchmark", "EndBenchmark() benchmark routine finished");
 
 	BenchmarkStoppedGuiSettings();
 	// check if all ok
-	if (!_benchmarkFailedAlgoPerDev->count() && StartMining()==false) {
+	if (!_hasFailedAlgorithms && StartMining()==false) {
 		QMessageBox::information(this, International::GetText("FormBenchmark_Benchmark_Finish_MsgBox_Title"), International::GetText("FormBenchmark_Benchmark_Finish_Succes_MsgBox_Msg"), QMessageBox::Ok);
 		}
 	else if (StartMining()==false) {
@@ -512,107 +491,9 @@ void Form_Benchmark::EndBenchmark()
 				}
 			}
 		}
-	if (_exitWhenFinished || StartMining()) {
+	if (ExitWhenFinished || StartMining()) {
 		close();
 		}
-}
-
-void Form_Benchmark::SetCurrentStatus(QString status)
-{
-//	algorithmsListView1.SetSpeedStatus(_currentDevice, _currentAlgorithm, getDotsWaitString());
-	QMetaObject::invokeMethod(algorithmsListView1, "SetSpeedStatus", Q_ARG(ComputeDevice*, _currentDevice), Q_ARG(Algorithm*, _currentAlgorithm), Q_ARG(QString, GetDotsWaitString()));
-}
-
-void Form_Benchmark::OnBenchmarkComplete(bool success, QString status)
-{
-	if (!_inBenchmark) {
-		return;
-		}
-	QMetaObject::invokeMethod(this, [=]{
-		_benchmarkedSuccesCount+= success? 1 : 0;
-		bool rebenchSame=false;
-		if (success
-			&& _cpuBenchmarkStatus!=nullptr
-			&& _cpuAlgos->contains(_currentAlgorithm->NiceHashID)
-			&& _currentAlgorithm->MinerBaseType==Enums::MinerBaseType::XmrStackCPU
-			) {
-			_cpuBenchmarkStatus->SetNextSpeed(_currentAlgorithm->BenchmarkSpeed);
-			rebenchSame=_cpuBenchmarkStatus->HasTest();
-			_currentAlgorithm->LessThreads=_cpuBenchmarkStatus->LessThreads();
-			if (!rebenchSame) {
-				_cpuBenchmarkStatus->FindFastest();
-				_currentAlgorithm->BenchmarkSpeed=_cpuBenchmarkStatus->GetBestSpeed();
-				_currentAlgorithm->LessThreads=_cpuBenchmarkStatus->GetLessThreads();
-				}
-			}
-
-		if (_claymoreZcashStatus!=nullptr
-			&& _currentAlgorithm->MinerBaseType==Enums::MinerBaseType::Claymore
-			&& _currentAlgorithm->NiceHashID==Enums::AlgorithmType::Equihash
-			) {
-			if (_claymoreZcashStatus->HasTest()) {
-				_currentMiner=MinerFactory::CreateMiner(_currentDevice, _currentAlgorithm);
-				rebenchSame=true;
-				_claymoreZcashStatus->SetSpeed(_currentAlgorithm->BenchmarkSpeed);
-				_claymoreZcashStatus->SetNext();
-				_currentAlgorithm->ExtraLaunchParameters=_claymoreZcashStatus->GetTestExtraParams();
-				Helpers::ConsolePrint("ClaymoreAMD_Equihash", _currentAlgorithm->ExtraLaunchParameters.join(' '));
-				_currentMiner->InitBenchmarkSetup(new MiningPair(_currentDevice, _currentAlgorithm));
-				}
-
-			if (!_claymoreZcashStatus->HasTest()) {
-				rebenchSame=false;
-				// set fastest mode
-				_currentAlgorithm->BenchmarkSpeed=_claymoreZcashStatus->GetFastestTime();
-				_currentAlgorithm->ExtraLaunchParameters=_claymoreZcashStatus->GetFastestExtraParams();
-				}
-			}
-
-		if (!rebenchSame) {
-			_benchmarkingTimer->stop();
-			}
-
-		if (!success && !rebenchSame) {
-			// add new failed list
-			DeviceAlgo* da=new DeviceAlgo;
-			da->Device=_currentDevice->Name;
-			da->Algorithm=_currentAlgorithm->AlgorithmName;
-			_benchmarkFailedAlgoPerDev->append(da);
-			algorithmsListView1->SetSpeedStatus(_currentDevice, _currentAlgorithm, status);
-			}
-		else if (!rebenchSame) {
-			// set status to empty string it will return speed
-			_currentAlgorithm->ClearBenchmarkPending();
-			algorithmsListView1->SetSpeedStatus(_currentDevice, _currentAlgorithm, "");
-			}
-		if (rebenchSame) {
-			if (_cpuBenchmarkStatus!=nullptr) {
-				_currentMiner->BenchmarkStart(_cpuBenchmarkStatus->Time, this);
-				}
-			else if (_claymoreZcashStatus!=nullptr) {
-				_currentMiner->BenchmarkStart(_claymoreZcashStatus->Time, this);
-				}
-			}
-		else {
-			NextBenchmark();
-			}
-		});
-}
-
-void Form_Benchmark::SetLabelBenchmarkSteps(int current, int max)
-{
-	labelBenchmarkSteps->setText(International::GetText("FormBenchmark_Benchmark_Step").arg(current).arg(max));
-}
-
-void Form_Benchmark::StepUpBenchmarkStepProgress()
-{
-	SetLabelBenchmarkSteps(_benchmarkCurrentIndex+1, _benchmarkAlgorithmsCount);
-	progressBarBenchmarkSteps->setValue(_benchmarkCurrentIndex+1);
-}
-
-void Form_Benchmark::ResetBenchmarkProgressStatus()
-{
-	progressBarBenchmarkSteps->setValue(0);
 }
 
 void Form_Benchmark::CloseBtn_Click()
@@ -622,7 +503,7 @@ void Form_Benchmark::CloseBtn_Click()
 
 void Form_Benchmark::FormBenchmark_New_FormClosing(QCloseEvent* e)
 {
-	if (_inBenchmark) {
+	if (InBenchmark()) {
 		e->ignore();
 		return;
 		}
@@ -641,7 +522,7 @@ void Form_Benchmark::FormBenchmark_New_FormClosing(QCloseEvent* e)
 		if (cdev->Enabled) {
 			bool Enabled=false;
 			foreach (Algorithm* algo, *cdev->GetAlgorithmSettings()) {
-				if (algo->BenchmarkSpeed>0) {
+				if (algo->BenchmarkSpeed()>0) {
 					Enabled=true;
 					break;
 					}
@@ -679,7 +560,17 @@ void Form_Benchmark::RadioButton_RE_SelectedUnbenchmarked_CheckedChanged()
 
 void Form_Benchmark::CheckBox_StartMiningAfterBenchmark_CheckedChanged()
 {
-	_StartMining=checkBox_StartMiningAfterBenchmark->isChecked();
+	StartMining_=checkBox_StartMiningAfterBenchmark->isChecked();
+}
+
+void Form_Benchmark::SetLabelBenchmarkSteps(int current, int max)
+{
+	labelBenchmarkSteps->setText(International::GetText("FormBenchmark_Benchmark_Step").arg(current).arg(max));
+}
+
+void Form_Benchmark::ResetBenchmarkProgressStatus()
+{
+	progressBarBenchmarkSteps->setValue(0);
 }
 
 void Form_Benchmark::closeEvent(QCloseEvent* ev)

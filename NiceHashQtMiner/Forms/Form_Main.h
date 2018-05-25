@@ -21,7 +21,7 @@ class Form_Main
 	Q_OBJECT
 
 public:
-	Form_Main(QWidget *parent=Q_NULLPTR);
+	Form_Main(QWidget* parent=Q_NULLPTR);
 	virtual ~Form_Main() {};
 
 	enum class StartMiningReturnType {
@@ -95,13 +95,14 @@ private Q_SLOTS:
 	void StartupTimer_Tick();
 	void SmaCallback();
 	void VersionBurnCallback();
+	void ExchangeCallback();
 	void ConnectionLostCallback();
 	void ConnectionEstablishedCallback();
 	void IdleCheck_Tick();
 	void BalanceCallback();
 	void VersionUpdateCallback();
 //	void SetVersionLabelCallback();
-	void BitcoinExchangeCheck_Tick();
+//	void BitcoinExchangeCheck_Tick();
 	void MinerStatsCheck_Tick();
 //	void SMAMinerCheck_Tick(); // @deprecated Deprecated in favour of AlgorithmSwitchingManager timer
 	void ComputeDevicesCheckTimer_Tick();
@@ -115,7 +116,7 @@ private:
 
 	QTimer* _minerStatsCheck=nullptr;
 //	QTimer* _smaMinerCheck=nullptr;
-	QTimer* _bitcoinExchangeCheck=nullptr;
+//	QTimer* _bitcoinExchangeCheck=nullptr;
 	QTimer* _startupTimer=nullptr;
 	QTimer* _idleCheck=nullptr;
 	QTimer* _computeDevicesCheckTimer=nullptr;
@@ -150,6 +151,7 @@ private:
 	void Form_Main_Shown();
 	void InitFlowPanelStart();
 	void UpdateGlobalRate();
+	void UpdateExchange();
 	bool VerifyMiningAddress(bool showError);
 	void Form1_FormClosing(); //done
 	QString FormatPayingOutput(double paying);

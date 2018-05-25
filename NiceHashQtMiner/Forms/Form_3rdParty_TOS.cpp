@@ -9,7 +9,7 @@ Form_3rdParty_TOS::Form_3rdParty_TOS(QWidget* parent)
 {
 	InitializeComponent();
 
-	// @todo update 3rd party TOS
+	// TODO update 3rd party TOS
 	setWindowTitle(International::GetText("Form_Main_3rdParty_Title"));
 	label_Tos->setText(International::GetText("Form_Main_3rdParty_Text"));
 	button_Agree->setText(International::GetText("Form_Main_3rdParty_Button_Agree_Text"));

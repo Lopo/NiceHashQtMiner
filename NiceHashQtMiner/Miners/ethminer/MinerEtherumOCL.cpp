@@ -30,7 +30,7 @@ QStringList MinerEtherumOCL::GetStartCommandStringPart(QString url, QString user
 {
 	QStringList ret;
 	ret << "--opencl" << "--opencl-platform" << QString::number(_gpuPlatformNumber)
-			<< ExtraLaunchParametersParser::ParseForMiningSetup(_MiningSetup, Enums::DeviceType::AMD)
+			<< ExtraLaunchParametersParser::ParseForMiningSetup(MiningSetup_, Enums::DeviceType::AMD)
 			<< "-S" << url.mid(14)
 			<< "-O" << username+":x"
 			<< "-SP" << QString::number(2)
@@ -43,7 +43,7 @@ QStringList MinerEtherumOCL::GetBenchmarkCommandStringPart(Algorithm* algorithm)
 {
 	QStringList ret;
 	ret << "--opencl" << "--opencl-platform" << QString::number(_gpuPlatformNumber)
-			<< ExtraLaunchParametersParser::ParseForMiningSetup(_MiningSetup, Enums::DeviceType::AMD)
+			<< ExtraLaunchParametersParser::ParseForMiningSetup(MiningSetup_, Enums::DeviceType::AMD)
 			<< "--benchmark-warmup" << QString::number(40) << "--benchmark-trial" << QString::number(20)
 			<< "--opencl-devices";
 	return ret;	

@@ -1,7 +1,7 @@
 #include "Miners/Equihash/Dtsm.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Miners/Parsing/ExtraLaunchParametersParser.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "Globals.h"
 #include "Configs/ConfigManager.h"
 #include "Configs/Data/GeneralConfig.h"
@@ -38,10 +38,10 @@ QStringList Dtsm::GetStartCommand(QString url, QString btcAddress, QString worke
 QStringList Dtsm::GetDeviceCommand()
 {
 	QStringList ret({"--dev"});
-	foreach (MiningPair* p, *_MiningSetup->MiningPairs) {
+	foreach (MiningPair* p, *MiningSetup_->MiningPairs) {
 		ret << QString::number(p->Device->ID);
 		}
-	return ret << ExtraLaunchParametersParser::ParseForMiningSetup(_MiningSetup, Enums::DeviceType::NVIDIA);
+	return ret << ExtraLaunchParametersParser::ParseForMiningSetup(MiningSetup_, Enums::DeviceType::NVIDIA);
 }
 
 void Dtsm::_Stop(Enums::MinerStopType willswitch)
@@ -55,7 +55,7 @@ QStringList Dtsm::BenchmarkCreateCommandLine(Algorithm* algorithm, int time)
 
 	_benchmarkTime=std::max(time, 60);
 
-	return GetStartCommand(url, Globals::GetBitcoinUser(), ConfigManager.generalConfig->WorkerName.trimmed()) << "--logfile=benchmark_log.txt";
+	return GetStartCommand(url, Globals::GetBitcoinUser(), ConfigManager.generalConfig->WorkerName.trimmed()) << "--logfile="+GetLogFileName();
 }
 
 void Dtsm::BenchmarkThreadRoutine(QStringList commandLine)
@@ -87,7 +87,7 @@ void Dtsm::ProcessBenchLinesAlternate(QStringList lines)
 			benchCount++;
 			}
 		}
-	BenchmarkAlgorithm->BenchmarkSpeed=(benchSum/std::max(1, benchCount))*(1-DevFee*0.01);
+	BenchmarkAlgorithm->BenchmarkSpeed((benchSum/std::max(1, benchCount))*(1-DevFee*0.01));
 }
 
 void Dtsm::BenchmarkOutputErrorDataReceivedImpl(QString outdata)
@@ -102,7 +102,7 @@ ApiData* Dtsm::GetSummaryAsync()
 {
 	CurrentMinerReadStatus=Enums::MinerApiReadStatus::NONE;
 
-	ApiData* ad=new ApiData(_MiningSetup->CurrentAlgorithmType);
+	ApiData* ad=new ApiData(MiningSetup_->CurrentAlgorithmType);
 
 	QString* response=QtConcurrent::run(this, static_cast<QString*(Dtsm::*)(int, QString, bool, bool)>(&Miner::GetApiDataAsync), ApiPort(), QString("{\"method\":\"getstat\",\"id\"=1}\n"), false, false).result();
 	DtsmResponse* resp=nullptr;
@@ -113,7 +113,7 @@ ApiData* Dtsm::GetSummaryAsync()
 			delete response;
 			}
 		}
-	catch (QException e) {
+	catch (QException& e) {
 		Helpers::ConsolePrint(MinerTag(), e.what());
 		}
 

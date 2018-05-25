@@ -12,7 +12,7 @@ if (WIN32)
 	add_definitions(-D_WIN32_WINNT=${ver})
 endif ()
 
-# Boost is required for all plugins as it is used in Lotos++ includes
+# Boost is required for all plugins as it is used in includes
 add_definitions(-DBOOST_LOG_DYN_LINK)
 add_definitions(-DBOOST_DATE_TIME_NO_LIB)
 if (WIN32)

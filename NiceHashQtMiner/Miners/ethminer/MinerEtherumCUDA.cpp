@@ -28,7 +28,7 @@ QStringList MinerEtherumCUDA::GetStartCommandStringPart(QString url, QString use
 {
 	QStringList ret;
 	ret << "--cuda"
-			<< ExtraLaunchParametersParser::ParseForMiningSetup(_MiningSetup, Enums::DeviceType::NVIDIA)
+			<< ExtraLaunchParametersParser::ParseForMiningSetup(MiningSetup_, Enums::DeviceType::NVIDIA)
 			<< "-S" << url.mid(14)
 			<< "-O" << username+":x"
 			<< "-SP" << QString::number(2)
@@ -42,7 +42,7 @@ QStringList MinerEtherumCUDA::GetBenchmarkCommandStringPart(Algorithm* algorithm
 {
 	QStringList ret;
 	ret << "--benchmark-warmup" << QString::number(40) << "--benchmark-trial" << QString::number(20)
-			<< ExtraLaunchParametersParser::ParseForMiningSetup(_MiningSetup, Enums::DeviceType::NVIDIA)
+			<< ExtraLaunchParametersParser::ParseForMiningSetup(MiningSetup_, Enums::DeviceType::NVIDIA)
 			<< "--cuda" << "--cuda-devices";
 	ret.removeAll("");
 	return ret;

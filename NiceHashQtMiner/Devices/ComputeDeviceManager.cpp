@@ -27,6 +27,8 @@
 //#	include "NVCtrl/nv_control.h"
 #	include "Devices/CudaDevice.h"
 #	include "Devices/ComputeDevice/CudaComputeDevice.h"
+#include <NvmlTypes.h>
+#include <NvmlNativeMethods.h>
 #endif
 #include "Qt/LException.h"
 #include "Devices/OpenCLDevice.h"
@@ -108,7 +110,7 @@ ComputeDeviceManager::Query::NvidiaSmiDriver* ComputeDeviceManager::Query::GetNv
 			if (!P.waitForStarted()) {
 				return InvalidSmiDriver;
 				}
-			if (!P.waitForFinished()) {
+			if (!P.waitForFinished(30*1000)) {
 				return InvalidSmiDriver;
 				}
 			QString stdOut=QString(P.readAll());
@@ -126,7 +128,7 @@ ComputeDeviceManager::Query::NvidiaSmiDriver* ComputeDeviceManager::Query::GetNv
 					}
 				}
 			}
-		catch (QException ex) {
+		catch (QException& ex) {
 			Helpers::ConsolePrint(Tag, QString("GetNvidiaSMIDriver Exception: ")+ex.what());
 			return InvalidSmiDriver;
 			}
@@ -197,7 +199,7 @@ void ComputeDeviceManager::Query::QueryDevices(IMessageNotifier* messageNotifier
 	Group::UncheckedCpu();
 //ComputeDevice* cd1=Avaliable.AllAvailableDevices->first();
 
-	// @todo update this to report undetected hardware
+	// TODO update this to report undetected hardware
 	// #6 check NVIDIA, AMD devices count
 	int nvidiaCount=0;
 	{
@@ -219,7 +221,7 @@ void ComputeDeviceManager::Query::QueryDevices(IMessageNotifier* messageNotifier
 		Helpers::ConsolePrint(Tag, nvidiaCount==_cudaDevices->count()? "Cuda NVIDIA/CUDA device count GOOD" : "Cuda NVIDIA/CUDA device count BAD!!!");
 #endif
 #if WITH_AMD
-		Helpers::ConsolePrint(Tag, AmdDevices->count()? "AMD GPU device count GOOD" : "AMD GPU device count BAD!!!");
+		Helpers::ConsolePrint(Tag, amdCount==AmdDevices->count()? "AMD GPU device count GOOD" : "AMD GPU device count BAD!!!");
 #endif
 	}
 #if WITH_NVIDIA
@@ -538,12 +540,16 @@ void ComputeDeviceManager::Query::Cpu::QueryCpus()
 	int threadsPerCpu=CPUID::GetVirtualCoresCount()/Avaliable.CpusCount;
 
 	if (!Helpers::Is64BitOperatingSystem()) {
-		QMessageBox::warning(nullptr, International::GetText("Warning_with_Exclamation"), International::GetText("Form_Main_msgbox_CPUMining64bitMsg"), QMessageBox::Ok);
+		if (ConfigManager.generalConfig->ShowDriverVersionWarning) {
+			QMessageBox::warning(nullptr, International::GetText("Warning_with_Exclamation"), International::GetText("Form_Main_msgbox_CPUMining64bitMsg"), QMessageBox::Ok);
+			}
 		Avaliable.CpusCount=0;
 		}
 
 	if (threadsPerCpu*Avaliable.CpusCount>64) {
-		QMessageBox::warning(nullptr, International::GetText("Warning_with_Exclamation"), International::GetText("Form_Main_msgbox_CPUMining64CoresMsg"), QMessageBox::Ok);
+		if (ConfigManager.generalConfig->ShowDriverVersionWarning) {
+			QMessageBox::warning(nullptr, International::GetText("Warning_with_Exclamation"), International::GetText("Form_Main_msgbox_CPUMining64CoresMsg"), QMessageBox::Ok);
+			}
 		Avaliable.CpusCount=0;
 		}
 
@@ -617,6 +623,19 @@ void ComputeDeviceManager::Query::Nvidia::QueryCudaDevices()
 				}
 			}
 #endif
+		bool nvmlInit=false;
+		using namespace ManagedCuda::Nvml;
+/*		try {
+			nvmlReturn ret=ManagedCuda::Nvml::NvmlNativeMethods::nvmlInit();
+			if (ret!=nvmlReturn::Success) {
+				throw LException(QString("NVML init failed with code %1").arg((int)ret).toLatin1());
+				}
+			nvmlInit=true;
+			}
+		catch (QException& e) {
+			Helpers::ConsolePrint("NVML", e.what());
+			}*/
+
 		foreach (CudaDevice* cudaDev, *_cudaDevices) {
 			// check sm versions
 			bool isUnderSM21;
@@ -658,9 +677,16 @@ void ComputeDeviceManager::Query::Nvidia::QueryCudaDevices()
 						group=Enums::DeviceGroupType::NVIDIA_6_x;
 						break;
 					}
+				nvmlDevice* nvmlHandle=new nvmlDevice;
+
+				if (nvmlInit) {
+					nvmlReturn ret=NvmlNativeMethods::nvmlDeviceGetHandleByUUID(cudaDev->UUID.toStdString(), nvmlHandle);
+					stringBuilder << "\t\tNVML HANDLE: " << (ret==nvmlReturn::Success? QString::number(*nvmlHandle->Pointer) : QString("Failed with code ret %1").arg((int)ret));
+					}
+
 //				NvPhysicalGpuHandle handle=idHandles.value(cudaDev->pciBusID);
 				nvmlDevice_t* handle=idHandles.value(cudaDev->pciBusID);
-				Avaliable.AllAvailableDevices->append(new CudaComputeDevice(cudaDev, group, ++_gpuCount, handle));
+				Avaliable.AllAvailableDevices->append(new CudaComputeDevice(cudaDev, group, ++_gpuCount, handle, nvmlHandle));
 				}
 			}
 		Helpers::ConsolePrint(Tag, stringBuilder.join('\n'));
@@ -690,7 +716,7 @@ void ComputeDeviceManager::Query::Nvidia::QueryCudaDevices(QList<CudaDevice*>* c
 				}
 			}
 		}
-	catch (QException ex) {
+	catch (QException& ex) {
 		// TODO
 		Helpers::ConsolePrint(Tag, QString("CudaDevicesDetection threw Exception: ")+ex.what());
 		}
@@ -791,7 +817,7 @@ void ComputeDeviceManager::Query::OpenCL::QueryOpenCLDevices()
 			Helpers::ConsolePrint(Tag, "AMDOpenCLDeviceDetection found no devices. AMDOpenCLDeviceDetection returned: "+_queryOpenCLDevicesString);
 			}
 		}
-	catch (QException ex) {
+	catch (QException& ex) {
 		Helpers::ConsolePrint(Tag, "AMDOpenCLDeviceDetection threw Exception: "+QString(ex.what()));
 		}
 	if (!_openCLJsonData->count()) {
@@ -892,7 +918,7 @@ void ComputeDeviceManager::Query::Amd::QueryAmd()
 				bool isAdlInit=true;
 				// ADL does not get devices in order map devices by bus number
 				// bus id, <name, uuid>
-				QMap<int, std::tuple<QString, QString, QString, int>*>* busIDsInfo=new QMap<int, std::tuple<QString, QString, QString, int>*>;
+				QMap<int, std::tuple<QString, QString, QString, int, int>*>* busIDsInfo=new QMap<int, std::tuple<QString, QString, QString, int, int>*>;
 				QStringList* amdDeviceName=new QStringList;
 				QStringList* amdDeviceUuid=new QStringList;
 				try {
@@ -901,6 +927,8 @@ void ComputeDeviceManager::Query::Amd::QueryAmd()
 						}
 					int adlRet=-1;
 					int numberOfAdapters=0;
+					ADL_CONTEXT_HANDLE adl2Control=nullptr;
+
 					adlRet=ADL::ADL_Main_Control_Create(ADL_Main_Memory_Alloc, 1);
 					if (adlRet==ADL::ADL_SUCCESS) {
 						ADL::ADL_Adapter_NumberOfAdapters_Get(&numberOfAdapters);
@@ -915,6 +943,17 @@ void ComputeDeviceManager::Query::Amd::QueryAmd()
 							memset(adapterBuffer, '\0', size);
 
 							adlRet=ADL::ADL_Adapter_AdapterInfo_Get(adapterBuffer, size);
+
+							int adl2Ret=-1;
+							adl2Ret=ADL::ADL2_Main_Control_Create(ADL_Main_Memory_Alloc, 0, &adl2Control);
+							AdapterInfo adl2Info[ADL_MAX_ADAPTERS];
+							if (adl2Ret==ADL::ADL_SUCCESS) {
+								adl2Ret=ADL::ADL2_Adapter_AdapterInfo_Get(adl2Control, adl2Info, sizeof(adl2Info));
+								}
+							else {
+								adl2Ret=-1;
+								}
+
 							if (adlRet==ADL::ADL_SUCCESS) {
 								int isActive=0;
 
@@ -959,7 +998,16 @@ void ComputeDeviceManager::Query::Amd::QueryAmd()
 												amdDeviceUuid->append(uuid);
 												amdDeviceName->append(devName);
 												if (!busIDsInfo->contains(budId)) {
-													busIDsInfo->insert(budId, new std::tuple<QString, QString, QString, int>(devName, uuid, infSection, index));
+													int adl2Index=-1;
+													if (adl2Ret==ADL::ADL_SUCCESS) {
+														for (int i=0; i<ADL_MAX_ADAPTERS; i++) {
+															if (adl2Info[i].strUDID==adapterBuffer[i].strUDID) {
+																adl2Index=adl2Info[i].iAdapterIndex;
+																break;
+																}
+															}
+														}
+													busIDsInfo->insert(budId, new std::tuple<QString, QString, QString, int, int>(devName, uuid, infSection, index, adl2Index));
 													}
 												}
 											}
@@ -977,6 +1025,9 @@ void ComputeDeviceManager::Query::Amd::QueryAmd()
 							}
 						if (numberOfAdapters<=0) {
 							ADL::ADL_Main_Control_Destroy(); // Close ADL if it found no AMD devices
+/*							if (adl2Control!=nullptr) {
+								ADL::ADL2_Main_Control_Destroy(adl2Control);
+								}*/
 							}
 						}
 					else {
@@ -986,7 +1037,7 @@ void ComputeDeviceManager::Query::Amd::QueryAmd()
 						isAdlInit=false;
 						}
 					}
-				catch (LException ex) {
+				catch (LException& ex) {
 					Helpers::ConsolePrint(Tag, QString("AMD ADL exception: ")+ex.what());
 					isAdlInit=false;
 					}
@@ -1035,7 +1086,7 @@ void ComputeDeviceManager::Query::Amd::QueryAmd()
 							newAmdDev->AdapterIndex=std::get<3>(*busIDsInfo->value(busID));
 							bool isDisabledGroup=ConfigManager.generalConfig->DeviceDetection->DisableDetectionAMD;
 
-							Avaliable.AllAvailableDevices->append(new AmdComputeDevice(newAmdDev, ++_gpuCount, false));
+							Avaliable.AllAvailableDevices->append(new AmdComputeDevice(newAmdDev, ++_gpuCount, false, std::get<4>(*busIDsInfo->value(busID))));
 //							try {
 								stringBuilder << QString("\t%1 device%2:").arg(isDisabledGroup? "SKIPED" : "ADDED").arg(isDisabledGroup? " (AMD group disabled)" : "");
 								stringBuilder << "\t\tID: "+QString::number(newAmdDev->DeviceID());
@@ -1084,7 +1135,7 @@ void ComputeDeviceManager::Query::Amd::QueryAmd()
 						newAmdDev->UUID="UNUSED";
 						bool isDisabledGroup=ConfigManager.generalConfig->DeviceDetection->DisableDetectionAMD;
 
-						Avaliable.AllAvailableDevices->append(new AmdComputeDevice(newAmdDev, ++_gpuCount, true));
+						Avaliable.AllAvailableDevices->append(new AmdComputeDevice(newAmdDev, ++_gpuCount, true, -1));
 //						try {
 							stringBuilder << QString("\t%1 device%2:").arg(isDisabledGroup? "SKIPED" : "ADDED").arg(isDisabledGroup? " (AMD group disabled)" : "");
 							stringBuilder << "\t\tID: "+QString::number(newAmdDev->DeviceID());

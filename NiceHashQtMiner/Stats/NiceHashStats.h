@@ -2,12 +2,12 @@
 #define STATS_NICEHASHSTATS_H_
 
 #include "config.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "Utils/Helpers.h"
 #include "Enums.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Utils/Links.h"
-#include "Stats/NiceHashSocket.h"
+//#include "Stats/NiceHashSocket.h"
 #include <QObject>
 #include <QString>
 #include <QList>
@@ -17,7 +17,8 @@
 #include <QJsonArray>
 #include <QTimer>
 
-class NiceHashSma;
+//class NiceHashSma;
+class NiceHashSocket;
 
 
 class NiceHashStats
@@ -28,18 +29,26 @@ class NiceHashStats
 	Q_PROPERTY(QString Version READ Version)
 public:
 	class NicehashCredentials {
-	public:
-		QString method="credentials.set";
-		QString btc;
-		QString worker;
-		QString asJson();
+		public:
+			QString method="credentials.set";
+			QString btc;
+			QString worker;
+			QString asJson();
 		};
 
 	class NicehashDeviceStatus {
-	public:
-		QString method="devices.status";
-		QList<QJsonArray>* devices=nullptr;
-		QString asJson();
+		public:
+			QString method="devices.status";
+			QList<QJsonArray>* devices=nullptr;
+			QString asJson();
+		};
+
+	class ExchangeRateJson {
+		public:
+			QList<QMap<QString, QString>> exchanges;
+			QMap<QString, double> exchanges_fiat;
+//			static ExchangeRateJson* fromJsonObject(QJsonObject obj);
+			static ExchangeRateJson* fromJsonString(QString str);
 		};
 
 	inline static double Balance() { return Balance_; };
@@ -63,11 +72,14 @@ private:
 	void SetStableAlgorithms(QJsonArray stable);
 	void SetBalance(QString balance);
 	void SetVersion(QString version);
+	void SetExchangeRates(QString data);
 
 Q_SIGNALS:
 	void BalanceUpdate(double);
 	void SmaUpdate();
 	void VersionUpdate(QString);
+//	void ExchangeUpdate(QJsonObject data);
+	void ExchangeUpdate();
 	void ConnectionLost();
 	void ConnectionEstablished();
 	void VersionBurn(QString);

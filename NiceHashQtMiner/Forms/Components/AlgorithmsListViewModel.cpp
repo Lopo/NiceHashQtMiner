@@ -6,7 +6,7 @@ AlgorithmsListViewModel::AlgorithmsListViewModel(QObject* parent)
 
 int AlgorithmsListViewModel::columnCount(const QModelIndex&/* parent*/) const
 {
-	return 5;
+	return 6;
 }
 
 int AlgorithmsListViewModel::rowCount(const QModelIndex&/* parent*/) const
@@ -16,7 +16,7 @@ int AlgorithmsListViewModel::rowCount(const QModelIndex&/* parent*/) const
 
 bool AlgorithmsListViewModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant& value, int role)
 {
-	if (role!=Qt::EditRole || orientation!=Qt::Horizontal || section<0 || section>=5) {
+	if (role!=Qt::EditRole || orientation!=Qt::Horizontal || section<0 || section>=6) {
 		return false;
 		}
 	_header[section]=value.toString();

@@ -101,7 +101,7 @@ QString Helpers::FormatSpeedOutput(double speed, QString separator/*=" "*/)
 	return QString::number(speed*0.000000000001, 'f', 3)+separator+"T";
 }
 
-QString Helpers::FormatDualSpeedOutput(Enums::AlgorithmType algorithmID, double primarySpeed, double secondarySpeed)
+QString Helpers::FormatDualSpeedOutput(double primarySpeed, double secondarySpeed/*=0*/, Enums::AlgorithmType algo/*=Enums::AlgorithmType::NONE*/)
 {
 	QString ret;
 	if (secondarySpeed>0) {
@@ -111,10 +111,8 @@ QString Helpers::FormatDualSpeedOutput(Enums::AlgorithmType algorithmID, double 
 		ret=FormatSpeedOutput(primarySpeed);
 		}
 
-	if (algorithmID==Enums::AlgorithmType::Equihash) {
-		return ret+"Sols/s ";
-		}
-	return ret+"H/s ";
+	QString unit= algo==Enums::AlgorithmType::Equihash? "Sol/s " : "H/s ";
+	return ret+unit;
 }
 
 QString Helpers::GetMotherboardID()
@@ -305,7 +303,30 @@ void Helpers::SetNvidiaP0State()
 				ConsolePrint("NICEHASH", "nvidiasetp0state all OK");
 				}
 			}
-		catch (std::exception ex) {
+		catch (std::exception& ex) {
 			ConsolePrint("NICEHASH", QString("nvidiasetp0state error: ")+ex.what());
 			}
+}
+
+Enums::AlgorithmType Helpers::DualAlgoFromAlgos(Enums::AlgorithmType primary, Enums::AlgorithmType secondary)
+{
+	if (primary==Enums::AlgorithmType::DaggerHashimoto) {
+		switch (secondary) {
+			case Enums::AlgorithmType::Decred:
+				return Enums::AlgorithmType::DaggerDecred;
+			case Enums::AlgorithmType::Lbry:
+				return Enums::AlgorithmType::DaggerLbry;
+			case Enums::AlgorithmType::Pascal:
+				return Enums::AlgorithmType::DaggerPascal;
+			case Enums::AlgorithmType::Sia:
+				return Enums::AlgorithmType::DaggerSia;
+			case Enums::AlgorithmType::Blake2s:
+				return Enums::AlgorithmType::DaggerBlake2s;
+			case Enums::AlgorithmType::Keccak:
+				return Enums::AlgorithmType::DaggerKeccak;
+			default: // make compiler happy
+				return primary;
+			}
+		}
+	return primary;
 }

@@ -7,7 +7,6 @@
 class IBenchmarkComunicator
 {
 public:
-	virtual void SetCurrentStatus(QString status)=0;
 	virtual void OnBenchmarkComplete(bool success, QString status)=0;
 };
 

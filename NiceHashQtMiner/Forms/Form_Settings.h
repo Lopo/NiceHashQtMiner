@@ -47,8 +47,11 @@ private:
 	QLabel* label_BitcoinAddress=nullptr;
 //	QCheckBox* checkBox_DebugConsole=nullptr;
 	QWidget* tabPageDevicesAlgos=nullptr;
-	QToolTip* toolTip1=nullptr;
+//	QToolTip* toolTip1=nullptr;
 	QGroupBox* groupBox_Main=nullptr;
+	QLabel* pictureBox_ElectricityCost=nullptr;
+	QDoubleSpinBox* textBox_ElectricityCost=nullptr;
+	QLabel* label_ElectricityCost=nullptr;
 	QGroupBox* groupBox_Localization=nullptr;
 	QGroupBox* groupBox_Logging=nullptr;
 	QDoubleSpinBox* textBox_MinProfit=nullptr;
@@ -221,7 +224,7 @@ private Q_SLOTS:
 	void CheckBox_UseIFTTT_CheckChanged();
 
 protected:
-	void closeEvent(QCloseEvent*); // FormSettings_FormClosing
+	void closeEvent(QCloseEvent* e); // FormSettings_FormClosing
 };
 
 #endif

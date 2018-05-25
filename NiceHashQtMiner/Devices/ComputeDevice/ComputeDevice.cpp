@@ -12,7 +12,9 @@
 #include "Configs/Data/GeneralConfig.h"
 #include "Configs/Data/DeviceBenchmarkConfig.h"
 #include "Miners/Grouping/MinerPaths.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
+#include "Algorithms/DualAlgorithm.h"
+#include "Configs/Data/DualAlgorithmConfig.h"
 #include <QCryptographicHash>
 
 
@@ -41,80 +43,24 @@ ComputeDevice::ComputeDevice(int id)
 	DeviceGroupType=Enums::DeviceGroupType::NONE;
 	IsEtherumCapale=false;
 	_Codename="fake";
-	_Uuid=GetUuid(ID, GroupNames::GetGroupName(DeviceGroupType, ID), Name, DeviceGroupType);
+	Uuid_=GetUuid(ID, GroupNames::GetGroupName(DeviceGroupType, ID), Name, DeviceGroupType);
 	GpuRam=0;
 }
-
-ComputeDevice::ComputeDevice(int id, QString group, QString name, int threads, ulong affinityMask, int cpuCount)
-{
-	ID=id;
-	Name=name;
-	_Threads=threads;
-	_AffinityMask=affinityMask;
-	Enabled=true;
-	DeviceGroupType=Enums::DeviceGroupType::CPU;
-	DeviceType=Enums::DeviceType::CPU;
-	NameCount=International::GetText("ComputeDevice_Short_Name_CPU").arg(cpuCount);
-	_Uuid=GetUuid(ID, GroupNames::GetGroupName(DeviceGroupType, ID), Name, DeviceGroupType);
-	AlgorithmSettings=GroupAlgorithms::CreateForDeviceList(this);
-	IsEtherumCapale=false;
-	GpuRam=0;
-}
-
-#if WITH_NVIDIA
-ComputeDevice::ComputeDevice(CudaDevice* cudaDevice, Enums::DeviceGroupType group, int gpuCount)
-{
-	_SM_major=cudaDevice->SM_major;
-	_SM_minor=cudaDevice->SM_minor;
-	ID=(int)cudaDevice->DeviceID;
-	Name=cudaDevice->GetName();
-	Enabled=true;
-	DeviceGroupType=group;
-	IsEtherumCapale=cudaDevice->IsEtherumCapable();
-	DeviceType=Enums::DeviceType::NVIDIA;
-	NameCount=International::GetText("ComputeDevice_Short_Name_NVIDIA_GPU").arg(gpuCount);
-	_Uuid=cudaDevice->UUID;
-	AlgorithmSettings=GroupAlgorithms::CreateForDeviceList(this);
-	GpuRam=cudaDevice->DeviceGlobalMemory;
-}
-
-bool ComputeDevice::IsSM50()
-{
-	return (_SM_major==5 && !_SM_minor);
-}
-#endif
-
-#if WITH_AMD
-ComputeDevice::ComputeDevice(AmdGpuDevice* amdDevice, int gpuCount, bool isDetectionFallback)
-{
-	ID=amdDevice->DeviceID();
-	_BusID=amdDevice->BusID();
-	DeviceGroupType=Enums::DeviceGroupType::AMD_OpenCL;
-	Name=amdDevice->DeviceName;
-	Enabled=true;
-	IsEtherumCapale=amdDevice->IsEtherumCapable();
-	DeviceType=Enums::DeviceType::AMD;
-	NameCount=International::GetText("ComputeDevice_Short_Name_AMD_GPU").arg(gpuCount);
-	_Uuid= isDetectionFallback
-		? GetUuid(ID, GroupNames::GetGroupName(DeviceGroupType, ID), Name, DeviceGroupType)
-		: amdDevice->UUID;
-	_Codename=amdDevice->Codename();
-	_InfSection=amdDevice->InfSection;
-	AlgorithmSettings=GroupAlgorithms::CreateForDeviceList(this);
-	_DriverDisableAlgos=amdDevice->DriverDisableAlgos;
-	GpuRam=amdDevice->DeviceGlobalMemory();
-}
-#endif
 
 QString ComputeDevice::GetFullName()
 {
 	return International::GetText("ComputeDevice_Full_Device_Name").arg(NameCount, Name);
 }
 
+Algorithm* ComputeDevice::GetAlgorithm(Algorithm* modelAlgo)
+{
+	return GetAlgorithm(modelAlgo->MinerBaseType, modelAlgo->NiceHashID, modelAlgo->SecondaryNiceHashID());
+}
+
 Algorithm* ComputeDevice::GetAlgorithm(Enums::MinerBaseType minerBaseType, Enums::AlgorithmType algorithmType, Enums::AlgorithmType secondaryAlgorithmType)
 {
 	foreach (Algorithm* a, *AlgorithmSettings) {
-		if (a->NiceHashID==algorithmType && a->MinerBaseType==minerBaseType && a->SecondaryNiceHashID==secondaryAlgorithmType) {
+		if (a->NiceHashID==algorithmType && a->MinerBaseType==minerBaseType && a->SecondaryNiceHashID()==secondaryAlgorithmType) {
 			return a;
 			}
 		}
@@ -124,35 +70,85 @@ Algorithm* ComputeDevice::GetAlgorithm(Enums::MinerBaseType minerBaseType, Enums
 void ComputeDevice::CopyBenchmarkSettingsFrom(ComputeDevice* copyBenchCDev)
 {
 	foreach (Algorithm* copyFromAlgo, *copyBenchCDev->AlgorithmSettings) {
-		Algorithm* setAlgo=GetAlgorithm(copyFromAlgo->MinerBaseType, copyFromAlgo->NiceHashID, copyFromAlgo->SecondaryNiceHashID);
+		Algorithm* setAlgo=GetAlgorithm(copyFromAlgo);
 		if (setAlgo!=nullptr) {
-			setAlgo->BenchmarkSpeed=copyFromAlgo->BenchmarkSpeed;
-			setAlgo->SecondaryBenchmarkSpeed=copyFromAlgo->SecondaryBenchmarkSpeed;
+			setAlgo->BenchmarkSpeed(copyFromAlgo->BenchmarkSpeed());
 			setAlgo->ExtraLaunchParameters=copyFromAlgo->ExtraLaunchParameters;
 			setAlgo->LessThreads=copyFromAlgo->LessThreads;
+			setAlgo->PowerUsage(copyFromAlgo->PowerUsage());
+			DualAlgorithm* dualSA=qobject_cast<DualAlgorithm*>(setAlgo);
+			DualAlgorithm* dualCFA=qobject_cast<DualAlgorithm*>(copyFromAlgo);
+			if (dualSA!=nullptr && dualCFA!=nullptr) {
+				dualSA->SecondaryBenchmarkSpeed(dualCFA->SecondaryBenchmarkSpeed());
+				}
+			}
+		}
+}
+
+void ComputeDevice::CopyTuningSettingsFrom(ComputeDevice* copyTuningCDev)
+{
+	foreach (Algorithm* acopyFromAlgo, *copyTuningCDev->AlgorithmSettings) {
+		DualAlgorithm* copyFromAlgo=qobject_cast<DualAlgorithm*>(acopyFromAlgo);
+		if (copyFromAlgo==nullptr) {
+			continue;
+			}
+		DualAlgorithm* setAlgo=qobject_cast<DualAlgorithm*>(GetAlgorithm(copyFromAlgo));
+		if (setAlgo!=nullptr) {
+			setAlgo->IntensitySpeeds=copyFromAlgo->IntensitySpeeds;
+			setAlgo->SecondaryIntensitySpeeds=copyFromAlgo->SecondaryIntensitySpeeds;
+			setAlgo->TuningStart=copyFromAlgo->TuningStart;
+			setAlgo->TuningEnd=copyFromAlgo->TuningEnd;
+			setAlgo->TuningInterval=copyFromAlgo->TuningInterval;
+			setAlgo->TuningEnabled=copyFromAlgo->TuningEnabled;
+			setAlgo->IntensityPowers=copyFromAlgo->IntensityPowers;
+			setAlgo->UseIntensityPowers=copyFromAlgo->UseIntensityPowers;
+			setAlgo->IntensityUpToDate=false;
 			}
 		}
 }
 
 void ComputeDevice::SetFromComputeDeviceConfig(ComputeDeviceConfig* config)
 {
-	if (config!=nullptr && config->UUID==_Uuid) {
+	if (config!=nullptr && config->UUID==Uuid_) {
 		Enabled=config->Enabled;
 		}
 }
 
 void ComputeDevice::SetAlgorithmDeviceConfig(DeviceBenchmarkConfig* config)
 {
-	if (config!=nullptr && config->DeviceUUID==_Uuid && config->AlgorithmSettings!=nullptr) {
+	if (config!=nullptr && config->DeviceUUID==Uuid_ && config->AlgorithmSettings!=nullptr) {
 		AlgorithmSettings=GroupAlgorithms::CreateForDeviceList(this);
 		foreach (AlgorithmConfig* conf, *config->AlgorithmSettings) {
 			Algorithm* setAlgo=GetAlgorithm(conf->MinerBaseType, conf->NiceHashID, conf->SecondaryNiceHashID);
 			if (setAlgo!=nullptr) {
-				setAlgo->BenchmarkSpeed=conf->BenchmarkSpeed;
-				setAlgo->SecondaryBenchmarkSpeed=conf->SecondaryBenchmarkSpeed;
+				setAlgo->BenchmarkSpeed(conf->BenchmarkSpeed);
 				setAlgo->ExtraLaunchParameters=conf->ExtraLaunchParameters;
 				setAlgo->Enabled=conf->Enabled;
 				setAlgo->LessThreads=conf->LessThreads;
+				setAlgo->PowerUsage(conf->PowerUsage);
+				DualAlgorithm* dualSA=qobject_cast<DualAlgorithm*>(GetAlgorithm(setAlgo));
+				if (dualSA!=nullptr) {
+					dualSA->SecondaryBenchmarkSpeed(conf->SecondaryBenchmarkSpeed);
+					DualAlgorithmConfig* dualConf=nullptr;
+					if (config->DualAlgorithmSettings!=nullptr) {
+						foreach (DualAlgorithmConfig* dac, *config->DualAlgorithmSettings) {
+							if (dac->SecondaryNiceHashID==dualSA->SecondaryNiceHashID()) {
+								dualConf=dac;
+								}
+							}
+						}
+					if (dualConf!=nullptr) {
+						dualConf->FixSettingsBounds();
+						dualSA->IntensitySpeeds=dualConf->IntensitySpeeds;
+						dualSA->SecondaryIntensitySpeeds=dualConf->SecondaryIntensitySpeeds;
+						dualSA->TuningEnabled=dualConf->TuningEnabled;
+						dualSA->TuningStart=dualConf->TuningStart;
+						dualSA->TuningEnd=dualConf->TuningEnd;
+						dualSA->TuningInterval=dualConf->TuningInterval;
+						dualSA->IntensityPowers=dualConf->IntensityPowers;
+						dualSA->UseIntensityPowers=dualConf->UseIntensityPowers;
+						}
+					}
 				}
 			}
 		}
@@ -163,7 +159,7 @@ ComputeDeviceConfig* ComputeDevice::GetComputeDeviceConfig()
 	ComputeDeviceConfig* ret=new ComputeDeviceConfig;
 	ret->Enabled=Enabled;
 	ret->Name=Name;
-	ret->UUID=_Uuid;
+	ret->UUID=Uuid_;
 	return ret;
 }
 
@@ -171,22 +167,39 @@ DeviceBenchmarkConfig* ComputeDevice::GetAlgorithmDeviceConfig()
 {
 	DeviceBenchmarkConfig* ret=new DeviceBenchmarkConfig;
 	ret->DeviceName=Name;
-	ret->DeviceUUID=_Uuid;
+	ret->DeviceUUID=Uuid_;
 	foreach (Algorithm* algo, *AlgorithmSettings) { // init algo settings
 		AlgorithmConfig* conf=new AlgorithmConfig;
-		conf->Name=algo->AlgorithmStringID;
+		conf->Name=algo->AlgorithmStringID();
 		conf->NiceHashID=algo->NiceHashID;
-		conf->SecondaryNiceHashID=algo->SecondaryNiceHashID;
 		conf->MinerBaseType=algo->MinerBaseType;
 		conf->MinerName=algo->MinerName;
-		conf->BenchmarkSpeed=algo->BenchmarkSpeed;
-		conf->SecondaryBenchmarkSpeed=algo->SecondaryBenchmarkSpeed;
+		conf->BenchmarkSpeed=algo->BenchmarkSpeed();
 		conf->ExtraLaunchParameters=algo->ExtraLaunchParameters;
 		conf->Enabled=algo->Enabled;
 		conf->LessThreads=algo->LessThreads;
-		// TODO probably not needed
+		conf->PowerUsage=algo->PowerUsage();
 		// insert
 		ret->AlgorithmSettings->append(conf);
+		DualAlgorithm* dualAlgo=qobject_cast<DualAlgorithm*>(GetAlgorithm(algo));
+		if (dualAlgo!=nullptr) {
+			conf->SecondaryNiceHashID=dualAlgo->SecondaryNiceHashID();
+			conf->SecondaryBenchmarkSpeed=dualAlgo->SecondaryBenchmarkSpeed();
+
+			DualAlgorithmConfig* dualConf=new DualAlgorithmConfig;
+			dualConf->Name=algo->AlgorithmStringID();
+			dualConf->SecondaryNiceHashID=dualAlgo->SecondaryNiceHashID();
+			dualConf->IntensitySpeeds=dualAlgo->IntensitySpeeds;
+			dualConf->SecondaryIntensitySpeeds=dualAlgo->SecondaryIntensitySpeeds;
+			dualConf->TuningEnabled=dualAlgo->TuningEnabled;
+			dualConf->TuningStart=dualAlgo->TuningStart;
+			dualConf->TuningEnd=dualAlgo->TuningEnd;
+			dualConf->TuningInterval=dualAlgo->TuningInterval;
+			dualConf->IntensityPowers=dualAlgo->IntensityPowers;
+			dualConf->UseIntensityPowers=dualAlgo->UseIntensityPowers;
+
+			ret->DualAlgorithmSettings->append(dualConf);
+			}
 		}
 	return ret;
 }
@@ -215,7 +228,7 @@ QList<Algorithm*>* ComputeDevice::GetAlgorithmSettings()
 		}
 #endif
 	// sort by algo
-	std::sort(retAlgos->begin(), retAlgos->end(), [](const Algorithm* a_1, const Algorithm* a_2) { return (a_1->NiceHashID-a_2->NiceHashID)? (a_1->NiceHashID<a_2->NiceHashID) : (((int)a_1->MinerBaseType)<(int)a_2->MinerBaseType); });
+	std::sort(retAlgos->begin(), retAlgos->end(), [](const Algorithm* a_1, const Algorithm* a_2) { return (a_1->NiceHashID-a_2->NiceHashID)? (a_1->NiceHashID<a_2->NiceHashID) : (((int)a_1->MinerBaseType-(int)a_2->MinerBaseType)? a_1->MinerBaseType<a_2->MinerBaseType : a_1->SecondaryNiceHashID()<a_2->SecondaryNiceHashID()); });
 	return retAlgos;
 }
 
@@ -227,7 +240,7 @@ QList<Algorithm*>* ComputeDevice::GetAlgorithmSettingsFastest() //done
 	foreach (Algorithm* algo, algosTmp) {
 		Enums::AlgorithmType algoKey=algo->NiceHashID;
 		if (sortDict.contains(algoKey)) {
-			if (sortDict[algoKey]->BenchmarkSpeed<algo->BenchmarkSpeed) {
+			if (sortDict[algoKey]->BenchmarkSpeed()<algo->BenchmarkSpeed()) {
 				sortDict[algoKey]=algo;
 				}
 			}
@@ -270,4 +283,19 @@ QString ComputeDevice::GetUuid(int id, QString group, QString name, Enums::Devic
 bool ComputeDevice::IsAlgorithmSettingsInitialized()
 {
 	return AlgorithmSettings!=nullptr;
+}
+
+bool ComputeDevice::Equals(const ComputeDevice* other)
+{
+	return ID==other->ID && DeviceGroupType==other->DeviceGroupType && DeviceType==other->DeviceType;
+}
+
+bool ComputeDevice::operator==(const ComputeDevice& right)
+{
+	return Equals(&right);
+}
+
+bool ComputeDevice::operator!=(const ComputeDevice& right)
+{
+	return !Equals(&right);
 }

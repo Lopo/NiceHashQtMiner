@@ -20,7 +20,7 @@ public:
 	inline QVector<int>* TimeLimits() const { return _timeLimits; };
 	void setTimeLimits(QVector<int>* value);
 
-	void SetToolTip(QToolTip* toolTip, QString groupTypeName);
+	void SetToolTip(/*QToolTip* toolTip, */QString groupTypeName);
 
 	void InitLocale();
 

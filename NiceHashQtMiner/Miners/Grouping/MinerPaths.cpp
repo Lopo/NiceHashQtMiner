@@ -1,11 +1,13 @@
 #define __MinerPaths_cpp__
 #include "Miners/Grouping/MinerPaths.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Utils/Helpers.h"
 #include "Devices/GroupAlgorithms.h"
 #include <QMetaEnum>
 #include <QFile>
+#include <QJsonObject>
+#include <QJsonArray>
 
 
 MinerPath::MinerPath(Enums::AlgorithmType algo, QString path)
@@ -15,6 +17,22 @@ MinerPath::MinerPath(Enums::AlgorithmType algo, QString path)
 	Name=QMetaEnum::fromType<Enums::AlgorithmType>().valueToKey((int)Algorithm);
 }
 
+MinerPath::MinerPath(QJsonObject obj)
+{
+	Algorithm=(Enums::AlgorithmType)obj.value("Algorithm").toInt();
+	Path=obj.value("Path").toString();
+	Name=obj.value("Name").toString(QMetaEnum::fromType<Enums::AlgorithmType>().valueToKey((int)Algorithm));
+}
+
+QJsonObject MinerPath::asJsonObject()
+{
+	QJsonObject o;
+	o.insert("Algorithm", (int)Algorithm);
+	o.insert("Path", Path);
+	o.insert("Name", Name);
+	return o;
+}
+
 MinerTypePath::MinerTypePath(Enums::MinerBaseType type, QList<MinerPath> paths)
 {
 	Type=type;
@@ -22,7 +40,29 @@ MinerTypePath::MinerTypePath(Enums::MinerBaseType type, QList<MinerPath> paths)
 	Name=QMetaEnum::fromType<Enums::MinerBaseType>().valueToKey((int)type);
 }
 
-MinerPathPackage::MinerPathPackage(Enums::DeviceGroupType type, QList<MinerTypePath> paths)
+MinerTypePath::MinerTypePath(QJsonObject obj)
+{
+	Type=(Enums::MinerBaseType)obj.value("Type").toInt();
+	foreach (QJsonValue a, obj.value("Algorithms").toArray()) {
+		Algorithms.append(MinerPath(a.toObject()));
+		}
+	Name=obj.value("Name").toString(QMetaEnum::fromType<Enums::MinerBaseType>().valueToKey((int)Type));
+}
+
+QJsonObject MinerTypePath::asJsonObject()
+{
+	QJsonObject o;
+	o.insert("Type", (int)Type);
+	o.insert("Name", Name);
+	QJsonArray aA;
+	foreach (MinerPath mp, Algorithms) {
+		aA.append(mp.asJsonObject());
+		}
+	o.insert("Algorithms", aA);
+	return o;
+}
+
+MinerPathPackage::MinerPathPackage(Enums::DeviceGroupType type, QList<MinerTypePath*> paths)
 {
 	DeviceType=type;
 	MinerTypes=paths;
@@ -52,6 +92,7 @@ const QString MinerPaths::Data::Excavator=Bin+"/excavator/excavator";
 
 const QString MinerPaths::Data::XmrStackCpuMiner=Bin+"/xmr-stack-cpu/xmr-stak";
 const QString MinerPaths::Data::XmrStakAmd=Bin+"/xmr-stak-amd/xmr-stak-amd";
+const QString MinerPaths::Data::XmrStak=Bin+"/xmr-stak/xmr-stak";
 const QString MinerPaths::Data::Xmrig=Bin+"/xmrig/xmrig";
 
 const QString MinerPaths::Data::None="";
@@ -60,14 +101,13 @@ const QString MinerPaths::Data::Bin3rdParty="bin_3rdparty";
 
 const QString MinerPaths::Data::ClaymoreZcashMiner=Bin3rdParty+"/claymore_zcash/zecminer64";
 const QString MinerPaths::Data::ClaymoreCryptoNightMiner=Bin3rdParty+"/claymore_cryptonight/nsgpucnminer";
-const QString MinerPaths::Data::ClaymoreCryptoNightMinerOld=Bin3rdParty+"/claymore_cryptonight_old/NsGpuCNMiner";
 const QString MinerPaths::Data::OptiminerZcashMiner=Bin3rdParty+"/optiminer_zcash/optiminer-zcash";
 const QString MinerPaths::Data::ClaymoreDual=Bin3rdParty+"/claymore_dual/ethdcrminer64";
 const QString MinerPaths::Data::Ewbf=Bin3rdParty+"/ewbf/miner";
 const QString MinerPaths::Data::Prospector=Bin3rdParty+"/prospector/prospector";
 const QString MinerPaths::Data::Dtsm=Bin3rdParty+"/dtsm/zm";
 
-QList<MinerPathPackage>* MinerPaths::MinerPathPackages=new QList<MinerPathPackage>;
+QList<MinerPathPackage*>* MinerPaths::MinerPathPackages=new QList<MinerPathPackage*>;
 QList<Enums::MinerBaseType>* MinerPaths::ConfigurableMiners=new QList<Enums::MinerBaseType>({
 	Enums::MinerBaseType::ccminer,
 	Enums::MinerBaseType::sgminer
@@ -78,15 +118,15 @@ QString MinerPaths::GetPathFor(Enums::MinerBaseType minerBaseType, Enums::Algori
 {
 	if (!def & ConfigurableMiners->contains(minerBaseType)) {
 		// Override with internals
-		foreach (MinerPathPackage mpp, *MinerPathPackages) {
-			if (mpp.DeviceType!=devGroupType) {
+		foreach (MinerPathPackage* mpp, *MinerPathPackages) {
+			if (mpp->DeviceType!=devGroupType) {
 				continue;
 				}
-			foreach (MinerTypePath mtp, mpp.MinerTypes) {
-				if (mtp.Type!=minerBaseType) {
+			foreach (MinerTypePath* mtp, mpp->MinerTypes) {
+				if (mtp->Type!=minerBaseType) {
 					continue;
 					}
-				foreach (MinerPath mp, mtp.Algorithms) {
+				foreach (MinerPath mp, mtp->Algorithms) {
 					if (mp.Algorithm!=algoType) {
 						continue;
 						}
@@ -115,8 +155,8 @@ QString MinerPaths::GetPathFor(Enums::MinerBaseType minerBaseType, Enums::Algori
 			return Data.OptiminerZcashMiner;
 		case Enums::MinerBaseType::excavator:
 			return Data.Excavator;
-		case Enums::MinerBaseType::XmrStackCPU:
-			return Data.XmrStackCpuMiner;
+		case Enums::MinerBaseType::XmrStak:
+			return Data.XmrStak;
 		case Enums::MinerBaseType::ccminer_alexis:
 			return NvidiaGroups.CcminerUnstablePath(algoType, devGroupType);
 		case Enums::MinerBaseType::experimental:
@@ -127,10 +167,6 @@ QString MinerPaths::GetPathFor(Enums::MinerBaseType minerBaseType, Enums::Algori
 			return Data.Prospector;
 		case Enums::MinerBaseType::Xmrig:
 			return Data.Xmrig;
-		case Enums::MinerBaseType::XmrStakAMD:
-			return Data.XmrStakAmd;
-		case Enums::MinerBaseType::Claymore_old:
-			return Data.ClaymoreCryptoNightMinerOld;
 		case Enums::MinerBaseType::dtsm:
 			return Data.Dtsm;
 		default:
@@ -223,6 +259,8 @@ QString MinerPaths::NvidiaGroups::Ccminer_path(Enums::AlgorithmType algorithmTyp
 		case Enums::DeviceGroupType::NVIDIA_5_x:
 		case Enums::DeviceGroupType::NVIDIA_6_x:
 			return CcminerSM5XOrSM6X(algorithmType);
+		default:
+			return Data.None; // should not happen
 		}
 	return Data.None; // should not happen
 }
@@ -269,10 +307,115 @@ QString MinerPaths::Experimental::GetPath(Enums::AlgorithmType algoType, Enums::
 		: Data.None;
 }
 
-void MinerPaths::InitializePackages() // @todo finish
+void MinerPaths::InitializePackages() // @todo finish & verify
 {
-	QList<MinerPathPackage> defaults;
+	QList<MinerPathPackage*> defaults;
 	for (int i=(int)Enums::DeviceGroupType::NONE+1; i<(int)Enums::DeviceGroupType::LAST; i++) {
 		QMap<Enums::MinerBaseType, QList<Algorithm*>*>* package=GroupAlgorithms::CreateDefaultsForGroup((Enums::DeviceGroupType)i);
+		QList<MinerTypePath*> minerTypePaths;
+		foreach (Enums::MinerBaseType type, *ConfigurableMiners) {
+			if (!package->contains(type)) {
+				continue;
+				}
+			QList<MinerPath> minerPaths;
+			foreach (Algorithm* algo, *package->value(type)) { // @todo finish
+				minerPaths.append(MinerPath(algo->NiceHashID, GetPathFor(type, algo->NiceHashID, (Enums::DeviceGroupType)i, true)));
+				}
+			minerTypePaths.append(new MinerTypePath(type, minerPaths));
+			}
+		if (minerTypePaths.count()) {
+			defaults.append(new MinerPathPackage((Enums::DeviceGroupType)i, minerTypePaths));
+			}
 		}
+
+	foreach (MinerPathPackage* pack, defaults) {
+		QString packageName="MinerPathPackage_"+pack->Name;
+		MinerPathPackageFile packageFile(packageName);
+		MinerPathPackage* readPack=packageFile.ReadFile();
+		if (readPack==nullptr) {
+			// read has failed
+			Helpers::ConsolePrint("MinerPaths", "Creating internal paths config "+packageName);
+			MinerPathPackages->append(pack);
+			packageFile.Commit(pack);
+			}
+		else {
+			Helpers::ConsolePrint("MinerPaths", "Loading internal paths config "+packageName);
+			bool isChange=false;
+			foreach (MinerTypePath* miner, pack->MinerTypes) {
+				MinerTypePath* readMiner=nullptr;
+				foreach (MinerTypePath* x, readPack->MinerTypes) {
+					if (x->Type==miner->Type) {
+						readMiner=x;
+						break;
+						}
+					}
+				if (readMiner!=nullptr) {
+					// file contains miner type
+					foreach (MinerPath algo, miner->Algorithms) {
+						bool e=false;
+						foreach (MinerPath x, readMiner->Algorithms) {
+							if (x.Algorithm==algo.Algorithm) {
+								e=true;
+								break;
+								}
+							}
+						if (!e) {
+							// file does not contain algo on this miner
+							Helpers::ConsolePrint("PATHS", QString("Algorithm %1 not found in miner %2 on device %3. Adding default").arg(algo.Name).arg(miner->Name).arg(pack->Name));
+							readMiner->Algorithms.append(algo);
+							isChange=true;
+							}
+						}
+					}
+				else {
+					// file does not contain miner type
+					Helpers::ConsolePrint("PATHS", QString("Miner %1 not found on device %2").arg(miner->Name).arg(pack->Name));
+					readPack->MinerTypes.append(miner);
+					isChange=true;
+					}
+				}
+			MinerPathPackages->append(readPack);
+			if (isChange) {
+				packageFile.Commit(readPack);
+				}
+			}
+		}
+}
+
+MinerPathPackage* MinerPathPackage::fromJson(QString json)
+{
+	QJsonObject o=QJsonDocument::fromJson(json.toLatin1()).object();
+	Enums::DeviceGroupType type;
+	QList<MinerTypePath*> paths;
+	if (o.value("DeviceType")!=QJsonValue::Undefined) {
+		type=(Enums::DeviceGroupType)o.value("DeviceType").toInt();
+		}
+	else {
+		return nullptr;
+		}
+	if (o.value("MinerTypes")!=QJsonValue::Undefined) {
+		QJsonArray mtA=o.value("MinerTypes").toArray();
+		foreach (QJsonValue mtV, mtA) {
+			paths.append(new MinerTypePath(mtV.toObject()));
+			}
+		}
+	else {
+		return nullptr;
+		}
+	MinerPathPackage* ret=new MinerPathPackage(type, paths);
+	ret->Name=o.value("Name").toString(QMetaEnum::fromType<Enums::DeviceGroupType>().valueToKey((int)type));
+	return ret;
+}
+
+QString MinerPathPackage::asJson(QJsonDocument::JsonFormat format)
+{
+	QJsonObject o;
+	o.insert("Name", Name);
+	o.insert("DeviceType", (int)DeviceType);
+	QJsonArray mtA;
+	foreach (MinerTypePath* p, MinerTypes) {
+		mtA.append(p->asJsonObject());
+		}
+	o.insert("MinerTypes", mtA);
+	return QString(QJsonDocument(o).toJson(format));
 }

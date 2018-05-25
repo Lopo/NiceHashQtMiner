@@ -20,5 +20,8 @@ AmdGpuDevice::AmdGpuDevice(OpenCLDevice* openClSubset, bool isOldDriver, QString
 
 bool AmdGpuDevice::IsEtherumCapable()
 {
+#if WITH_DEBUG
+	return true;
+#endif
 	return _openClSubset->_CL_DEVICE_GLOBAL_MEM_SIZE>=ComputeDevice::Memory3Gb;
 }

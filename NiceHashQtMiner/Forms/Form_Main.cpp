@@ -7,7 +7,7 @@
 #include "Qt/NHMCashRegisterBitcoin.h"
 #include "Forms/Components/DevicesListViewEnableControl.h"
 #include "Configs/Data/GeneralConfig.h"
-#include "ExchangeRateAPI.h"
+#include "Stats/ExchangeRateAPI.h"
 #include "Globals.h"
 #include "Forms/Form_Loading.h"
 #include "Utils/Helpers.h"
@@ -322,7 +322,7 @@ void Form_Main::InitLocalization()
 
 	toolStripStatusLabelGlobalRateText->setText(International::GetText("Form_Main_global_rate")+":");
 	toolStripStatusLabelBTCDayText->setText("BTC/"+International::GetText(QMetaEnum::fromType<Enums::TimeUnitType>().valueToKey((int)ConfigManager.generalConfig->TimeUnit)));
-	toolStripStatusLabelBalanceText->setText(ExchangeRateAPI.ActiveDisplayCurrency+"/"+International::GetText(QMetaEnum::fromType<Enums::TimeUnitType>().valueToKey((int)ConfigManager.generalConfig->TimeUnit))+"     "+International::GetText("Form_Main_balance")+":");
+	toolStripStatusLabelBalanceText->setText(ExchangeRateApi::ActiveDisplayCurrency+"/"+International::GetText(QMetaEnum::fromType<Enums::TimeUnitType>().valueToKey((int)ConfigManager.generalConfig->TimeUnit))+"     "+International::GetText("Form_Main_balance")+":");
 
 	devicesListViewEnableControl1->InitLocale();
 
@@ -353,7 +353,7 @@ void Form_Main::InitMainConfigGuiData()
 	_demoMode=false;
 
 	// init active display currency after config load
-	ExchangeRateAPI.ActiveDisplayCurrency=ConfigManager.generalConfig->DisplayCurrency;
+	ExchangeRateApi::ActiveDisplayCurrency=ConfigManager.generalConfig->DisplayCurrency;
 
 	// init factor for Time Unit
 	switch (ConfigManager.generalConfig->TimeUnit) {
@@ -374,8 +374,8 @@ void Form_Main::InitMainConfigGuiData()
 			break;
 		}
 
-	toolStripStatusLabelBalanceDollarValue->setText("("+ExchangeRateAPI.ActiveDisplayCurrency+")");
-	toolStripStatusLabelBalanceText->setText(ExchangeRateAPI.ActiveDisplayCurrency+"/"+International::GetText(QMetaEnum::fromType<Enums::TimeUnitType>().valueToKey((int)ConfigManager.generalConfig->TimeUnit))+"     "+International::GetText("Form_Main_balance")+":");
+	toolStripStatusLabelBalanceDollarValue->setText("("+ExchangeRateApi::ActiveDisplayCurrency+")");
+	toolStripStatusLabelBalanceText->setText(ExchangeRateApi::ActiveDisplayCurrency+"/"+International::GetText(QMetaEnum::fromType<Enums::TimeUnitType>().valueToKey((int)ConfigManager.generalConfig->TimeUnit))+"     "+International::GetText("Form_Main_balance")+":");
 	BalanceCallback(); // update currency changes
 
 	if (_isDeviceDetectionInitialized) {
@@ -424,7 +424,7 @@ void Form_Main::StartupTimer_Tick()
 	_startupTimer=nullptr;
 
 	// Internals Init
-	// @todo add loading step
+	// TODO add loading step
 	MinersSettingsManager.Init();
 
 	if (!Helpers::Is64BitOperatingSystem()) {
@@ -484,6 +484,7 @@ void Form_Main::StartupTimer_Tick()
 	connect(&NiceHashStats, SIGNAL(ConnectionLost()), this, SLOT(ConnectionLostCallback()));
 	connect(&NiceHashStats, SIGNAL(ConnectionEstablished()), this, SLOT(ConnectionEstablishedCallback()));
 	connect(&NiceHashStats, SIGNAL(VersionBurn(QString)), this, SLOT(VersionBurnCallback()));
+	connect(&NiceHashStats, SIGNAL(ExchangeUpdate()), this, SLOT(ExchangeCallback()));
 	NiceHashStats.StartConnection(Links::NhmSocketAddress);
 
 	// increase timeout
@@ -495,10 +496,10 @@ void Form_Main::StartupTimer_Tick()
 
 	_loadingScreen->IncreaseLoadCounterAndMessage(International::GetText("Form_Main_loadtext_GetBTCRate"));
 
-	_bitcoinExchangeCheck=new QTimer(this);
+/*	_bitcoinExchangeCheck=new QTimer(this);
 	connect(_bitcoinExchangeCheck, SIGNAL(timeout()), this, SLOT(BitcoinExchangeCheck_Tick()));
 	_bitcoinExchangeCheck->start(1000*3601); // every 1h and 1s
-	BitcoinExchangeCheck_Tick();
+	BitcoinExchangeCheck_Tick();*/
 
 	_loadingScreen->IncreaseLoadCounterAndMessage(International::GetText("Form_Main_loadtext_SetEnvironmentVariable"));
 	Helpers::SetDefaultEnvironmentVariables();
@@ -582,7 +583,7 @@ void Form_Main::StartupTimer_Tick()
 	if (ConfigManager.generalConfig->AutoStartMining) {
 		// well this is started manually as we want it to start at runtime
 		_isManuallyStarted=true;
-		if (StartMining(true)!=StartMiningReturnType::StartMining) {
+		if (StartMining(false)!=StartMiningReturnType::StartMining) {
 			_isManuallyStarted=false;
 			StopMining();
 			}
@@ -636,7 +637,7 @@ void Form_Main::ComputeDevicesCheckTimer_Tick()
 		try {
 			QProcess::execute(QDir::currentPath()+"/OnGPUsLost.sh");
 			}
-		catch (QException ex) {
+		catch (QException& ex) {
 			Helpers::ConsolePrint("NICEHASH", QString("OnGPUsMismatch.sh error: ")+ex.what());
 			}
 		}
@@ -706,9 +707,9 @@ void Form_Main::AddRateInfo(QString groupName, QString deviceStringInfo, ApiData
 		? "**"
 		: "";
 
-	QString speedString= Helpers::FormatDualSpeedOutput(iAPIData->AlgorithmID, iAPIData->Speed, iAPIData->SecondarySpeed) + iAPIData->AlgorithmName + apiGetExceptionString;
+	QString speedString= Helpers::FormatDualSpeedOutput(iAPIData->Speed, iAPIData->SecondarySpeed, iAPIData->AlgorithmID) + iAPIData->AlgorithmName + apiGetExceptionString;
 	QString rateBTCString=FormatPayingOutput(paying);
-	QString rateCurrencyString=QString::number(ExchangeRateAPI.ConvertToActiveCurrency(paying*Globals::BitcoinUsdRate*_factorTimeUnit), 'f', 2)+QString(" %1/").arg(ExchangeRateAPI.ActiveDisplayCurrency)+International::GetText(QMetaEnum::fromType<Enums::TimeUnitType>().valueToKey((int)ConfigManager.generalConfig->TimeUnit));
+	QString rateCurrencyString=QString::number(ExchangeRateApi::ConvertToActiveCurrency(paying*ExchangeRateApi::GetUsdExchangeRate()*_factorTimeUnit), 'f', 2)+QString(" %1/").arg(ExchangeRateApi::ActiveDisplayCurrency)+International::GetText(QMetaEnum::fromType<Enums::TimeUnitType>().valueToKey((int)ConfigManager.generalConfig->TimeUnit));
 
 	try {
 		((GroupProfitControl*)flowLayoutPanelRates->itemWidget(flowLayoutPanelRates->item(_flowLayoutPanelRatesIndex++)))->UpdateProfitStats(groupName, deviceStringInfo, speedString, rateBTCString, rateCurrencyString);
@@ -754,7 +755,7 @@ void Form_Main::ForceMinerStatsUpdate()
 	try {
 		QMetaObject::invokeMethod(this, "MinerStatsCheck_Tick");
 		}
-	catch (std::exception e) {
+	catch (std::exception& e) {
 		Helpers::ConsolePrint("NiceHash", e.what());
 		}
 }
@@ -771,8 +772,8 @@ void Form_Main::UpdateGlobalRate()
 		toolStripStatusLabelBTCDayText->setText("BTC/"+International::GetText(QMetaEnum::fromType<Enums::TimeUnitType>().valueToKey((int)ConfigManager.generalConfig->TimeUnit)));
 		toolStripStatusLabelGlobalRateValue->setText(QString::number(totalRate*_factorTimeUnit, 'f', 6));
 		}
-	toolStripStatusLabelBTCDayValue->setText(QString::number(ExchangeRateAPI.ConvertToActiveCurrency(totalRate*_factorTimeUnit*Globals::BitcoinUsdRate), 'f', 2));
-	toolStripStatusLabelBalanceText->setText(ExchangeRateAPI.ActiveDisplayCurrency+"/"+International::GetText(QMetaEnum::fromType<Enums::TimeUnitType>().valueToKey((int)ConfigManager.generalConfig->TimeUnit))+"     "+International::GetText("Form_Main_balance")+":");
+	toolStripStatusLabelBTCDayValue->setText(QString::number(ExchangeRateApi::ConvertToActiveCurrency(totalRate*_factorTimeUnit*ExchangeRateApi::GetUsdExchangeRate()), 'f', 2));
+	toolStripStatusLabelBalanceText->setText(ExchangeRateApi::ActiveDisplayCurrency+"/"+International::GetText(QMetaEnum::fromType<Enums::TimeUnitType>().valueToKey((int)ConfigManager.generalConfig->TimeUnit))+"     "+International::GetText("Form_Main_balance")+":");
 }
 
 void Form_Main::BalanceCallback()
@@ -788,26 +789,42 @@ void Form_Main::BalanceCallback()
 			toolStripStatusLabelBalanceBTCCode->setText("BTC");
 			toolStripStatusLabelBalanceBTCValue->setText(QString::number(balance, 'f', 6));
 			}
-		double amount=(balance*Globals::BitcoinUsdRate);
-		amount=ExchangeRateAPI.ConvertToActiveCurrency(amount);
+		double amount=(balance*ExchangeRateApi::GetUsdExchangeRate());
+		amount=ExchangeRateApi::ConvertToActiveCurrency(amount);
 		toolStripStatusLabelBalanceDollarText->setText(QString::number(amount, 'f', 2));
-		toolStripStatusLabelBalanceDollarValue->setText(QString("(%1)").arg(ExchangeRateAPI.ActiveDisplayCurrency));
+		toolStripStatusLabelBalanceDollarValue->setText(QString("(%1)").arg(ExchangeRateApi::ActiveDisplayCurrency));
 		}
 }
-
-void Form_Main::BitcoinExchangeCheck_Tick()
+/*void Form_Main::BitcoinExchangeCheck_Tick()
 {
 	Helpers::ConsolePrint("NICEHASH", "Bitcoin rate get");
-	ExchangeRateAPI.UpdateApi(textBoxWorkerName->text().trimmed());
-	double br=ExchangeRateAPI.GetUsdExchangeRate();
+	ExchangeRateApi.UpdateApi(textBoxWorkerName->text().trimmed());
+	double br=ExchangeRateApi.GetUsdExchangeRate();
 	QString currencyRate=International::GetText("BenchmarkRatioRateN_A");
 	if (br>0) {
 		Globals::BitcoinUsdRate=br;
-		currencyRate=QString::number(ExchangeRateAPI.ConvertToActiveCurrency(br), 'f', 2);
+		currencyRate=QString::number(ExchangeRateApi.ConvertToActiveCurrency(br), 'f', 2);
 		}
 
 //	toolTip1.
 	Helpers::ConsolePrint("NICEHASH", "Current Bitcoin rate: "+QString::number(Globals::BitcoinUsdRate, 'f', 2));
+}*/
+
+void Form_Main::ExchangeCallback()
+{
+	UpdateExchange();
+}
+
+void Form_Main::UpdateExchange()
+{
+	double br=ExchangeRateApi::GetUsdExchangeRate();
+	QString currencyRate=International::GetText("BenchmarkRatioRateN_A");
+	if (br>0) {
+		currencyRate=QString::number(ExchangeRateApi::ConvertToActiveCurrency(br), 'f', 2);
+		}
+	statusStrip1->setToolTip(QString("1 BTC = %1 %2").arg(currencyRate).arg(ExchangeRateApi::ActiveDisplayCurrency));
+
+	Helpers::ConsolePrint("NICEHASH", "Current Bitcoin rate: "+QString::number(br, 'f', 2));
 }
 
 void Form_Main::SmaCallback()
@@ -1050,7 +1067,21 @@ Form_Main::StartMiningReturnType Form_Main::StartMining(bool showWarnings)
 		return StartMiningReturnType::IgnoreMsg;
 		}
 
-	if (!NHSmaData::HasData()) {
+	bool hasData=NHSmaData::HasData();
+
+	if (!showWarnings) {
+		for (int i=0; i<10; i++) {
+			if (hasData) {
+				break;
+				}
+			QThread::sleep(1000);
+			hasData=NHSmaData::HasData();
+			Helpers::ConsolePrint("NICEHASH", QString("After %1s has data: %2").arg(i).arg(hasData));
+			}
+		}
+
+	if (!hasData) {
+		Helpers::ConsolePrint("NICEHASH", "No data received within timeout");
 		if (showWarnings) {
 			QMessageBox::critical(this, International::GetText("Error_with_Exclamation"), International::GetText("Form_Main_msgbox_NullNiceHashDataMsg"), QMessageBox::Ok);
 			}
@@ -1063,7 +1094,7 @@ Form_Main::StartMiningReturnType Form_Main::StartMining(bool showWarnings)
 		if (cdev->Enabled) {
 			foreach (Algorithm* algo, *cdev->GetAlgorithmSettings()) {
 				if (algo->Enabled==true) {
-					if (algo->BenchmarkSpeed==0) {
+					if (!algo->BenchmarkSpeed()) {
 						isBenchInit=false;
 						break;
 						}
@@ -1091,7 +1122,7 @@ Form_Main::StartMiningReturnType Form_Main::StartMining(bool showWarnings)
 				if (cdev->Enabled) {
 					bool enabled=false;
 					foreach (Algorithm* algo, *cdev->GetAlgorithmSettings()) {
-						if (algo->BenchmarkSpeed>0) {
+						if (algo->BenchmarkSpeed()>0) {
 							enabled=true;
 							break;
 							}

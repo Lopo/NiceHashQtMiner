@@ -17,6 +17,7 @@ public:
 	QStringList ExtraLaunchParameters;
 	bool Enabled=true;
 	int LessThreads=0;
+	double PowerUsage=0;
 
 	static AlgorithmConfig* fromJsonObject(QJsonObject o);
 	QJsonObject asJsonObject();

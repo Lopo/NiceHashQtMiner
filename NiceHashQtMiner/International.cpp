@@ -26,12 +26,12 @@ QList<International::Language*>* International::GetLanguages()
 				f.close();
 				langs->append(l);
 				}
-			catch (QException ex) {
+			catch (QException& ex) {
 				Helpers::ConsolePrint("NICEHASH", QString("Lang error: ")+ex.what());
 				}
 			}
 		}
-	catch (QException ex) {
+	catch (QException& ex) {
 		Helpers::ConsolePrint("NICEHASH", QString("Lang error: ")+ex.what());
 		}
 
@@ -52,7 +52,9 @@ void International::Initialize(Enums::LanguageType lid)
 			}
 		}
 
-	Helpers::ConsolePrint("NICEHASH", "Critical error: missing language");
+	if (_selectedLanguage==nullptr) {
+		Helpers::ConsolePrint("NICEHASH", "Critical error: missing language");
+		}
 }
 
 QMap<Enums::LanguageType, QString>* International::GetAvailableLanguages()

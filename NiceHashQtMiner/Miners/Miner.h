@@ -22,13 +22,13 @@ class ApiData //done
 	Q_OBJECT
 public:
 	ApiData(Enums::AlgorithmType algorithmID, Enums::AlgorithmType secondaryAlgorithmID=Enums::AlgorithmType::NONE);
-	Enums::AlgorithmType DualAlgorithmID();
 
 	Enums::AlgorithmType AlgorithmID;
 	Enums::AlgorithmType SecondaryAlgorithmID;
 	QString AlgorithmName;
 	double Speed;
 	double SecondarySpeed;
+	double PowerUsage;
 };
 
 
@@ -66,6 +66,7 @@ public:
 	QString MinerDeviceName;
 	inline bool IsApiReadException() const { return _IsApiReadException; };
 //	inline bool IsNeverHideMiningWindow() const { return _IsNeverHideMiningWindow; };
+	inline MiningSetup* miningSetup() const { return MiningSetup_;};
 	inline bool IsRunning() const { return _IsRunning; };
 
 	bool BenchmarkSignalQuit=false;
@@ -105,7 +106,7 @@ protected:
 	bool _IsApiReadException=false;
 //	bool _IsNeverHideMiningWindow=false;
 	inline bool IsInit() const { return _IsInit; };
-	MiningSetup* _MiningSetup=nullptr;
+	MiningSetup* MiningSetup_=nullptr;
 	// sgminer/zcash claymore workaround
 	bool IsKillAllUsedMinerProcs=false;
 	bool _IsRunning;
@@ -128,9 +129,13 @@ protected:
 
 	QStringList* BenchLines=nullptr;
 
+	bool TimeoutStandard=false;
+
 	Enums::MinerApiReadStatus CurrentMinerReadStatus;
 
 	const QString HttpHeaderDelimiter="\r\n\r\n";
+
+	bool IsMultiType=false;
 
 	Miner(QString minerDeviceName, int maxCDTime);
 	~Miner();
@@ -145,6 +150,7 @@ protected:
 
 	virtual QStringList BenchmarkCreateCommandLine(Algorithm* algorithm, int time)=0;
 	virtual QProcess* BenchmarkStartProcess(QStringList CommandLine);
+	virtual void FinishUpBenchmark();
 	virtual void BenchmarkOutputErrorDataReceivedImpl(QString outdata)=0;
 	void CheckOutdata(QString outdata);
 	double BenchmarkParseLine_cpu_ccminer_extra(QString outdata);
@@ -155,7 +161,9 @@ protected:
 	virtual QString GetFinalBenchmarkString();
 	void BenchmarkThreadRoutineFinish();
 	void BenchmarkThreadRoutineAlternate(QStringList commandLine, int benchmarkTimeWait);
-	void CleanAllOldLogs();
+	void CleanOldLogs();
+	QString GetDeviceID(); // When parallel benchmarking each device needs its own log files, so this uniquely identifies for the setup
+	QString GetLogFileName();
 	virtual void ProcessBenchLinesAlternate(QStringList lines);
 	virtual bool BenchmarkParseLine(QString outdata)=0;
 	QString GetServiceUrl(Enums::AlgorithmType algo);

@@ -4,7 +4,7 @@
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Utils/Helpers.h"
 #include "Miners/ethminer/Ethereum.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "PInvoke/NiceHashProcess.h"
 #include <QUdpSocket>
 #include <QDateTime>
@@ -22,7 +22,7 @@ MinerEtherum::MinerEtherum(QString minerDeviceName, QString blockString)
 QStringList MinerEtherum::GetDevicesCommandString()
 {
 	QStringList deviceStringCommand;
-	foreach (MiningPair* mPair, *_MiningSetup->MiningPairs) {
+	foreach (MiningPair* mPair, *MiningSetup_->MiningPairs) {
 		deviceStringCommand << QString::number(mPair->Device->ID);
 		}
 	// set dag load mode
@@ -91,8 +91,8 @@ void MinerEtherum::InitMiningSetup(MiningSetup* miningSetup)
 	Miner::InitMiningSetup(miningSetup);
 	// now find the fastest for DAG generation
 	double fastestSpeed=-DBL_MAX;
-	foreach (MiningPair* mPair, *_MiningSetup->MiningPairs) {
-		double compareSpeed=mPair->algorithm->AveragedSpeed;
+	foreach (MiningPair* mPair, *MiningSetup_->MiningPairs) {
+		double compareSpeed=mPair->algorithm->AvaragedSpeed;
 		if (fastestSpeed<compareSpeed) {
 			DaggerHashimotoGenerateDevice=mPair->Device;
 			fastestSpeed=compareSpeed;
@@ -102,7 +102,7 @@ void MinerEtherum::InitMiningSetup(MiningSetup* miningSetup)
 
 ApiData* MinerEtherum::GetSummaryAsync()
 {
-	ApiData* ad=new ApiData(_MiningSetup->CurrentAlgorithmType);
+	ApiData* ad=new ApiData(MiningSetup_->CurrentAlgorithmType);
 
 	bool ismining;
 	GetSpeedStatus getSpeedStatus=GetSpeed(&ismining, &ad->Speed);
@@ -167,7 +167,7 @@ bool MinerEtherum::BenchmarkParseLine(QString outdata)
 	double avg_spd=splt.at(index+2).toDouble();
 	Helpers::ConsolePrint("BENCHMARK", QString("Final Speed: %1 H/s").arg(avg_spd));
 
-	BenchmarkAlgorithm->BenchmarkSpeed=avg_spd;
+	BenchmarkAlgorithm->BenchmarkSpeed(avg_spd);
 	return true;
 }
 

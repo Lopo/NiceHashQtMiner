@@ -21,8 +21,8 @@ public:
 	Q_ENUM(AlgorithmBenchmarkSettingsType)
 
 	enum AlgorithmType {
-		DaggerBlake2s=-228,
-		DaggerKeccak=-205,
+		DaggerKeccak=-8,
+		DaggerBlake2s=-7,
 		DaggerSia=-6,
 		DaggerDecred=-5,
 		DaggerLbry=-4,
@@ -171,7 +171,7 @@ public:
 		Claymore,
 		OptiminerAMD,
 		excavator,
-		XmrStackCPU,
+		XmrStak,
 		ccminer_alexis,
 		experimental,
 		EWBF,

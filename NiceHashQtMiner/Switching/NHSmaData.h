@@ -34,6 +34,7 @@ public:
 
 private:
 	static const QString Tag;
+	static const QString CachedFile;
 
 	static bool Initialized_;
 	static bool HasData_;

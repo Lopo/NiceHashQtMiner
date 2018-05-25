@@ -86,7 +86,9 @@ Q_SIGNALS:
 private Q_SLOTS:
 	void listViewDevicesItemChecked(int);
 //	void ListViewDevices_MouseClick(QTreeWidgetItem*, int);
+//	void ToolStripMenuItem_Click(bool justTuning);
 //	void ToolStripMenuItemCopySettings_Click();
+//	void ToolStripMenuItemCopyTuning_Click();
 //	void DevicesListViewEnableControl_Resize();
 	void forwardSelectionChanged(const QItemSelection&, const QItemSelection&);
 };

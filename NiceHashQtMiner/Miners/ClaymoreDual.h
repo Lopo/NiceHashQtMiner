@@ -15,14 +15,10 @@ public:
 	void Start(QString url, QString btcAdress, QString worker) override;
 
 protected:
-	double DevFee() override;
-	QString SecondaryLookForStart() override;
 	QStringList DeviceCommand(int amdCount=-1) override;
 	QStringList BenchmarkCreateCommandLine(Algorithm* algorithm, int time) override;
 
 private:
-	static const QString _LookForStart;
-
 	QStringList GetStartCommand(QString url, QString btcAdress, QString worker);
 };
 

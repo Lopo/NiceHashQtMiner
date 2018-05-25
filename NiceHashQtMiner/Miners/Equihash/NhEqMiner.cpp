@@ -3,7 +3,7 @@
 #include "PInvoke/CPUID.h"
 #include "PInvoke/NiceHashProcess.h"
 #include "Miners/Parsing/ExtraLaunchParametersParser.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 
 using namespace NiceHashQtMiner;
 
@@ -91,7 +91,7 @@ bool NhEqMiner::BenchmarkParseLine(QString outdata)
 	if (outdata.contains(SolsPerSec)) {
 		double sols=GetNumber(outdata, "Speed: ", SolsPerSec);
 		if (sols>0) {
-			BenchmarkAlgorithm->BenchmarkSpeed=CurSpeed;
+			BenchmarkAlgorithm->BenchmarkSpeed(CurSpeed);
 			return true;
 			}
 		}

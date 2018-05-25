@@ -7,7 +7,7 @@
 class Ifttt
 {
 private:
-	const QString ApiUrl="https://maker.ifttt.com/trigger/";
+	static const QString ApiUrl/*="https://maker.ifttt.com/trigger/"*/;
 
 public:
 	static void PostToIfttt(QString action, QString msg);

@@ -16,6 +16,10 @@ public:
 protected:
 	int BenchmarkTimeWait=2*45; // Ok... this was all wrong
 	QString LookForStart;
+	QString LookForEnd="h/s";
+	QString SecondaryLookForStart;
+
+	double DevFee;
 
 	// only dagger change
 	bool IgnoreZero=false;
@@ -23,10 +27,10 @@ protected:
 	double ApiReadMult=1;
 	Enums::AlgorithmType SecondaryAlgorithmType=Enums::AlgorithmType::NONE;
 
-	ClaymoreBaseMiner(QString minerDeviceName, QString lookForStart, int maxCDTime);
+	// CD intensity tuning
+	const int defaultIntensity=30;
 
-	virtual double DevFee()=0;
-	virtual QString SecondaryLookForStart();
+	ClaymoreBaseMiner(QString minerDeviceName, int maxCDTime);
 
 	void _Stop(Enums::MinerStopType willswitch) override;
 	virtual QStringList DeviceCommand(int amdCount=1);
@@ -44,7 +48,6 @@ private:
 	double _benchmarkSum=0.0d;
 	int _secondaryBenchmarkReadCount=0;
 	double _secondaryBenchmarkSum=0.0d;
-	const QString LookForEnd="h/s";
 
 	class JsonApiResponse {
 	public:

@@ -1,6 +1,8 @@
 #include "Forms/Components/AlgorithmsListView.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "International.h"
+#include "Algorithms/DualAlgorithm.h"
+#include "Forms/Form_DcriValues.h"
 
 
 QColor AlgorithmsListView::DefaultAlgorithmColorSeter::DisabledColor=Qt::darkGray;
@@ -15,8 +17,8 @@ AlgorithmsListView::AlgorithmsListView(QWidget* parent)
 	// callback initializations
 	connect(this, SIGNAL(itemSelectionChanged(int)), this, SLOT(ListViewAlgorithms_ItemSelectionChanged(int)));
 	connect(model, SIGNAL(ItemChecked(int)), this, SLOT(ListViewAlgorithms_ItemChecked(int)));
-	this->setContextMenuPolicy(Qt::CustomContextMenu);
-	setIsInBenchmark(false);
+	setContextMenuPolicy(Qt::CustomContextMenu);
+	IsInBenchmark(false);
 }
 
 void AlgorithmsListView::InitializeComponent()
@@ -37,7 +39,9 @@ void AlgorithmsListView::InitializeComponent()
 //	connect(listViewAlgorithms, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(listViewAlgorithms_MouseClick()));
 
 	listViewAlgorithms->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-	listViewAlgorithms->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+	listViewAlgorithms->horizontalHeader()->setFixedHeight(30);
+	listViewAlgorithms->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+	listViewAlgorithms->verticalHeader()->setDefaultSectionSize(30);
 	listViewAlgorithms->verticalHeader()->hide();
 	listViewAlgorithms->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
 	listViewAlgorithms->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
@@ -59,7 +63,7 @@ void AlgorithmsListView::DefaultAlgorithmColorSeter::LviSetColor(QAbstractTableM
 	if (!algorithm->Enabled && !algorithm->IsBenchmarkPending()) {
 		model->setData(idx, DisabledColor, Qt::BackgroundColorRole);
 		}
-	else if (algorithm->BenchmarkSpeed>0&& !algorithm->IsBenchmarkPending()) {
+	else if (!algorithm->BenchmarkSpeed() && !algorithm->IsBenchmarkPending()) {
 		model->setData(idx, BenchmarkedColor, Qt::BackgroundColorRole);
 		}
 	else {
@@ -67,9 +71,9 @@ void AlgorithmsListView::DefaultAlgorithmColorSeter::LviSetColor(QAbstractTableM
 		}
 }
 
-void AlgorithmsListView::setIsInBenchmark(const bool value)
+void AlgorithmsListView::IsInBenchmark(const bool value)
 {
-	IsInBenchmark_=value;
+	_isInBenchmark=value;
 	model->CheckBoxes=!value;
 }
 
@@ -78,6 +82,7 @@ void AlgorithmsListView::InitLocale()
 	model->setHeaderData(ENABLED, Qt::Horizontal, International::GetText("AlgorithmsListView_Enabled"));
 	model->setHeaderData(ALGORITHM, Qt::Horizontal, International::GetText("AlgorithmsListView_Algorithm"));
 	model->setHeaderData(SPEED, Qt::Horizontal, International::GetText("AlgorithmsListView_Speed"));
+	model->setHeaderData(SECSPEED, Qt::Horizontal, International::GetText("Form_DcriValues_SecondarySpeed"));
 	model->setHeaderData(RATIO, Qt::Horizontal, International::GetText("AlgorithmsListView_Ratio"));
 	model->setHeaderData(RATE, Qt::Horizontal, International::GetText("AlgorithmsListView_Rate"));
 }
@@ -93,14 +98,29 @@ void AlgorithmsListView::SetAlgorithms(ComputeDevice* computeDevice, bool isEnab
 		int rc=model->rowCount();
 		model->insertRows(rc, 1, QModelIndex());
 		QModelIndex idx=model->index(rc, 0, QModelIndex());
-		model->setData(model->index(rc, ALGORITHM, QModelIndex()), QString("%1 (%2)").arg(alg->AlgorithmName, alg->MinerBaseTypeName), Qt::EditRole); // DisplayRole?
+		QString name="";
+		QString secondarySpeed="";
+		QString payingRatio="";
+		DualAlgorithm* dualAlgo=qobject_cast<DualAlgorithm*>(alg);
+		if (dualAlgo!=nullptr) {
+			name="  + "+dualAlgo->SecondaryAlgorithmName;
+			secondarySpeed=dualAlgo->SecondaryBenchmarkSpeedString();
+			payingRatio=dualAlgo->SecondaryCurPayingRatio();
+			}
+		else {
+			name=QString("%1 (%2)").arg(alg->AlgorithmName()).arg(alg->MinerBaseTypeName);
+			payingRatio=alg->CurPayingRatio();
+			}
+		model->setData(model->index(rc, ALGORITHM, QModelIndex()), name, Qt::EditRole); // DisplayRole?
 		model->setData(model->index(rc, SPEED, QModelIndex()), alg->BenchmarkSpeedString(), Qt::EditRole); // DisplayRole?
-		model->setData(model->index(rc, RATIO, QModelIndex()), alg->CurPayingRatio(), Qt::EditRole); // DisplayRole?
+		model->setData(model->index(rc, SECSPEED, QModelIndex()), secondarySpeed, Qt::EditRole); // DisplayRole?
+		model->setData(model->index(rc, RATIO, QModelIndex()), payingRatio, Qt::EditRole); // DisplayRole?
 		model->setData(model->index(rc, RATE, QModelIndex()), alg->CurPayingRate(), Qt::EditRole); // DisplayRole?
 		model->setData(idx, QVariant::fromValue<Algorithm*>(alg), Qt::EditRole);
 		model->setData(idx, alg->Enabled? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
 		_listItemCheckColorSetter->LviSetColor(model, rc);
 		}
+
 	listViewAlgorithms->setUpdatesEnabled(true);
 	setEnabled(isEnabled);
 }
@@ -109,7 +129,12 @@ void AlgorithmsListView::RepaintStatus(bool isEnabled, const QString uuid)
 {
 	if (_computeDevice!=nullptr && _computeDevice->Uuid()==uuid) {
 		for (int i=0; i<model->rowCount(); i++) {
-			model->setData(model->index(i, SPEED, QModelIndex()), model->data(model->index(i, 0, QModelIndex()), Qt::EditRole).value<Algorithm*>()->BenchmarkSpeedString(), Qt::EditRole);
+			Algorithm* algo=model->data(model->index(i, 0, QModelIndex()), Qt::EditRole).value<Algorithm*>();
+			model->setData(model->index(i, SPEED, QModelIndex()), algo->BenchmarkSpeedString(), Qt::EditRole);
+			DualAlgorithm* dualAlgo=qobject_cast<DualAlgorithm*>(algo);
+			if (dualAlgo!=nullptr) {
+				model->setData(model->index(i, SECSPEED, QModelIndex()), dualAlgo->SecondaryBenchmarkSpeedString(), Qt::EditRole);
+				}
 			_listItemCheckColorSetter->LviSetColor(model, i);
 			}
 		setEnabled(isEnabled);
@@ -126,7 +151,7 @@ void AlgorithmsListView::ListViewAlgorithms_ItemSelectionChanged(int row)
 void AlgorithmsListView::ListViewAlgorithms_ItemChecked(int row)
 {
 	QModelIndex idx=model->index(row, 0, QModelIndex());
-	if (IsInBenchmark_) {
+	if (_isInBenchmark) {
 		model->setData(idx, model->data(idx, Qt::CheckStateRole)==Qt::Checked? Qt::Unchecked : Qt::Checked);
 		return;
 		}
@@ -162,11 +187,20 @@ void AlgorithmsListView::SetSpeedStatus(ComputeDevice* computeDevice, Algorithm*
 		if (_computeDevice!=nullptr && computeDevice->Uuid()==_computeDevice->Uuid()) {
 			for (int i=0; i<model->rowCount(); i++) {
 				Algorithm* algo=model->data(model->index(i, 0, QModelIndex()), Qt::EditRole).value<Algorithm*>();
-				if (algo!=nullptr && algo->AlgorithmStringID==algorithm->AlgorithmStringID) {
-					// @todo handle numbers
+				if (algo!=nullptr && algo->AlgorithmStringID()==algorithm->AlgorithmStringID()) {
+					// TODO handle numbers
 					model->setData(model->index(i, SPEED, QModelIndex()), algorithm->BenchmarkSpeedString(), Qt::EditRole);
 					model->setData(model->index(i, RATE, QModelIndex()), algorithm->CurPayingRate(), Qt::EditRole);
-					model->setData(model->index(i, RATIO, QModelIndex()), algorithm->CurPayingRatio(), Qt::EditRole);
+
+					DualAlgorithm* dualAlg=qobject_cast<DualAlgorithm*>(algorithm);
+					if (dualAlg!=nullptr) {
+						model->setData(model->index(i, RATIO, QModelIndex()), dualAlg->SecondaryCurPayingRatio(), Qt::EditRole);
+						model->setData(model->index(i, SECSPEED, QModelIndex()), dualAlg->SecondaryBenchmarkSpeedString(), Qt::EditRole);
+						}
+					else {
+						model->setData(model->index(i, RATIO, QModelIndex()), algorithm->CurPayingRatio(), Qt::EditRole);
+						}
+
 					_listItemCheckColorSetter->LviSetColor(model, i);
 					break;
 					}
@@ -177,23 +211,44 @@ void AlgorithmsListView::SetSpeedStatus(ComputeDevice* computeDevice, Algorithm*
 
 void AlgorithmsListView::ListViewAlgorithms_MouseClick(const QPoint& pos)
 {
-	if (IsInBenchmark_) {
+	if (IsInBenchmark()) {
 		return;
 		}
 	QMenu ctx(this);
 
-	QAction disableAllItems(International::GetText("AlgorithmsListView_ContextMenu_DisableAll"), this); // disable all
-	connect(&disableAllItems, SIGNAL(triggered()), this, SLOT(ToolStripMenuItemDisableAll_Click()));
-	QAction enableAllItems(International::GetText("AlgorithmsListView_ContextMenu_EnableAll"), this); // enable all
-	connect(&enableAllItems, SIGNAL(triggered()), this, SLOT(ToolStripMenuItemEnableAll_Click()));
-	QAction testItem(International::GetText("AlgorithmsListView_ContextMenu_TestItem"), this); // test this
-	connect(&testItem, SIGNAL(triggered()), this, SLOT(ToolStripMenuItemTest_Click()));
-	QAction enableBenchedItem(International::GetText("AlgorithmsListView_ContextMenu_EnableBenched"), this); // enable benchmarked only
-	connect(&enableBenchedItem, SIGNAL(triggered()), this, SLOT(ToolStripMenuItemEnableBenched_Click()));
-	QAction clearItem(International::GetText("AlgorithmsListView_ContextMenu_ClearItem"), this); // clear item
-	connect(&clearItem, SIGNAL(triggered()), this, SLOT(ToolStripMenuItemClear_Click()));
+	QAction* disableAllItems=ctx.addAction(International::GetText("AlgorithmsListView_ContextMenu_DisableAll")); // disable all
+	connect(disableAllItems, SIGNAL(triggered()), this, SLOT(ToolStripMenuItemDisableAll_Click()));
+	QAction* enableAllItems=ctx.addAction(International::GetText("AlgorithmsListView_ContextMenu_EnableAll")); // enable all
+	connect(enableAllItems, SIGNAL(triggered()), this, SLOT(ToolStripMenuItemEnableAll_Click()));
+	QAction* testItem=ctx.addAction(International::GetText("AlgorithmsListView_ContextMenu_TestItem")); // test this
+	connect(testItem, SIGNAL(triggered()), this, SLOT(ToolStripMenuItemTest_Click()));
+	QAction* enableBenchedItem=ctx.addAction(International::GetText("AlgorithmsListView_ContextMenu_EnableBenched")); // enable benchmarked only
+	connect(enableBenchedItem, SIGNAL(triggered()), this, SLOT(ToolStripMenuItemEnableBenched_Click()));
+	QAction* clearItem=ctx.addAction(International::GetText("AlgorithmsListView_ContextMenu_ClearItem")); // clear item
+	connect(clearItem, SIGNAL(triggered()), this, SLOT(ToolStripMenuItemClear_Click()));
+	QMenu* dcriMenu=ctx.addMenu(International::GetText("Form_DcriValues_Title")); // open dcri
+	if (listViewAlgorithms->selectionModel()->selectedRows().count()>0) {
+		Algorithm* algo=model->data(model->index(listViewAlgorithms->selectionModel()->selectedRows().at(0).row(), 0, QModelIndex()), Qt::EditRole).value<Algorithm*>();
+		DualAlgorithm* dualAlg=qobject_cast<DualAlgorithm*>(algo);
+		if (dualAlg!=nullptr) {
+			dcriMenu->setEnabled(true);
 
-	ctx.addActions({&disableAllItems, &enableAllItems, &testItem, &enableBenchedItem, &clearItem});
+			QAction* openDcri=dcriMenu->addAction(International::GetText("AlgorithmsListView_ContextMenu_OpenDcri"));
+			connect(openDcri, SIGNAL(triggered()), this, SLOT(toolStripMenuItemOpenDcri_Click()));
+
+			QAction* tuningEnabled=dcriMenu->addAction(International::GetText("Form_DcriValues_TuningEnabled"));
+			tuningEnabled->setCheckable(true);
+			tuningEnabled->setChecked(dualAlg->TuningEnabled);
+			connect(tuningEnabled, SIGNAL(toggled(bool)), this, SLOT(toolStripMenuItemTuningEnabled_Checked(bool))); // @todo check slot (checkedchanged)
+			}
+		else {
+			dcriMenu->setEnabled(false);
+			}
+		}
+	else {
+		dcriMenu->setEnabled(false);
+		}
+
 	ctx.exec(mapToGlobal(pos));
 }
 
@@ -219,8 +274,14 @@ void AlgorithmsListView::ToolStripMenuItemClear_Click()
 			if (index.isValid()) {
 				Algorithm* algorithm=model->data(model->index(index.row(), 0, QModelIndex()), Qt::EditRole).value<Algorithm*>();
 				if (algorithm!=nullptr) {
-					algorithm->BenchmarkSpeed=0;
-					algorithm->SecondaryBenchmarkSpeed=0;
+					algorithm->BenchmarkSpeed(0);
+					DualAlgorithm* dualAlgo=qobject_cast<DualAlgorithm*>(algorithm);
+					if (dualAlgo!=nullptr) {
+						dualAlgo->SecondaryBenchmarkSpeed(0);
+						dualAlgo->IntensitySpeeds.clear();
+						dualAlgo->SecondaryIntensitySpeeds.clear();
+						dualAlgo->IntensityUpToDate=false;
+						}
 					RepaintStatus(_computeDevice->Enabled, _computeDevice->Uuid());
 					if (BenchmarkCalculation!=nullptr) { // update benchmark status data
 						BenchmarkCalculation->CalcBenchmarkDevicesAlgorithmQueue();
@@ -243,8 +304,8 @@ void AlgorithmsListView::ToolStripMenuItemTest_Click()
 			if (algorithm!=nullptr) {
 				bool selected=listViewAlgorithms->selectionModel()->selectedRows().contains(idx);
 				model->setData(idx, selected? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
-				if (selected && algorithm->BenchmarkSpeed<=0) { // If it has zero speed, set to 1 so it can be tested
-					algorithm->BenchmarkSpeed=1;
+				if (selected && algorithm->BenchmarkSpeed()<=0) { // If it has zero speed, set to 1 so it can be tested
+					algorithm->BenchmarkSpeed(1);
 					RepaintStatus(_computeDevice->Enabled, _computeDevice->Uuid());
 					if (ComunicationInterface!=nullptr) {
 						ComunicationInterface->ChangeSpeed(model, i);
@@ -255,12 +316,45 @@ void AlgorithmsListView::ToolStripMenuItemTest_Click()
 		}
 }
 
+void AlgorithmsListView::toolStripMenuItemOpenDcri_Click()
+{
+	foreach (QModelIndex lvi, listViewAlgorithms->selectionModel()->selectedRows()) {
+		Algorithm* algorithm=model->data(lvi, Qt::EditRole).value<Algorithm*>();
+		DualAlgorithm* algo=qobject_cast<DualAlgorithm*>(algorithm);
+		if (algo!=nullptr) {
+			FormDcriValues* dcriValues=new FormDcriValues(algo, this);
+			dcriValues->exec();
+			RepaintStatus(_computeDevice->Enabled, _computeDevice->Uuid());
+			// update benchmark status data
+			if (BenchmarkCalculation!=nullptr) {
+				BenchmarkCalculation->CalcBenchmarkDevicesAlgorithmQueue();
+				}
+			// update settings
+			if (ComunicationInterface!=nullptr) {
+				ComunicationInterface->ChangeSpeed(model, lvi.row());
+				}
+			}
+		}
+}
+
 void AlgorithmsListView::ToolStripMenuItemEnableBenched_Click()
 {
 	for (int i=0; i<model->rowCount(); i++) {
 		QModelIndex idx=model->index(i, 0, QModelIndex());
-		if (model->data(idx, Qt::EditRole).value<Algorithm*>()->BenchmarkSpeed>0) {
+		if (model->data(idx, Qt::EditRole).value<Algorithm*>()->BenchmarkSpeed()>0) {
 			model->setData(idx, Qt::Checked, Qt::CheckStateRole);
+			}
+		}
+}
+
+void AlgorithmsListView::toolStripMenuItemTuningEnabled_Checked(bool checked)
+{
+	foreach (QModelIndex lvi, listViewAlgorithms->selectionModel()->selectedRows()) {
+		Algorithm* algorithm=model->data(lvi, Qt::EditRole).value<Algorithm*>();
+		DualAlgorithm* algo=qobject_cast<DualAlgorithm*>(algorithm);
+		if (algo!=nullptr) {
+			algo->TuningEnabled=checked;
+			RepaintStatus(_computeDevice->Enabled, _computeDevice->Uuid());
 			}
 		}
 }

@@ -1,5 +1,6 @@
 #include "Miners/Excavator.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
+#include "Algorithms/DualAlgorithm.h"
 #include "Globals.h"
 #include "Configs/ConfigManager.h"
 #include "Configs/Data/GeneralConfig.h"
@@ -94,8 +95,11 @@ bool Excavator::BenchmarkParseLine(QString outdata)
 			speed=speed.mid(0, speed.lastIndexOf("/s")+2);
 			if (IsDual()) {
 				QStringList splitDual=speed.trimmed().split('&');
-				BenchmarkAlgorithm->BenchmarkSpeed=GetNumber(splitDual.at(0).trimmed());
-				BenchmarkAlgorithm->SecondaryBenchmarkSpeed=GetNumber(splitDual.at(1).trimmed());
+				BenchmarkAlgorithm->BenchmarkSpeed(GetNumber(splitDual.at(0).trimmed()));
+				DualAlgorithm* dualBenchAlgo=qobject_cast<DualAlgorithm*>(BenchmarkAlgorithm);
+				if (dualBenchAlgo!=nullptr) {
+					dualBenchAlgo->SecondaryBenchmarkSpeed(GetNumber(splitDual.at(1).trimmed()));
+					}
 				return true;
 				}
 			else {
@@ -104,11 +108,11 @@ bool Excavator::BenchmarkParseLine(QString outdata)
 				double spd=GetNumber(speed);
 
 				// wrong benchmark workaround over 3gh/s is considered false
-				if (_MiningSetup->CurrentAlgorithmType==Enums::AlgorithmType::Pascal && spd>3.0d*1000000000.0d) {
+				if (MiningSetup_->CurrentAlgorithmType==Enums::AlgorithmType::Pascal && spd>3.0d*1000000000.0d) {
 					return false;
 					}
 
-				BenchmarkAlgorithm->BenchmarkSpeed=spd;
+				BenchmarkAlgorithm->BenchmarkSpeed(spd);
 				return true;
 				}
 			}
@@ -120,7 +124,7 @@ bool Excavator::BenchmarkParseLine(QString outdata)
 ApiData* Excavator::GetSummaryAsync()
 {
 	CurrentMinerReadStatus=Enums::MinerApiReadStatus::NONE;
-	ApiData* ad=new ApiData(_MiningSetup->CurrentAlgorithmType);
+	ApiData* ad=new ApiData(MiningSetup_->CurrentAlgorithmType);
 
 	JsonApiResponse* resp=nullptr;
 	try {
@@ -133,7 +137,7 @@ ApiData* Excavator::GetSummaryAsync()
 		resp=JsonApiResponse::fromJson(client.readAll());
 		client.close();
 		}
-	catch (std::exception ex) {
+	catch (std::exception& ex) {
 		Helpers::ConsolePrint("ERROR", ex.what());
 		}
 
@@ -193,7 +197,7 @@ Excavator::JsonApiResponse* Excavator::JsonApiResponse::fromJson(QString json)
 
 QString Excavator::GetConfigFileName()
 {
-	return QString("config_%1.cfg").arg(_MiningSetup->MiningPairs->at(0)->Device->ID);
+	return QString("config_%1.cfg").arg(MiningSetup_->MiningPairs->at(0)->Device->ID);
 }
 
 QString Excavator::jsonConfig(QString url, QString btcAdress, QString worker)
@@ -201,7 +205,7 @@ QString Excavator::jsonConfig(QString url, QString btcAdress, QString worker)
 	ExcavatorAction* act;
 	QJsonArray cfg;
 
-	QString algo=_MiningSetup->MinerName;
+	QString algo=MiningSetup_->MinerName;
 	if (IsDual()) {
 		algo+=QString("_%1").arg(QMetaEnum::fromType<Enums::AlgorithmType>().valueToKey((int)SecondaryAlgorithmType));
 		}
@@ -215,7 +219,7 @@ QString Excavator::jsonConfig(QString url, QString btcAdress, QString worker)
 	cfg.append(act->asJObject());
 
 	act=new ExcavatorAction(1);
-	foreach (MiningPair* nvidiaPair, *_MiningSetup->MiningPairs) {
+	foreach (MiningPair* nvidiaPair, *MiningSetup_->MiningPairs) {
 		act->commands.append(ExcavatorCommand("worker.add", {"0", QString::number(nvidiaPair->Device->ID)}));
 		}
 	cfg.append(act->asJObject());
@@ -236,7 +240,7 @@ QString Excavator::jsonBenchConfig(QString url, QString btcAdress, QString worke
 	QJsonArray cfg;
 
 	QString algo= !IsDual()
-		? _MiningSetup->MinerName
+		? MiningSetup_->MinerName
 		: QString("daggerhashimoto_%1").arg(QMetaEnum::fromType<Enums::AlgorithmType>().valueToKey((int)SecondaryAlgorithmType)).toLower();
 	QString wallet=GetUsername(btcAdress, worker);
 
@@ -249,7 +253,7 @@ QString Excavator::jsonBenchConfig(QString url, QString btcAdress, QString worke
 	cfg.append(act->asJObject());
 
 	act=new ExcavatorAction(3);
-	foreach (MiningPair* nvidiaPair, *_MiningSetup->MiningPairs) {
+	foreach (MiningPair* nvidiaPair, *MiningSetup_->MiningPairs) {
 		if (IsDual()) {
 			act->commands.append(ExcavatorCommand("worker.add", {"0", QString::number(nvidiaPair->Device->ID)}));
 			}
@@ -259,7 +263,7 @@ QString Excavator::jsonBenchConfig(QString url, QString btcAdress, QString worke
 		}
 	cfg.append(act->asJObject());
 
-	act=new ExcavatorAction(_benchmarkTimeWait+3+(_MiningSetup->CurrentAlgorithmType==Enums::AlgorithmType::DaggerHashimoto? 5 : 0));
+	act=new ExcavatorAction(_benchmarkTimeWait+3+(MiningSetup_->CurrentAlgorithmType==Enums::AlgorithmType::DaggerHashimoto? 5 : 0));
 	act->commands.append(ExcavatorCommand("algorithm.print.speeds", {"0"}));
 	act->commands.append(ExcavatorCommand("quit", {}));
 	cfg.append(act->asJObject());

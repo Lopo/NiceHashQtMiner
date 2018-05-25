@@ -11,12 +11,11 @@
 #include "Miners/Equihash/Dtsm.h"
 #include "Miners/ethminer/MinerEtherumOCL.h"
 #include "Miners/ethminer/MinerEtherumCUDA.h"
-#include "Miners/XmrStak/XmrStackCPUMiner.h"
+#include "Miners/XmrStak/XmrStak.h"
 #include "Miners/Prospector.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "Miners/Xmrig.h"
-#include "XmrStak/XmrStakAMD.h"
 
 
 Miner* MinerFactory::CreateEthminer(Enums::DeviceType deviceType)
@@ -34,16 +33,16 @@ Miner* MinerFactory::CreateEthminer(Enums::DeviceType deviceType)
 	return nullptr;
 }
 
-Miner* MinerFactory::CreateClaymore(Enums::AlgorithmType algorithmType, Enums::AlgorithmType secondaryAlgorithmType)
+Miner* MinerFactory::CreateClaymore(Algorithm* algorithm)
 {
-	switch (algorithmType) {
+	switch (algorithm->NiceHashID) {
 		case Enums::AlgorithmType::Equihash:
 			return new ClaymoreZcashMiner;
 		case Enums::AlgorithmType::CryptoNight:
 		case Enums::AlgorithmType::CryptoNightV7:
 			return new ClaymoreCryptoNightMiner;
 		case Enums::AlgorithmType::DaggerHashimoto:
-			return new ClaymoreDual(secondaryAlgorithmType);
+			return new ClaymoreDual(algorithm->SecondaryNiceHashID());
 		default:
 			return nullptr;
 		}
@@ -60,9 +59,9 @@ Miner* MinerFactory::CreateExperimental(Enums::DeviceType deviceType, Enums::Alg
 	return nullptr;
 }
 
-Miner* MinerFactory::CreateMiner(Enums::DeviceType deviceType, Enums::AlgorithmType algorithmType, Enums::MinerBaseType minerBaseType, Enums::AlgorithmType secondaryAlgorithmType)
+Miner* MinerFactory::CreateMiner(Enums::DeviceType deviceType, Algorithm* algorithm)
 {
-	switch (minerBaseType) {
+	switch (algorithm->MinerBaseType) {
 		case Enums::MinerBaseType::ccminer:
 			return new Ccminer;
 		case Enums::MinerBaseType::sgminer:
@@ -72,27 +71,23 @@ Miner* MinerFactory::CreateMiner(Enums::DeviceType deviceType, Enums::AlgorithmT
 		case Enums::MinerBaseType::ethminer:
 			return CreateEthminer(deviceType);
 		case Enums::MinerBaseType::Claymore:
-			return CreateClaymore(algorithmType, secondaryAlgorithmType);
+			return CreateClaymore(algorithm);
 		case Enums::MinerBaseType::OptiminerAMD:
 			return new OptiminerZcashMiner;
 		case Enums::MinerBaseType::excavator:
-			return new Excavator(secondaryAlgorithmType);
-		case Enums::MinerBaseType::XmrStackCPU:
-			return new XmrStackCPUMiner;
+			return new Excavator(algorithm->SecondaryNiceHashID());
+		case Enums::MinerBaseType::XmrStak:
+			return new XmrStak;
 		case Enums::MinerBaseType::ccminer_alexis:
 			return new Ccminer;
 		case Enums::MinerBaseType::experimental:
-			return CreateExperimental(deviceType, algorithmType);
+			return CreateExperimental(deviceType, algorithm->NiceHashID);
 		case Enums::MinerBaseType::EWBF:
 			return new Ewbf;
 		case Enums::MinerBaseType::Prospector:
 			return new Prospector;
 		case Enums::MinerBaseType::Xmrig:
 			return new Xmrig;
-		case Enums::MinerBaseType::XmrStakAMD:
-			return new XmrStakAMD;
-		case Enums::MinerBaseType::Claymore_old:
-			return new ClaymoreCryptoNightMiner(true);
 		case Enums::MinerBaseType::dtsm:
 			return new Dtsm;
 		default:
@@ -104,7 +99,7 @@ Miner* MinerFactory::CreateMiner(Enums::DeviceType deviceType, Enums::AlgorithmT
 Miner* MinerFactory::CreateMiner(ComputeDevice* device, Algorithm* algorithm)
 {
 	if (device!=nullptr && algorithm!=nullptr) {
-		return CreateMiner(device->DeviceType, algorithm->NiceHashID, algorithm->MinerBaseType, algorithm->SecondaryNiceHashID);
+		return CreateMiner(device->DeviceType, algorithm);
 		}
 	return nullptr;
 }

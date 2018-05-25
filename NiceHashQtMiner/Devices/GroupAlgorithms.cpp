@@ -1,7 +1,8 @@
 #include "Devices/GroupAlgorithms.h"
 #include "config.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
+#include "Algorithms/DualAlgorithm.h"
 #if WITH_AMD
 #	include "Devices/AmdGpuDevice.h"
 #endif
@@ -180,19 +181,20 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 	switch (deviceGroupType) {
 		case Enums::DeviceGroupType::CPU:
 			return new QMap<Enums::MinerBaseType, QList<Algorithm*>*>({
-/*				{
-					Enums::MinerBaseType::XmrStackCPU,
+				{
+					Enums::MinerBaseType::XmrStak,
 					new QList<Algorithm*>({
-						new Algorithm(Enums::MinerBaseType::XmrStackCPU, Enums::AlgorithmType::CryptoNight, "cryptonight"),
-						new Algorithm(Enums::MinerBaseType::XmrStackCPU, Enums::AlgorithmType::CryptoNightV7, "monero7")
+//						new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNight, "cryptonight"),
+						new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightV7, "")
 						})
 					},
 				{
 					Enums::MinerBaseType::Xmrig,
 					new QList<Algorithm*>({
-						new Algorithm(Enums::MinerBaseType::Xmrig, Enums::AlgorithmType::CryptoNight, "")
+						//new Algorithm(Enums::MinerBaseType::Xmrig, Enums::AlgorithmType::CryptoNight, ""),
+						new Algorithm(Enums::MinerBaseType::Xmrig, Enums::AlgorithmType::CryptoNightV7, "")
 						})
-					}*/
+					}
 				});
 #if WITH_AMD
 		case Enums::DeviceGroupType::AMD_OpenCL:
@@ -231,24 +233,17 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 			ret->insert(
 				Enums::MinerBaseType::Claymore,
 				new QList<Algorithm*>({
-//					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::CryptoNight, "cryptonight"),
-					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::CryptoNightV7, "cryptonightv7"),
+					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::CryptoNightV7, ""),
 					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::Equihash, "equihash"),
 					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, ""),
-					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Decred),
-					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Lbry),
-					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Pascal),
-					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Sia),
-					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Keccak),
-					new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Blake2s)
+					new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Decred),
+					new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Lbry),
+					new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Pascal),
+					new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Sia),
+					new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Blake2s),
+					new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Keccak)
 					})
 				);
-//			ret->insert(
-//				Enums::MinerBaseType::Claymore_old,
-//				new QList<Algorithm*>({
-//					new Algorithm(Enums::MinerBaseType::Claymore_old, Enums::AlgorithmType::CryptoNight, "old")
-//					})
-//				);
 			ret->insert(
 				Enums::MinerBaseType::OptiminerAMD,
 				new QList<Algorithm*>({
@@ -262,6 +257,13 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 					new Algorithm(Enums::MinerBaseType::Prospector, Enums::AlgorithmType::Sia, "sia")
 					})
 				);
+			ret->insert(
+				Enums::MinerBaseType::XmrStak,
+				new QList<Algorithm*>({
+//					new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNight, ""),
+					new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightV7, "")
+					})
+				);
 			return ret;
 		}
 #endif
@@ -270,6 +272,7 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 		case Enums::DeviceGroupType::NVIDIA_3_x:
 		case Enums::DeviceGroupType::NVIDIA_5_x:
 		case Enums::DeviceGroupType::NVIDIA_6_x:
+		{
 			QList<Enums::AlgorithmType> toRemoveAlgoTypes;
 			QList<Enums::MinerBaseType> toRemoveMinerTypes;
 			QMap<Enums::MinerBaseType, QList<Algorithm*>*>* ret=new QMap<Enums::MinerBaseType, QList<Algorithm*>*>({
@@ -287,6 +290,7 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 //						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Nist5, "nist5"),
 						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Keccak, "keccak"),
 						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Skunk, "skunk")
+//						new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::CryptoNightV7, "cryptonight")
 						})
 					},
 				{
@@ -337,9 +341,9 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 						new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::NeoScrypt, "neoscrypt"),
 						new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::Keccak, "keccak"),
 						new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::Nist5, "nist5"),
-						new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Pascal),
-						new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Decred),
-						new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Sia)
+						new DualAlgorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Pascal),
+						new DualAlgorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Decred),
+						new DualAlgorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Sia)
 						})
 					},
 				{
@@ -352,18 +356,25 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 					Enums::MinerBaseType::Claymore,
 					new QList<Algorithm*>({
 						new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, ""),
-						new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Decred),
-						new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Lbry),
-						new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Pascal),
-						new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Sia),
-						new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Keccak),
-						new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, "", Enums::AlgorithmType::Blake2s)
+						new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Decred),
+						new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Lbry),
+						new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Pascal),
+						new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Sia),
+						new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Blake2s),
+						new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Keccak)
 						})
 					},
 				{
 					Enums::MinerBaseType::dtsm,
 					new QList<Algorithm*>({
 						new Algorithm(Enums::MinerBaseType::dtsm, Enums::AlgorithmType::Equihash, "")
+						})
+					},
+				{
+					Enums::MinerBaseType::XmrStak,
+					new QList<Algorithm*>({
+//						new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNight, ""),
+						new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightV7, "")
 						})
 					}
 				});
@@ -379,11 +390,12 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 					toRemoveAlgoTypes.append({
 						Enums::AlgorithmType::NeoScrypt,
 						Enums::AlgorithmType::Lyra2RE,
-						Enums::AlgorithmType::Lyra2REv2
+						Enums::AlgorithmType::Lyra2REv2,
+						Enums::AlgorithmType::CryptoNightV7
 						});
 					toRemoveMinerTypes.append({
 						Enums::MinerBaseType::eqm,
-						Enums::MinerBaseType::excavator,
+//						Enums::MinerBaseType::excavator,
 						Enums::MinerBaseType::EWBF,
 						Enums::MinerBaseType::dtsm
 						});
@@ -400,14 +412,18 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 					Enums::AlgorithmType::X11Gost
 					});
 				toRemoveMinerTypes.append({
-					Enums::MinerBaseType::Claymore
+					Enums::MinerBaseType::Claymore,
+					Enums::MinerBaseType::XmrStak
 					});
 				}
 
 			// filter unused
 			QMap<Enums::MinerBaseType, QList<Algorithm*>*>* finalRet=FilterMinerAlgos(ret, toRemoveAlgoTypes, new QList<Enums::MinerBaseType>({ Enums::MinerBaseType::ccminer }));
 			return FilterMinerBaseTypes(finalRet, toRemoveMinerTypes);
+		}
 #endif
+		default:
+			return nullptr;
 		}
 	return nullptr;
 }

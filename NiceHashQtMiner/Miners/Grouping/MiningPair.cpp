@@ -1,5 +1,5 @@
 #include "Miners/Grouping/MiningPair.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 
 
 MiningPair::MiningPair(const MiningPair& other)

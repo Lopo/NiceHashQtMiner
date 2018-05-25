@@ -7,28 +7,28 @@
 class Links
 {
 public:
-	const static QString VisitUrl;
+	static const QString VisitUrl/*="https://www.nicehash.com"*/;
 
-	const static QString VisitUrlNew; // add version
+	static const QString VisitUrlNew/*="https://github.com/Lopo/NiceHashQtMiner/releases/tag/"*/; // add version
 
-	const static QString CheckStats; // add btc adress as parameter
+	static const QString CheckStats/*="https://www.nicehash.com/index.jsp?p=miners&addr="*/; // add btc adress as parameter
 
 	// help and faq
-	const static QString NHQTM_Help;
-	const static QString NHQTM_NoDevHelp;
+	static const QString NHQTM_Help/*="https://github.com/Lopo/NiceHashQtMiner/"*/;
+	static const QString NHQTM_NoDevHelp/*="https://github.com/Lopo/NiceHashQtMiner/wiki/Troubleshooting#nosupportdev"*/;
 
 	// faq
-	const static QString NhmBtcWalletFaq;
-	const static QString NhmPayingFaq;
+	static const QString NhmBtcWalletFaq/*="https://www.nicehash.com/help/how-to-create-the-bitcoin-addresswallet"*/;
+	static const QString NhmPayingFaq/*="https://www.nicehash.com/help/when-and-how-do-you-get-paid"*/;
 
 	// API
-	const static QString NhmApiStats; // btc adress as parameter
-	const static QString NhmApiInfo;
-	const static QString NhmApiVersion;
+	static const QString NhmApiStats/*="https://api.nicehash.com/api?method=stats.provider&addr="*/; // btc adress as parameter
+	static const QString NhmApiInfo/*="https://api.nicehash.com/api?method=simplemultialgo.info"*/;
+	static const QString NhmApiVersion/*="http://nhqtm.losys.eu/version/?method=version&Qt"*/;
 
-	const static QString NhmProfitCheck; // device profits
+	static const QString NhmProfitCheck/*="https://api.nicehash.com/?p=calc&name="*/; // device profits
 
-	const static QString NhmSocketAddress; // SMA Socket
+	static const QString NhmSocketAddress/*="wss://nhmws.nicehash.com/v2/nhm"*/; // SMA Socket
 };
 
 #endif

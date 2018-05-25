@@ -4,6 +4,8 @@
 #include "International.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Properties/Resources.h"
+#include "Algorithms/DualAlgorithm.h"
+#include "Field.h"
 
 
 AlgorithmSettingsControl::AlgorithmSettingsControl(QWidget* parent)
@@ -11,9 +13,9 @@ AlgorithmSettingsControl::AlgorithmSettingsControl(QWidget* parent)
 {
 	InitializeComponent();
 
-	connect(field_LessThreads, QOverload<int>::of(&QSpinBox::valueChanged), [=](int i){ LessThreads_Leave(); });
-	connect(fieldBoxBenchmarkSpeed, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double d){ TextChangedBenchmarkSpeed(d); });
-	connect(secondaryFieldBoxBenchmarkSpeed, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double d){ SecondaryTextChangedBenchmarkSpeed(d); });
+	connect(field_PowerUsage, SIGNAL(TextLeave()), this, SLOT(PowerUsage_Leave()));
+	connect(fieldBoxBenchmarkSpeed, SIGNAL(TextChanged()), this, SLOT(TextChangedBenchmarkSpeed()));
+	connect(secondaryFieldBoxBenchmarkSpeed, SIGNAL(TextChanged()), this, SLOT(SecondaryTextChangedBenchmarkSpeed()));
 	connect(richTextBoxExtraLaunchParameters, SIGNAL(textChanged()), this, SLOT(TextChangedExtraLaunchParameters()));
 }
 
@@ -35,48 +37,22 @@ void AlgorithmSettingsControl::InitializeComponent()
 	flowLayoutPanel1->setGeometry(3, 16, 223, 266);
 	flowLayoutPanel1->setFont(fnt);
 
-	labelFieldIndicator_LessThreads=new QLabel(this);
-	labelFieldIndicator_LessThreads->setObjectName("label_LessThreads");
-	labelFieldIndicator_LessThreads->setGeometry(3+3, 3+6, 98, 13);
-	labelFieldIndicator_LessThreads->setText("Label field indicator");
+	field_PowerUsage=new Field<double>(flowLayoutPanel1);
+	field_PowerUsage->setObjectName("field_PowerUsage");
+	field_PowerUsage->setGeometry(3, 3, 220, 47);
+	field_PowerUsage->LabelText("Power Usage (W):");
+	field_PowerUsage->setFont(fnt);
 
-	field_LessThreads=new QSpinBox(flowLayoutPanel1);
-	field_LessThreads->setObjectName("field_LessThreads");
-//	field_LessThreads->setGeometry(3, 3, 220, 47);
-	field_LessThreads->setGeometry(3+3, 3+24, 214, 20);
-//	field_LessThreads->setTitle("LessThreads:");
-	field_LessThreads->setButtonSymbols(QSpinBox::ButtonSymbols::NoButtons);
-	field_LessThreads->setMinimum(0);
-	field_LessThreads->setFont(fnt);
-
-	labelFieldIndicator_fieldBoxBenchmarkSpeed=new QLabel(this);
-	labelFieldIndicator_fieldBoxBenchmarkSpeed->setObjectName("labelFieldIndicator_fieldBoxBenchmarkSpeed");
-	labelFieldIndicator_fieldBoxBenchmarkSpeed->setGeometry(3+3, 56+6, 98, 13);
-	labelFieldIndicator_fieldBoxBenchmarkSpeed->setText("Label field indicator");
-
-	fieldBoxBenchmarkSpeed=new QDoubleSpinBox(flowLayoutPanel1);
+	fieldBoxBenchmarkSpeed=new Field<double>(flowLayoutPanel1);
 	fieldBoxBenchmarkSpeed->setObjectName("fieldBoxBenchmarkSpeed");
-//	fieldBoxBenchmarkSpeed->setGeometry(3, 56, 220, 47);
-	fieldBoxBenchmarkSpeed->setGeometry(3+3, 56+24, 214, 20);
-//	fieldBoxBenchmarkSpeed->setTitle("Benchmark Speed (H/s):");
-	fieldBoxBenchmarkSpeed->setButtonSymbols(QDoubleSpinBox::ButtonSymbols::NoButtons);
-	fieldBoxBenchmarkSpeed->setMinimum(0.0d);
-	fieldBoxBenchmarkSpeed->setMaximum(999999999999999);
+	fieldBoxBenchmarkSpeed->setGeometry(3, 56, 220, 47);
+	fieldBoxBenchmarkSpeed->LabelText("Benchmark Speed (H/s):");
 	fieldBoxBenchmarkSpeed->setFont(fnt);
 
-	labelFieldIndicator_secondaryFieldBoxBenchmarkSpeed=new QLabel(this);
-	labelFieldIndicator_secondaryFieldBoxBenchmarkSpeed->setObjectName("labelFieldIndicator_secondaryFieldBoxBenchmarkSpeed");
-	labelFieldIndicator_secondaryFieldBoxBenchmarkSpeed->setGeometry(3+3, 109+6, 98, 13);
-	labelFieldIndicator_secondaryFieldBoxBenchmarkSpeed->setText("Label field indicator");
-
-	secondaryFieldBoxBenchmarkSpeed=new QDoubleSpinBox(flowLayoutPanel1);
+	secondaryFieldBoxBenchmarkSpeed=new Field<double>(flowLayoutPanel1);
 	secondaryFieldBoxBenchmarkSpeed->setObjectName("secondaryFieldBoxBenchmarkSpeed");
-//	secondaryFieldBoxBenchmarkSpeed->setGeometry(3, 109, 220, 47);
-	secondaryFieldBoxBenchmarkSpeed->setGeometry(3+3, 109+24, 214, 20);
-//	secondaryFieldBoxBenchmarkSpeed->setTitle("Secondary Benchmark Speed (H/s):");
-	secondaryFieldBoxBenchmarkSpeed->setButtonSymbols(QDoubleSpinBox::ButtonSymbols::NoButtons);
-	secondaryFieldBoxBenchmarkSpeed->setMinimum(0.0d);
-	secondaryFieldBoxBenchmarkSpeed->setMaximum(999999999999999);
+	secondaryFieldBoxBenchmarkSpeed->setGeometry(3, 109, 220, 47);
+	secondaryFieldBoxBenchmarkSpeed->LabelText("Secondary Benchmark Speed (H/s):");
 	secondaryFieldBoxBenchmarkSpeed->setFont(fnt);
 
 	groupBoxExtraLaunchParameters=new QGroupBox(flowLayoutPanel1);
@@ -107,17 +83,17 @@ void AlgorithmSettingsControl::Deselect()
 	_selected=false;
 	groupBoxSelectedAlgorithmSettings->setTitle(International::GetText("AlgorithmsListView_GroupBox").arg(International::GetText("AlgorithmsListView_GroupBox_NONE")));
 	setEnabled(false);
-	fieldBoxBenchmarkSpeed->setValue(0);
-	secondaryFieldBoxBenchmarkSpeed->setValue(0);
-	field_LessThreads->setValue(0);
+	fieldBoxBenchmarkSpeed->EntryText("0");
+	secondaryFieldBoxBenchmarkSpeed->EntryText("0");
+	field_PowerUsage->EntryText("0");
 	richTextBoxExtraLaunchParameters->setPlainText("");
 }
 
-void AlgorithmSettingsControl::InitLocale(QToolTip* toolTip1)
+void AlgorithmSettingsControl::InitLocale(/*QToolTip* toolTip1*/)
 {
-	labelFieldIndicator_LessThreads->setText(International::GetText("Form_Settings_General_CPU_LessThreads")+":");
-	labelFieldIndicator_fieldBoxBenchmarkSpeed->setText(International::GetText("Form_Settings_Algo_BenchmarkSpeed")+":");
-	labelFieldIndicator_secondaryFieldBoxBenchmarkSpeed->setText(International::GetText("Form_Settings_Algo_SecondaryBenchmarkSpeed")+":");
+	field_PowerUsage->InitLocale(International::GetText("Form_Settings_Algo_PowerUsage")+":", International::GetText("Form_Settings_ToolTip_PowerUsage"));
+	fieldBoxBenchmarkSpeed->InitLocale(International::GetText("Form_Settings_Algo_BenchmarkSpeed")+":", International::GetText("Form_Settings_ToolTip_AlgoBenchmarkSpeed"));
+	secondaryFieldBoxBenchmarkSpeed->InitLocale(International::GetText("Form_Settings_Algo_SecondaryBenchmarkSpeed")+":", International::GetText("Form_Settings_ToolTip_AlgoSecondaryBenchmarkSpeed"));
 	groupBoxExtraLaunchParameters->setTitle(International::GetText("Form_Settings_General_ExtraLaunchParameters"));
 	groupBoxExtraLaunchParameters->setToolTip(International::GetText("Form_Settings_ToolTip_AlgoExtraLaunchParameters"));
 	pictureBox1->setToolTip(International::GetText("Form_Settings_ToolTip_AlgoExtraLaunchParameters"));
@@ -130,7 +106,7 @@ QString AlgorithmSettingsControl::ParseStringDefault(QString value)
 
 QString AlgorithmSettingsControl::ParseDoubleDefault(double value)
 {
-	return value<=0? "" : QString::number(value);
+	return value<=0? "" : QString::number(value, 'f');
 }
 
 void AlgorithmSettingsControl::SetCurrentlySelected(AlgorithmsListViewModel* model, int row, ComputeDevice* computeDevice)
@@ -150,14 +126,19 @@ void AlgorithmSettingsControl::SetCurrentlySelected(AlgorithmsListViewModel* mod
 		_model=model;
 		setEnabled(model->data(idx, Qt::CheckStateRole)==Qt::Checked);
 
-		groupBoxSelectedAlgorithmSettings->setTitle(International::GetText("AlgorithmsListView_GroupBox").arg(QString("%1 (%2)").arg(algorithm->AlgorithmName, algorithm->MinerBaseTypeName)));
+		groupBoxSelectedAlgorithmSettings->setTitle(International::GetText("AlgorithmsListView_GroupBox").arg(QString("%1 (%2)").arg(algorithm->AlgorithmName()).arg(algorithm->MinerBaseTypeName)));
 
-		field_LessThreads->setEnabled(_computeDevice->DeviceGroupType==Enums::DeviceGroupType::CPU && algorithm->MinerBaseType==Enums::MinerBaseType::XmrStackCPU);
-		field_LessThreads->setValue(field_LessThreads->isEnabled()? algorithm->LessThreads : 0);
-		fieldBoxBenchmarkSpeed->setValue(algorithm->BenchmarkSpeed);
+		field_PowerUsage->EntryText(ParseDoubleDefault(algorithm->PowerUsage()));
+		fieldBoxBenchmarkSpeed->EntryText(ParseDoubleDefault(algorithm->BenchmarkSpeed()));
 		richTextBoxExtraLaunchParameters->setPlainText(algorithm->ExtraLaunchParameters.join(' '));
-		secondaryFieldBoxBenchmarkSpeed->setValue(algorithm->SecondaryBenchmarkSpeed);
-		secondaryFieldBoxBenchmarkSpeed->setEnabled(_currentlySelectedAlgorithm->SecondaryNiceHashID!=Enums::AlgorithmType::NONE);
+		DualAlgorithm* dualAlgo=qobject_cast<DualAlgorithm*>(algorithm);
+		if (dualAlgo!=nullptr) {
+			secondaryFieldBoxBenchmarkSpeed->EntryText(ParseDoubleDefault(dualAlgo->SecondaryBenchmarkSpeed()));
+			secondaryFieldBoxBenchmarkSpeed->setEnabled(true);
+			}
+		else {
+			secondaryFieldBoxBenchmarkSpeed->setEnabled(false);
+			}
 		update();
 		}
 	else {
@@ -179,8 +160,15 @@ void AlgorithmSettingsControl::ChangeSpeed(AlgorithmsListViewModel* model, int r
 	if (_currentlySelectedLvi==row) {
 		Algorithm* algorithm=model->data(model->index(row, 0, QModelIndex()), Qt::EditRole).value<Algorithm*>();
 		if (algorithm!=nullptr) {
-			fieldBoxBenchmarkSpeed->setValue(algorithm->BenchmarkSpeed);
-			secondaryFieldBoxBenchmarkSpeed->setValue(algorithm->SecondaryBenchmarkSpeed);
+			fieldBoxBenchmarkSpeed->EntryText(ParseDoubleDefault(algorithm->BenchmarkSpeed()));
+			field_PowerUsage->EntryText(ParseDoubleDefault(algorithm->PowerUsage()));
+			DualAlgorithm* dualAlgo=qobject_cast<DualAlgorithm*>(algorithm);
+			if (dualAlgo!=nullptr) {
+				secondaryFieldBoxBenchmarkSpeed->EntryText(ParseDoubleDefault(dualAlgo->SecondaryBenchmarkSpeed()));
+				}
+			else {
+				secondaryFieldBoxBenchmarkSpeed->EntryText("0");
+				}
 			}
 		}
 }
@@ -190,40 +178,50 @@ bool AlgorithmSettingsControl::CanEdit()
 	return _currentlySelectedAlgorithm!=nullptr && _selected;
 }
 
-void AlgorithmSettingsControl::TextChangedBenchmarkSpeed(double)
+void AlgorithmSettingsControl::TextChangedBenchmarkSpeed()
 {
 	if (!CanEdit()) {
 		return;
 		}
-	_currentlySelectedAlgorithm->BenchmarkSpeed=fieldBoxBenchmarkSpeed->value();
+	bool ok=false;
+	double value=fieldBoxBenchmarkSpeed->EntryText().toDouble(&ok);
+	if (ok) {
+		_currentlySelectedAlgorithm->BenchmarkSpeed(value);
+		}
 	UpdateSpeedText();
 }
 
-void AlgorithmSettingsControl::SecondaryTextChangedBenchmarkSpeed(double)
+void AlgorithmSettingsControl::SecondaryTextChangedBenchmarkSpeed()
 {
-	if (!CanEdit()) {
-		return;
+	bool ok=false;
+	double secondaryValue=secondaryFieldBoxBenchmarkSpeed->EntryText().toDouble(&ok);
+	if (ok) {
+		DualAlgorithm* dualAlgo=qobject_cast<DualAlgorithm*>(_currentlySelectedAlgorithm);
+		if (dualAlgo!=nullptr) {
+			dualAlgo->SecondaryBenchmarkSpeed(secondaryValue);
+			}
 		}
-	_currentlySelectedAlgorithm->SecondaryBenchmarkSpeed=secondaryFieldBoxBenchmarkSpeed->value();
 	UpdateSpeedText();
 }
 
 void AlgorithmSettingsControl::UpdateSpeedText()
 {
+	DualAlgorithm* dualAlgo=qobject_cast<DualAlgorithm*>(_currentlySelectedAlgorithm);
 	// update lvi speed
 	if (_currentlySelectedLvi!=-1 && _model!=nullptr) {
-		_model->setData(_model->index(_currentlySelectedLvi, 2, QModelIndex()), Helpers::FormatDualSpeedOutput(_currentlySelectedAlgorithm->NiceHashID, _currentlySelectedAlgorithm->BenchmarkSpeed, _currentlySelectedAlgorithm->SecondaryBenchmarkSpeed), Qt::EditRole);
+		_model->setData(_model->index(_currentlySelectedLvi, 2, QModelIndex()), Helpers::FormatDualSpeedOutput(_currentlySelectedAlgorithm->BenchmarkSpeed(), dualAlgo!=nullptr? dualAlgo->SecondaryBenchmarkSpeed() : 0, _currentlySelectedAlgorithm->NiceHashID), Qt::EditRole);
 		}
 }
 
-void AlgorithmSettingsControl::LessThreads_Leave()
+void AlgorithmSettingsControl::PowerUsage_Leave()
 {
-	int val=field_LessThreads->value();
-	if (Globals::ThreadsPerCpu-val<1) {
-		QMessageBox::warning(this, International::GetText("Warning_with_Exclamation"), International::GetText("Form_Main_msgbox_CPUMiningLessThreadMsg"), QMessageBox::Ok);
+	if (!CanEdit()) {
+		return;
 		}
-	else {
-		_currentlySelectedAlgorithm->LessThreads=val;
+	bool ok=false;
+	double value=field_PowerUsage->EntryText().toDouble(&ok);
+	if (ok) {
+		_currentlySelectedAlgorithm->PowerUsage(value);
 		}
 }
 

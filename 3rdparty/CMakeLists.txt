@@ -3,6 +3,7 @@
 #	)
 set(thirdpartys
 	QtSingleApplication
+	managedCuda
 	)
 
 foreach (part ${thirdpartys})

@@ -12,9 +12,11 @@
 #include "Miners/Grouping/GroupMiner.h"
 #include "Miners/Miner.h"
 #include "Miners/Grouping/MiningDevice.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Switching/NHSmaData.h"
+#include "Stats/ExchangeRateAPI.h"
+#include "Algorithms/DualAlgorithm.h"
 #include <QtConcurrent/QtConcurrentRun>
 
 
@@ -188,8 +190,10 @@ double MiningSession::GetTotalRate()
 bool MiningSession::CheckIfProfitable(double currentProfit, bool log/*=true*/)
 {
 	// TODO FOR NOW USD ONLY
-	double currentProfitUsd=(currentProfit*Globals::BitcoinUsdRate);
+	double currentProfitUsd=(currentProfit*ExchangeRateApi::GetUsdExchangeRate());
+#pragma GCC diagnostic ignored "-Wparentheses"
 	_isProfitable= _isMiningRegardlesOfProfit || !_isMiningRegardlesOfProfit && currentProfitUsd>=ConfigManager.generalConfig->MinimumProfit;
+#pragma GCC diagnostic pop
 	if (log) {
 		Helpers::ConsolePrint(Tag, "Current Global profit: "+QString::number(currentProfitUsd, 'f', 8)+" USD/Day");
 		if (!_isProfitable) {
@@ -248,7 +252,6 @@ void MiningSession::SwichMostProfitableGroupUpMethod(SmaUpdateEventArgs e)
 			}
 		}
 
-	// print profit statuses
 	QStringList stringBuilderFull;
 	stringBuilderFull << "Current device profits:";
 	foreach (MiningDevice* device, *_miningDevices) {
@@ -256,14 +259,15 @@ void MiningSession::SwichMostProfitableGroupUpMethod(SmaUpdateEventArgs e)
 		stringBuilderDevice << QString("\tProfits for %1 (%2):").arg(device->Device()->Uuid()).arg(device->Device()->GetFullName());
 		foreach (Algorithm* algo, *device->Algorithms) {
 			stringBuilderDevice << QString("\t\tPROFIT = %1\t(SPEED = %2)\t\t| NHSMA = %3)\t[%4]")
-					.arg(QString::number(algo->CurrentProfit, 'f', 12))
-					.arg(QString::number(algo->AveragedSpeed, 'e', 5))
-					.arg(QString::number(algo->CurNhmSmaDataVal, 'e', 5))
-					.arg(algo->AlgorithmStringID);
-			if (algo->IsDual()) {
+					.arg(QString::number(algo->CurrentProfit(), 'f', 12))
+					.arg(QString::number(algo->AvaragedSpeed, 'e', 5))
+					.arg(QString::number(algo->CurNhmSmaDataVal(), 'e', 5))
+					.arg(algo->AlgorithmStringID());
+			DualAlgorithm* dualAlg=qobject_cast<DualAlgorithm*>(algo);
+			if (dualAlg!=nullptr) {
 				stringBuilderDevice << QString("\t\t\t\t\t  Secondary:\t\t %1\t\t\t\t  %2")
-						.arg(QString::number(algo->SecondaryAveragedSpeed, 'e', 5))
-						.arg(QString::number(algo->SecondaryCurNhmSmaDataVal, 'e', 5));
+						.arg(QString::number(dualAlg->SecondaryAveragedSpeed, 'e', 5))
+						.arg(QString::number(dualAlg->SecondaryCurNhmSmaDataVal, 'e', 5));
 				}
 			}
 		// most profitable
@@ -349,8 +353,18 @@ void MiningSession::SwichMostProfitableGroupUpMethod(SmaUpdateEventArgs e)
 				QList<MiningPair*>* miningPairs=(*newGroupedMiningPairs)[runningGroupKey];
 				Enums::AlgorithmType newAlgoType=GetMinerPairAlgorithmType(miningPairs);
 				if (newAlgoType!=Enums::AlgorithmType::NONE && newAlgoType!=Enums::AlgorithmType::INVALID) {
+					// Check if dcri optimal value has changed
+					bool dcriChanged=false;
+					foreach (MiningPair* mPair, *_runningGroupMiners->value(runningGroupKey)->miner()->miningSetup()->MiningPairs) {
+						DualAlgorithm* algo=qobject_cast<DualAlgorithm*>(mPair->algorithm);
+						if (algo!=nullptr && algo->TuningEnabled && algo->MostProfitableIntensity()!=algo->CurrentIntensity) {
+							dcriChanged=true;
+							break;
+							}
+						}
+
 					// if algoType valid and different from currently running update
-					if (newAlgoType!=(*_runningGroupMiners)[runningGroupKey]->DualAlgorithmType()) {
+					if (newAlgoType!=(*_runningGroupMiners)[runningGroupKey]->DualAlgorithmType() || dcriChanged) {
 						// remove current one and schedule to stop mining
 						(*toStopGroupMiners)[runningGroupKey]=(*_runningGroupMiners)[runningGroupKey];
 						// create new one TODO check if DaggerHashimoto
@@ -484,6 +498,9 @@ void MiningSession::MinerStatsCheck()
 				if (NHSmaData::TryGetPaying(ad->SecondaryAlgorithmID, secPaying)) {
 					groupMiners->CurrentRate+=secPaying*ad->SecondarySpeed*0.000000001;
 					}
+				// Deduct power costs
+				double powerUsage= ad->PowerUsage>0? ad->PowerUsage : groupMiners->TotalPower();
+				groupMiners->CurrentRate-=ExchangeRateApi::GetKwhPriceInBtc()*powerUsage*24/1000;
 				}
 			else {
 				groupMiners->CurrentRate=0;
@@ -495,7 +512,7 @@ void MiningSession::MinerStatsCheck()
 			_mainFormRatesCommunication->AddRateInfo(m->MinerTag(), groupMiners->DevicesInfoString(), ad, groupMiners->CurrentRate, m->IsApiReadException());
 			}
 		}
-	catch (QException e) {
+	catch (QException& e) {
 		Helpers::ConsolePrint(Tag, e.what());
 		}
 }

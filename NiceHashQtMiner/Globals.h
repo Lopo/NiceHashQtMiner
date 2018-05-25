@@ -16,8 +16,6 @@ public:
 	static int CurrentTosVer; // change this if TOS changes
 
 	// variables
-	static double BitcoinUsdRate;
-
 	static int ThreadsPerCpu;
 
 	static bool IsFirstNetworkCheckTimeout;

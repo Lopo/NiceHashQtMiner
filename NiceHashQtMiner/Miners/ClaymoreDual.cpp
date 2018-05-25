@@ -2,25 +2,23 @@
 #include "Globals.h"
 #include "Configs/ConfigManager.h"
 #include "Configs/Data/GeneralConfig.h"
-#include "Algorithm.h"
-
-
-const QString ClaymoreDual::_LookForStart="ETH - Total Speed:";
+#include "Algorithms/Algorithm.h"
+#include "Algorithms/DualAlgorithm.h"
 
 
 ClaymoreDual::ClaymoreDual(Enums::AlgorithmType secondaryAlgorithmType)
-	: ClaymoreBaseMiner("ClaymoreDual", _LookForStart, 90*1000)
+	: ClaymoreBaseMiner("ClaymoreDual", 90*1000)
 {
 	IgnoreZero=true;
 	ApiReadMult=1000;
 	_ConectionType=Enums::NhmConectionType::STRATUM_TCP;
 	SecondaryAlgorithmType=secondaryAlgorithmType;
-}
 
-// eth-only: 1%; eth-dual-mine: 2%
-double ClaymoreDual::DevFee()
-{
-	return IsDual()? 2.0 : 1.0;
+	LookForStart="eth - total speed:";
+	SecondaryLookForStart=SecondaryShortName()+" - total speed:";
+	DevFee=IsDual()? 1.5 : 1.0;
+
+	IsMultiType=true;
 }
 
 // the short form the miner uses for secondary algo in cmd line and log
@@ -35,19 +33,14 @@ QString ClaymoreDual::SecondaryShortName()
 			return "pasc";
 		case Enums::AlgorithmType::Sia:
 			return "sc";
-		case Enums::AlgorithmType::Keccak:
-			return "kc";
 		case Enums::AlgorithmType::Blake2s:
 			return "b2s";
+		case Enums::AlgorithmType::Keccak:
+			return "kc";
 		default: // prevent warning: enumeration value not handled in switch
 			return "";
 		}
 	return "";
-}
-
-QString ClaymoreDual::SecondaryLookForStart()
-{
-	return (SecondaryShortName()+" - Total Speed:").toLower();
 }
 
 QStringList ClaymoreDual::GetStartCommand(QString url, QString btcAdress, QString worker)
@@ -56,7 +49,7 @@ QStringList ClaymoreDual::GetStartCommand(QString url, QString btcAdress, QStrin
 
 	QStringList dualModeParams;
 	if (!IsDual()) { // leave convenience param for non-dual entry
-		foreach (MiningPair* pair, *_MiningSetup->MiningPairs) {
+		foreach (MiningPair* pair, *MiningSetup_->MiningPairs) {
 			if (!pair->CurrentExtraLaunchParameters.join("").contains("-dual=")) {
 				continue;
 				}
@@ -78,28 +71,25 @@ QStringList ClaymoreDual::GetStartCommand(QString url, QString btcAdress, QStrin
 				dual=Enums::AlgorithmType::Pascal;
 				coinP=QStringList({"-dcoin", "pasc"});
 				}
-			if (pair->CurrentExtraLaunchParameters.join("").contains("Keccak")) {
-				dual=Enums::AlgorithmType::Keccak;
-				coinP=QStringList({"-dcoin", "keccak"});
-				}
 			if (pair->CurrentExtraLaunchParameters.join("").contains("Blake2s")) {
 				dual=Enums::AlgorithmType::Blake2s;
 				coinP=QStringList({"-dcoin", "blake2s"});
 				}
+			if (pair->CurrentExtraLaunchParameters.join("").contains("Keccak")) {
+				dual=Enums::AlgorithmType::Keccak;
+				coinP=QStringList({"-dcoin", "keccak"});
+				}
 			if (dual!=Enums::AlgorithmType::NONE) {
-				QString urlSecond=Globals::GetLocationURL(dual, Globals::MiningLocation[ConfigManager.generalConfig->ServiceLocation], _ConectionType);
-				dualModeParams << coinP << "-dpool" << urlSecond << "-dwal" << username;
+				dualModeParams << coinP << "-dpool" << Globals::GetLocationURL(dual, Globals::MiningLocation[ConfigManager.generalConfig->ServiceLocation], _ConectionType) << "-dwal" << username;
 				break;
 				}
 			}
 		}
 	else {
-		QString urlSecond=Globals::GetLocationURL(SecondaryAlgorithmType, Globals::MiningLocation[ConfigManager.generalConfig->ServiceLocation], _ConectionType);
-		dualModeParams << "-dcoin" << SecondaryShortName() << "-dpool" << urlSecond << "-dwal" << username << "-dpsw" << "x";
+		dualModeParams << "-dcoin" << SecondaryShortName() << "-dpool" << Globals::GetLocationURL(SecondaryAlgorithmType, Globals::MiningLocation[ConfigManager.generalConfig->ServiceLocation], _ConectionType) << "-dwal" << username << "-dpsw" << "x";
 		}
 
-	return QStringList()
-			<< GetDevicesCommandString()
+	return GetDevicesCommandString()
 			<< "-epool" << url << "-ewal" << username << "-mport" << QString("127.0.0.1:-%1").arg(ApiPort()) << "-esm" << "3" << "-epsw" << "x" << "-allpools" << "1"
 			<< dualModeParams
 			;
@@ -107,7 +97,17 @@ QStringList ClaymoreDual::GetStartCommand(QString url, QString btcAdress, QStrin
 
 void ClaymoreDual::Start(QString url, QString btcAdress, QString worker)
 {
-	QString username=GetUsername(btcAdress, worker);
+	// Update to most profitable intensity
+	foreach (MiningPair* mPair, *MiningSetup_->MiningPairs) {
+		DualAlgorithm* algo=qobject_cast<DualAlgorithm*>(mPair->algorithm);
+		if (algo!=nullptr && algo->TuningEnabled) {
+			int intensity=algo->MostProfitableIntensity();
+			if (intensity<0) {
+				intensity=defaultIntensity;
+				}
+			algo->CurrentIntensity=intensity;
+			}
+		}
 	LastCommandLine=GetStartCommand(url, btcAdress, worker) << "-dbg" << "-1";
 	ProcessHandle=_Start();
 }
@@ -125,11 +125,11 @@ QStringList ClaymoreDual::BenchmarkCreateCommandLine(Algorithm* algorithm, int t
 	// network stub
 	QString url=GetServiceUrl(algorithm->NiceHashID);
 	// demo for benchmark
-	QStringList ret=GetStartCommand(url, Globals::GetBitcoinUser(), ConfigManager.generalConfig->WorkerName.trimmed());
+	QStringList ret=GetStartCommand(url, Globals::GetBitcoinUser(), ConfigManager.generalConfig->WorkerName.trimmed()) << "-logfile" << GetLogFileName();
 	// local benchmark
 	if (!IsDual()) {
 		BenchmarkTimeWait=time;
-		ret << "-benchmark" << "1";
+		ret << "-benchmark" << "1"; // benchmark 1 does not output secondary speeds
 		return ret;
 		}
 	BenchmarkTimeWait=std::max(60, std::min(120, time*3)); // dual seems to stop mining after this time if redirect output is true

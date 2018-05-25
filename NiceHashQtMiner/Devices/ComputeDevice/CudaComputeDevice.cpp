@@ -3,30 +3,60 @@
 #include "Devices/ComputeDeviceManager.h"
 #include "International.h"
 #include "Devices/CudaDevice.h"
+#include "Utils/Helpers.h"
+#include <NvmlTypes.h>
 
 //using namespace NVIDIA::NVAPI;
 
-float CudaComputeDevice::Load()
+float CudaComputeDevice::Load() // @todo
 {
-	float load=0;
-/*	NvPStates* pStates=new NvPStates;
-	pStates->Version=NVAPI::GPU_PSTATES_VER;
-	pStates->PStates=new NvPState[NVAPI::MAX_PSTATES_PER_GPU];
-*/
+	float load=-1;
+	try {
+//		nvmlUtilization* rates=new nvmlUtilization;
+		}
+	catch (std::exception& e) {
+		Helpers::ConsolePrint("NVML", e.what());
+		}
+
 	return load;
 }
 
-float CudaComputeDevice::Temp()
+float CudaComputeDevice::Temp() // @todo
 {
-	uint temp=0;
+	float temp=-1;
+	try {
+		
+		}
+	catch (std::exception& e) {
+		Helpers::ConsolePrint("NVML", e.what());
+		}
+
 	return temp;
 }
 
-uint CudaComputeDevice::FanSpeed()
+int CudaComputeDevice::FanSpeed() // @todo
 {
-	int fanSpeed=0;
-	return (uint)fanSpeed;
+	int fanSpeed=-1;
+	try {
+		
+		}
+	catch (std::exception& e) {
+		Helpers::ConsolePrint("NVML", e.what());
+		}
+	return fanSpeed;
 }
+
+double CudaComputeDevice::PowerUsage() // @todo
+{
+	try {
+		
+		}
+	catch (std::exception& e) {
+		Helpers::ConsolePrint("NVML", e.what());
+		}
+	return -1;
+}
+
 /*
 CudaComputeDevice::CudaComputeDevice(CudaDevice* cudaDevice, Enums::DeviceGroupType group, int gpuCount, NvPhysicalGpuHandle* nvHandle)
 	: ComputeDevice((int)cudaDevice->DeviceID, cudaDevice->GetName(), true, group, cudaDevice->IsEtherumCapable(), Enums::DeviceType::NVIDIA, International::GetText("ComputeDevice_Short_Name_NVIDIA_GPU").arg(gpuCount), cudaDevice->DeviceGlobalMemory)
@@ -40,14 +70,16 @@ CudaComputeDevice::CudaComputeDevice(CudaDevice* cudaDevice, Enums::DeviceGroupT
 	_nvHandle=nvHandle;
 }
 */
-CudaComputeDevice::CudaComputeDevice(CudaDevice* cudaDevice, Enums::DeviceGroupType group, int gpuCount, nvmlDevice_t* nvHandle)
-	: ComputeDevice((int)cudaDevice->DeviceID, cudaDevice->GetName(), true, group, cudaDevice->IsEtherumCapable(), Enums::DeviceType::NVIDIA, "GPU#"+QString::number(gpuCount), cudaDevice->DeviceGlobalMemory)
+CudaComputeDevice::CudaComputeDevice(CudaDevice* cudaDevice, Enums::DeviceGroupType group, int gpuCount, nvmlDevice_t* nvHandle, ManagedCuda::Nvml::nvmlDevice* nvmlHandle) // @todo finish
+	: ComputeDevice((int)cudaDevice->DeviceID, cudaDevice->GetName(), true, group, cudaDevice->IsEtherumCapable(), Enums::DeviceType::NVIDIA, International::GetText("ComputeDevice_Short_Name_NVIDIA_GPU").arg(gpuCount), cudaDevice->DeviceGlobalMemory)
 {
-	_SM_major=cudaDevice->SM_major;
-	_SM_minor=cudaDevice->SM_minor;
-	_Uuid=cudaDevice->UUID;
+	BusID_=cudaDevice->pciBusID;
+	SMMajor=cudaDevice->SM_major;
+	SMMinor=cudaDevice->SM_minor;
+	Uuid_=cudaDevice->UUID;
 	AlgorithmSettings=GroupAlgorithms::CreateForDeviceList(this);
-	_Index=ID+ComputeDeviceManager.Avaliable.AvailCpus();
+	Index_=ID+ComputeDeviceManager.Avaliable.AvailCpus();
 
 	_nvHandle=nvHandle;
+	_nvmlDevice=nvmlHandle;
 }

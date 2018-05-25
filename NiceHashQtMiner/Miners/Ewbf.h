@@ -18,7 +18,6 @@ protected:
 	void KillMinerBase(QString exeName);
 	QStringList BenchmarkCreateCommandLine(Algorithm* algorithm, int time) override;
 	void BenchmarkThreadRoutine(QStringList commandLine) override;
-	void CleanAllOldLogs();
 	void BenchmarkOutputErrorDataReceivedImpl(QString outdata) override;
 	bool BenchmarkParseLine(QString outdata) override;
 	double GetNumber(QString outdata);

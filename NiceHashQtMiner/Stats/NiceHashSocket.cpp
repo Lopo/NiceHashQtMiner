@@ -22,6 +22,7 @@ NiceHashSocket::NiceHashSocket(QString address)
 
 void NiceHashSocket::StartConnection()
 {
+	NHSmaData::InitializeIfNeeded();
 	_connectionAttempted=true;
 	try {
 		if (_webSocket==nullptr) {
@@ -37,7 +38,7 @@ void NiceHashSocket::StartConnection()
 		_webSocket->open(QUrl(_address));
 		_connectionEstablished=true;
 		}
-	catch (QException e) {
+	catch (QException& e) {
 		Helpers::ConsolePrint("SOCKET", e.what());
 		}
 }
@@ -45,7 +46,6 @@ void NiceHashSocket::StartConnection()
 void NiceHashSocket::ConnectCallback()
 {
 	try {
-		NHSmaData::InitializeIfNeeded();
 		// send login
 		NicehashLogin login;
 		login.version="NHQM/"+qApp->applicationVersion();
@@ -53,7 +53,7 @@ void NiceHashSocket::ConnectCallback()
 
 		emit ConnectionEstablished();
 		}
-	catch (QException er) {
+	catch (QException& er) {
 		Helpers::ConsolePrint("SOCKET", er.what());
 		}
 }
@@ -108,7 +108,7 @@ bool NiceHashSocket::SendData(QString data, bool recurs/*=false*/)
 				}
 			}
 		}
-	catch (QException er) {
+	catch (QException& er) {
 		Helpers::ConsolePrint("SOCKET", er.what());
 		}
 	return false;
@@ -145,7 +145,10 @@ bool NiceHashSocket::AttemptReconnect()
 				return true;
 				}
 			}
-		catch (QException e) {
+//		catch (InvalidOperationException) {
+//			if (e.what())
+//			}
+		catch (QException& e) {
 			Helpers::ConsolePrint("SOCKET", QString("Error while attempting reconnect: %1").arg(e.what()));
 			}
 		QThread::msleep(1000);

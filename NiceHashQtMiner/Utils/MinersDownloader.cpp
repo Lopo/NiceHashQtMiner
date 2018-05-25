@@ -31,7 +31,7 @@ void MinersDownloader::Start(IMinerUpdateIndicator* minerUpdateIndicator)
 			d.removeRecursively();
 			}
 		}
-	catch (QException e) {
+	catch (QException& e) {
 		Helpers::ConsolePrint("MinersDownloader", e.what());
 		}
 	Downlaod();

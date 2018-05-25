@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
 		stdErr=P->readAllStandardOutput();
 		delete P;
 		}
-	catch (std::exception ex) {
+	catch (std::exception& ex) {
 		std::cout << "[ChangeP0State] Exception: " << ex.what() << std::endl;
 		return 1;
 		}
@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
 			GetClocks->close();
 			delete GetClocks;
 			}
-		catch (std::exception ex) {
+		catch (std::exception& ex) {
 			std::cout << "[ChangeP0State] Exception: " << ex.what() << std::endl;
 			}
 
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 					}
 				delete SetClock;
 				}
-			catch (std::exception ex) {
+			catch (std::exception& ex) {
 				std::cout << "[ChangeP0State] Exception: " << ex.what() << std::endl;
 				}
 			}

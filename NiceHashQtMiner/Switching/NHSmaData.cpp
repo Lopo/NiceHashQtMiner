@@ -2,14 +2,21 @@
 #include "Enums.h"
 #include "Switching/NiceHashSma.h"
 #include "Utils/Helpers.h"
+#include "Configs/ConfigManager.h"
+#include "Configs/Data/GeneralConfig.h"
 #include <QSet>
 #include <QMap>
 #include <QMetaEnum>
 #include <QVector>
+#include <QFile>
+#include <QException>
 #include <exception>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 
 const QString NHSmaData::Tag="NHSMAData";
+const QString NHSmaData::CachedFile="internals/cached_sma.json";
 bool NHSmaData::Initialized_=false;
 bool NHSmaData::HasData_=false;
 
@@ -26,14 +33,36 @@ void NHSmaData::Initialize()
 	_stableAlgorithms=new QSet<Enums::AlgorithmType>;
 
 	auto algoEnum=QMetaEnum::fromType<Enums::AlgorithmType>();
+	QMap<Enums::AlgorithmType, double> cacheDict;
+	try {
+		QFile fr(CachedFile);
+		if (fr.open(QIODevice::ReadOnly)) {
+			QByteArray cache=fr.readAll();
+			fr.close();
+			QJsonObject o=QJsonDocument::fromJson(cache).object();
+			foreach (QString key, o.keys()) {
+				cacheDict.insert((Enums::AlgorithmType)algoEnum.keyToValue(key.toStdString().c_str()), o.value(key).toDouble());
+				}
+			}
+		}
+	catch (QException& e) {
+		Helpers::ConsolePrint(Tag, e.what());
+		}
+
 	for (int i=0; i<algoEnum.keyCount(); i++) {
 		Enums::AlgorithmType algo=(Enums::AlgorithmType)algoEnum.value(i);
 		if (algo>=0) {
+			double paying=0;
+			if (cacheDict.contains(algo)) {
+				paying=cacheDict.value(algo);
+				HasData_=true;
+				}
+
 			NiceHashSma* nhs=new NiceHashSma;
 			nhs->Port=(int)algo+3333;
 			nhs->Name=algoEnum.valueToKey(algo);
 			nhs->Algo=(int)algo;
-			nhs->Paying=0;
+			nhs->Paying=paying;
 			_currentSma->insert(algo, nhs);
 			}
 		}
@@ -59,6 +88,24 @@ void NHSmaData::UpdateSmaPaying(QMap<Enums::AlgorithmType, double> newSma)
 		foreach (Enums::AlgorithmType algo, newSma.keys()) {
 			if (_currentSma->contains(algo)) {
 				_currentSma->value(algo)->Paying=newSma.value(algo);
+				}
+			}
+
+		if (ConfigManager.generalConfig->UseSmaCache) {
+			// Cache while in lock so file is not accessed on multiple threads
+			try {
+				QJsonObject o;
+				auto algoEnum=QMetaEnum::fromType<Enums::AlgorithmType>();
+				foreach (Enums::AlgorithmType at , newSma.keys()) {
+					o.insert(algoEnum.valueToKey(at), newSma.value(at));
+					}
+				QFile f(CachedFile);
+				f.open(QIODevice::WriteOnly);
+				f.write(QJsonDocument(o).toJson(QJsonDocument::JsonFormat::Compact));
+				f.close();
+				}
+			catch (QException& e) {
+				Helpers::ConsolePrint(Tag, e.what());
 				}
 			}
 		_currentSmaMtx.unlock();

@@ -4,7 +4,7 @@
 #include "WinPort/Process.h"
 #include "Utils/Helpers.h"
 #include "Globals.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "Configs/ConfigManager.h"
 #include "Configs/Data/GeneralConfig.h"
 #include "Qt/LException.h"
@@ -44,11 +44,11 @@ QStringList Ewbf::GetStartCommand(QString url, QString btcAddress, QString worke
 QStringList Ewbf::GetDevicesCommandString()
 {
 	QStringList deviceStringCommand={"--cuda_devices"};
-	foreach (MiningPair* nvidiaPair, *this->_MiningSetup->MiningPairs) {
+	foreach (MiningPair* nvidiaPair, *this->MiningSetup_->MiningPairs) {
 		deviceStringCommand << QString::number(nvidiaPair->Device->ID);
 		}
 
-	deviceStringCommand << ExtraLaunchParametersParser::ParseForMiningSetup(_MiningSetup, Enums::DeviceType::NVIDIA);
+	deviceStringCommand << ExtraLaunchParametersParser::ParseForMiningSetup(MiningSetup_, Enums::DeviceType::NVIDIA);
 
 	return deviceStringCommand;
 }
@@ -59,7 +59,7 @@ void Ewbf::KillMinerBase(QString exeName)
 		try {
 			::kill(pid, SIGKILL);
 			}
-		catch (std::exception e) {
+		catch (std::exception& e) {
 			Helpers::ConsolePrint(MinerDeviceName, e.what());
 			}
 		}
@@ -67,22 +67,22 @@ void Ewbf::KillMinerBase(QString exeName)
 
 QStringList Ewbf::BenchmarkCreateCommandLine(Algorithm* algorithm, int time)
 {
-	CleanAllOldLogs();
+	CleanOldLogs();
 
 	QString server=Globals::GetLocationURL(algorithm->NiceHashID, Globals::MiningLocation[ConfigManager.generalConfig->ServiceLocation], _ConectionType);
-	QStringList ret=QStringList() << "--log" << "2" << "--logfile" << "benchmark_log.txt" << GetStartCommand(server, Globals::GetBitcoinUser(), ConfigManager.generalConfig->WorkerName.trimmed());
+	QStringList ret=QStringList() << "--log" << "2" << "--logfile" << GetLogFileName() << GetStartCommand(server, Globals::GetBitcoinUser(), ConfigManager.generalConfig->WorkerName.trimmed());
 	_benchmarkTimeWait=std::max(time*3, 90); // EWBF takes a long time to get started
 	return ret;
 }
 
 void Ewbf::BenchmarkThreadRoutine(QStringList commandLine)
 {
-	QThread::msleep(ConfigManager.generalConfig->MinerRestartDelayMS);
-
 	BenchmarkSignalQuit=false;
 	BenchmarkSignalHanged=false;
 	BenchmarkSignalFinnished=false;
 	BenchmarkException=nullptr;
+
+	QThread::msleep(ConfigManager.generalConfig->MinerRestartDelayMS);
 
 	try {
 		Helpers::ConsolePrint("BENCHMARK", "Benchmark starts");
@@ -123,18 +123,18 @@ void Ewbf::BenchmarkThreadRoutine(QStringList commandLine)
 			QThread::msleep(1000);
 			}
 		}
-	catch (LException ex) {
+	catch (LException& ex) {
 		BenchmarkThreadRoutineCatch(ex);
 		}
-	catch (std::exception ex) {
+	catch (std::exception& ex) {
 		BenchmarkThreadRoutineCatch(ex);
 		}
 //	finally {
-		BenchmarkAlgorithm->BenchmarkSpeed=0;
+		BenchmarkAlgorithm->BenchmarkSpeed(0);
 		// find latest log file
 		QString latestLogFile="";
 		QDir dirInfo(WorkingDirectory());
-		foreach (QString file, dirInfo.entryList({"*_log.txt"})) {
+		foreach (QString file, dirInfo.entryList({GetLogFileName()})) {
 			latestLogFile=file;
 			break;
 			}
@@ -159,7 +159,7 @@ void Ewbf::BenchmarkThreadRoutine(QStringList commandLine)
 						read=true;
 						Helpers::ConsolePrint(MinerTag(), "Successfully read log after "+QString::number(iteration)+" iterations");
 						}
-					catch (std::exception ex) {
+					catch (std::exception& ex) {
 						Helpers::ConsolePrint(MinerTag(), ex.what());
 						QThread::msleep(1000);
 						}
@@ -184,28 +184,11 @@ void Ewbf::BenchmarkThreadRoutine(QStringList commandLine)
 					}
 				}
 			if (_benchmarkReadCount>0) {
-				BenchmarkAlgorithm->BenchmarkSpeed=_benchmarkSum/_benchmarkReadCount;
+				BenchmarkAlgorithm->BenchmarkSpeed(_benchmarkSum/_benchmarkReadCount);
 				}
 			}
 		BenchmarkThreadRoutineFinish();
 //		}
-}
-
-void Ewbf::CleanAllOldLogs()
-{
-	// clean old logs
-	try {
-		QDir dirInfo(WorkingDirectory());
-		QString deleteContains="_log.txt";
-		if (dirInfo.exists()) {
-			foreach (QString file, dirInfo.entryList()) {
-				if (file.contains(deleteContains)) {
-					QFile(file).remove();
-					}
-				}
-			}
-		}
-	catch (...) {}
 }
 
 void Ewbf::BenchmarkOutputErrorDataReceivedImpl(QString outdata)
@@ -244,7 +227,7 @@ double Ewbf::GetNumber(QString outdata, QString lookForStart, QString lookForEnd
 		speed=speed.trimmed();
 		return (speed.toDouble()*mult)*(1.0-DevFee*0.01);
 		}
-	catch (std::exception ex) {
+	catch (std::exception& ex) {
 		Helpers::ConsolePrint("GetNumber", QString(ex.what())+" | args => "+outdata+" | "+lookForEnd+" | "+lookForStart);
 		}
 	return 0;
@@ -253,7 +236,7 @@ double Ewbf::GetNumber(QString outdata, QString lookForStart, QString lookForEnd
 ApiData* Ewbf::GetSummaryAsync()
 {
 	CurrentMinerReadStatus=Enums::MinerApiReadStatus::NONE;
-	ApiData* ad=new ApiData(_MiningSetup->CurrentAlgorithmType);
+	ApiData* ad=new ApiData(MiningSetup_->CurrentAlgorithmType);
 	JsonApiResponse* resp=nullptr;
 	QTcpSocket client(this);
 	try {
@@ -265,7 +248,7 @@ ApiData* Ewbf::GetSummaryAsync()
 		resp=JsonApiResponse::fromJson(client.readAll());
 		client.close();
 		}
-	catch (std::exception ex) {
+	catch (std::exception& ex) {
 		Helpers::ConsolePrint(MinerTag(), ex.what());
 		}
 

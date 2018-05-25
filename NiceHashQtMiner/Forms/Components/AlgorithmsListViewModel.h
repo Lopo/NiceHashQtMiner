@@ -1,7 +1,7 @@
 #ifndef FORMS_COMPONENTS_ALGORITHMSLISTVIEWMODEL_H_
 #define FORMS_COMPONENTS_ALGORITHMSLISTVIEWMODEL_H_
 
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include <QAbstractTableModel>
 #include <QList>
 #include <QColor>
@@ -12,7 +12,7 @@ class aItem
 {
 protected:
 	Qt::CheckState Checked=Qt::Unchecked;
-	QVector<QString> SubItems=QVector<QString>(5);
+	QVector<QString> SubItems=QVector<QString>(6);
 	Algorithm* Tag=nullptr;
 	QColor color=Qt::white;
 
@@ -42,7 +42,7 @@ public:
 
 private:
 	QList<aItem> _data;
-	QVector<QString> _header=QVector<QString>(5);
+	QVector<QString> _header=QVector<QString>(6);
 
 Q_SIGNALS:
 	void ItemChecked(int);

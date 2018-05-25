@@ -1,6 +1,6 @@
 #include "Miners/Grouping/GroupingLogic.h"
 #include "Miners/Grouping/MiningPair.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 
 
@@ -8,9 +8,12 @@ bool GroupingLogic::ShouldGroup(MiningPair* a, MiningPair* b)
 {
 	bool canGroup= IsGroupableMinerBaseType(a) && IsGroupableMinerBaseType(b);
 	// group if same bin path and same algo type
-	if (canGroup && IsSameBinPath(a, b) && IsSameAlgorithmType(a, b)
+	if (canGroup
+		&& IsSameBinPath(a, b)
+		&& IsSameAlgorithmType(a, b)
 		&& ((IsNotCpuGroups(a, b) && IsSameDeviceType(a, b))
 			|| (a->algorithm->MinerBaseType==Enums::MinerBaseType::Prospector && b->algorithm->MinerBaseType==Enums::MinerBaseType::Prospector)
+			|| a->algorithm->MinerBaseType==Enums::MinerBaseType::XmrStak
 			)
 		) {
 		return true;
@@ -40,6 +43,5 @@ bool GroupingLogic::IsSameDeviceType(MiningPair* a, MiningPair* b)
 
 bool GroupingLogic::IsGroupableMinerBaseType(MiningPair* a)
 {
-	return a->algorithm->MinerBaseType!=Enums::MinerBaseType::cpuminer
-		&& a->algorithm->MinerBaseType!=Enums::MinerBaseType::XmrStackCPU;
+	return a->algorithm->MinerBaseType!=Enums::MinerBaseType::cpuminer;
 }

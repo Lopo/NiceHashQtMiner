@@ -110,7 +110,7 @@ void BenchmarkLimitControl::setTimeLimits(QVector<int>* value)
 		}
 }
 
-void BenchmarkLimitControl::SetToolTip(QToolTip* toolTip, QString groupTypeName)
+void BenchmarkLimitControl::SetToolTip(/*QToolTip* toolTip, */QString groupTypeName)
 {
 	labelQuick->setToolTip(International::GetText("Form_Settings_ToolTip_BenchmarkTimeLimits").arg(International::GetText("Quick")).arg(groupTypeName)+".");
 	labelStandard->setToolTip(International::GetText("Form_Settings_ToolTip_BenchmarkTimeLimits").arg(International::GetText("Standard")).arg(groupTypeName)+".");

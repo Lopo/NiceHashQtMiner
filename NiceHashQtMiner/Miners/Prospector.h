@@ -3,6 +3,7 @@
 
 #include "Miners/Miner.h"
 #include <QtSql/QSqlDatabase>
+#include <QMutex>
 
 class ProspectorPlatforms
 {
@@ -10,6 +11,8 @@ public:
 	inline static bool IsInit() {return NVPlatform>=0 || AmdPlatform>=0;};
 	static int NVPlatform/*=-1*/;
 	static int AmdPlatform/*=-1*/;
+
+	static QMutex Lock;
 
 	static int PlatformForDeviceType(Enums::DeviceType type);
 };
@@ -24,7 +27,6 @@ public:
 	void Start(QString url, QString btcAdress, QString worker) override;
 
 protected:
-	void CleanAllOldLogs();
 	void _Stop(Enums::MinerStopType willswitch) override;
 
 	QStringList BenchmarkCreateCommandLine(Algorithm* algorithm, int time) override;
@@ -60,8 +62,8 @@ private:
 	public:
 		ProspectorDatabase(QString path);
 		double QueryLastSpeed(QString device);
-		QVector<hashrates> QuerySpeedsForSession(int id);
-		sessions LastSession();
+		QVector<hashrates> QuerySpeedsForSessionDev(int id, QString device);
+		sessions* LastSession(QString device);
 	private:
 		QSqlDatabase _db;
 		};
@@ -80,6 +82,7 @@ private:
 	QString GetConfigFileName();
 	void PrepareConfigFile(QString pool, QString wallet);
 	bool InitPlatforms();
+	void CleanAllOldLogs();
 
 	QStringList GetStartupCommand(QString url, QString btcAddress, QString worker);
 };

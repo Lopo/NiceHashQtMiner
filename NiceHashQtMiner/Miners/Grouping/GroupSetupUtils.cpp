@@ -1,10 +1,11 @@
 #define __GroupSetupUtils_cpp__
 #include "Miners/Grouping/GroupSetupUtils.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Miners/Grouping/MinerPaths.h"
 #include "Miners/Grouping/MiningDevice.h"
 #include "Utils/Helpers.h"
+#include "Algorithms/DualAlgorithm.h"
 
 
 const QString GroupSetupUtils::Tag="GroupSetupUtils";
@@ -12,7 +13,7 @@ const QString GroupSetupUtils::Tag="GroupSetupUtils";
 
 bool GroupSetupUtils::IsAlgoMiningCapable(Algorithm* algo)
 {
-	return algo!=nullptr && algo->Enabled && algo->BenchmarkSpeed>0;
+	return algo!=nullptr && algo->Enabled && algo->BenchmarkSpeed()>0;
 }
 
 std::tuple<ComputeDevice*, Enums::DeviceMiningStatus>* GroupSetupUtils::GetDeviceMiningStatus(ComputeDevice* device)
@@ -88,7 +89,7 @@ void GroupSetupUtils::LogMiningNonMiningStatuses(QList<MiningDevice*>* enabledDe
 			stringBuilder << QString("\tENABLED (%1)").arg(device->GetFullName());
 			foreach (Algorithm* algo, *device->GetAlgorithmSettings()) {
 				bool isEnabled=IsAlgoMiningCapable(algo) && MinerPaths::IsValidMinerPath(&algo->MinerBinaryPath);
-				stringBuilder << QString("\t\tALGORITHM %1 (%2)").arg(isEnabled? "ENABLED " : "DISABLED").arg(algo->AlgorithmStringID);
+				stringBuilder << QString("\t\tALGORITHM %1 (%2)").arg(isEnabled? "ENABLED " : "DISABLED").arg(algo->AlgorithmStringID());
 				}
 			}
 		Helpers::ConsolePrint(Tag, stringBuilder.join('\n'));
@@ -141,14 +142,17 @@ void GroupSetupUtils::AvarageSpeeds(QList<MiningDevice*>* miningDevs)
 					double secondaryAvaragedSpeed=(*calculatedAvaragers->value(algoID))[1];
 					int index=-1;
 					for (int i=0; i<(*miningDevs)[minerDevIndex]->Algorithms->count(); i++) {
-						if ((*miningDevs)[minerDevIndex]->Algorithms->at(i)->AlgorithmStringID==algoID) {
+						if ((*miningDevs)[minerDevIndex]->Algorithms->at(i)->AlgorithmStringID()==algoID) {
 							index=i;
 							break;
 							}
 						}
 					if (index>-1) {
-						(*(*miningDevs)[minerDevIndex]->Algorithms)[index]->AveragedSpeed=avaragedSpeed;
-						(*(*miningDevs)[minerDevIndex]->Algorithms)[index]->SecondaryAveragedSpeed=secondaryAvaragedSpeed;
+						(*(*miningDevs)[minerDevIndex]->Algorithms)[index]->AvaragedSpeed=avaragedSpeed;
+						DualAlgorithm* dualAlgo=qobject_cast<DualAlgorithm*>(miningDevs->value(minerDevIndex)->Algorithms->value(index));
+						if (dualAlgo!=nullptr) {
+							dualAlgo->SecondaryAveragedSpeed=secondaryAvaragedSpeed;
+							}
 						}
 					}
 				}
@@ -185,18 +189,23 @@ QMap<QString, QList<double>*>* AvaragerGroup::CalculateAverages()
 void AvaragerGroup::AddAlgorithms(QList<Algorithm*>* algos)
 {
 	foreach (Algorithm* algo, *algos) {
-		QString algoID=algo->AlgorithmStringID;
+		QString algoID=algo->AlgorithmStringID();
+		double secondarySpeed=0;
+		DualAlgorithm* dualAlgo=qobject_cast<DualAlgorithm*>(algo);
+		if (dualAlgo!=nullptr) {
+			secondarySpeed=dualAlgo->SecondaryBenchmarkSpeed();
+			}
 		if (!BenchmarkSums->contains(algoID)) {
 			SpeedSumCount* ssc=new SpeedSumCount;
 			ssc->Count=1;
-			ssc->Speed=algo->BenchmarkSpeed;
-			ssc->SecondarySpeed=algo->SecondaryBenchmarkSpeed;
+			ssc->Speed=algo->BenchmarkSpeed();
+			ssc->SecondarySpeed=secondarySpeed;
 			(*BenchmarkSums)[algoID]=ssc;
 			}
 		else {
 			(*BenchmarkSums)[algoID]->Count++;
-			(*BenchmarkSums)[algoID]->Speed+=algo->BenchmarkSpeed;
-			(*BenchmarkSums)[algoID]->SecondarySpeed+=algo->SecondaryBenchmarkSpeed;
+			(*BenchmarkSums)[algoID]->Speed+=algo->BenchmarkSpeed();
+			(*BenchmarkSums)[algoID]->SecondarySpeed+=secondarySpeed;
 			}
 		}
 }

@@ -1,8 +1,9 @@
 #ifndef FORMS_COMPONENTS_ALGORITHMSETTINGSCONTROL_H_
 #define FORMS_COMPONENTS_ALGORITHMSETTINGSCONTROL_H_
 
-#include <QtWidgets>
 #include "Forms/Components/AlgorithmsListView.h"
+#include "Forms/Components/Field.h"
+#include <QtWidgets>
 
 
 class AlgorithmSettingsControl
@@ -14,7 +15,7 @@ public:
 	AlgorithmSettingsControl(QWidget* parent=Q_NULLPTR);
 
 	void Deselect();
-	void InitLocale(QToolTip* toolTip1);
+	void InitLocale(/*QToolTip* toolTip1*/);
 
 	void SetCurrentlySelected(AlgorithmsListViewModel* model, int row, ComputeDevice* computeDevice);
 	void HandleCheck(AlgorithmsListViewModel* model, int row);
@@ -25,12 +26,15 @@ private:
 	QGroupBox* groupBoxExtraLaunchParameters=nullptr;
 	QPlainTextEdit* richTextBoxExtraLaunchParameters=nullptr;
 	QWidget* flowLayoutPanel1=nullptr;
-	QDoubleSpinBox* secondaryFieldBoxBenchmarkSpeed=nullptr;
-	QLabel* labelFieldIndicator_secondaryFieldBoxBenchmarkSpeed=nullptr;
-	QDoubleSpinBox* fieldBoxBenchmarkSpeed=nullptr;
-	QLabel* labelFieldIndicator_fieldBoxBenchmarkSpeed=nullptr;
-	QSpinBox* field_LessThreads=nullptr;
-	QLabel* labelFieldIndicator_LessThreads=nullptr;
+	Field<double>* fieldBoxBenchmarkSpeed=nullptr;
+	Field<double>* secondaryFieldBoxBenchmarkSpeed=nullptr;
+	Field<double>* field_PowerUsage=nullptr;
+//	QDoubleSpinBox* secondaryFieldBoxBenchmarkSpeed=nullptr;
+//	QLabel* labelFieldIndicator_secondaryFieldBoxBenchmarkSpeed=nullptr;
+//	QDoubleSpinBox* fieldBoxBenchmarkSpeed=nullptr;
+//	QLabel* labelFieldIndicator_fieldBoxBenchmarkSpeed=nullptr;
+//	QDoubleSpinBox* field_PowerUsage=nullptr;
+//	QLabel* labelFieldIndicator_PowerUsage=nullptr;
 	QLabel* pictureBox1=nullptr;
 	void InitializeComponent();
 
@@ -50,9 +54,9 @@ private:
 	AlgorithmsListViewModel* _model=nullptr;
 
 private Q_SLOTS:
-	void TextChangedBenchmarkSpeed(double);
-	void SecondaryTextChangedBenchmarkSpeed(double);
-	void LessThreads_Leave();
+	void TextChangedBenchmarkSpeed();
+	void SecondaryTextChangedBenchmarkSpeed();
+	void PowerUsage_Leave();
 	void TextChangedExtraLaunchParameters();
 };
 

@@ -2,7 +2,7 @@
 #include "Utils/Logger.h"
 #include "Configs/ConfigManager.h"
 #include "Configs/Data/GeneralConfig.h"
-#include "ExchangeRateAPI.h"
+#include "Stats/ExchangeRateAPI.h"
 #include "Globals.h"
 #include "Forms/Form_ChooseLanguage.h"
 #include "Utils/Helpers.h"
@@ -10,8 +10,9 @@
 #include "Configs/ConfigJsonFile/FOLDERS.h"
 #include "International.h"
 #include "Utils/CommandLineParser.h"
-#include <boost/filesystem.hpp>
+#include "Utils/Links.h"
 #include <QtNetwork/QNetworkAccessManager>
+#include <boost/filesystem.hpp>
 #include <QtSingleApplication>
 
 
@@ -57,7 +58,7 @@ int main(int argc, char *argv[])
 //		}
 
 	// init active display currency after config load
-	ExchangeRateAPI.ActiveDisplayCurrency=ConfigManager.generalConfig->DisplayCurrency;
+	ExchangeRateApi::ActiveDisplayCurrency=ConfigManager.generalConfig->DisplayCurrency;
 
 	// #2 then parse args
 	CommandLineParser* commandLineArgs=new CommandLineParser(QCoreApplication::arguments());

@@ -65,6 +65,7 @@ void GeneralConfig::SetDefaults()
 	SwitchSmaTimeChangeSeconds=Interval(34, 55);
 	SwitchSmaTicksStable=Interval(2, 3);
 	SwitchSmaTicksUnstable=Interval(5, 13);
+	UseSmaCache=true;
 }
 
 void GeneralConfig::FixSettingBounds()
@@ -117,6 +118,9 @@ void GeneralConfig::FixSettingBounds()
 		}
 	if (IQRNormalizeFactor<0) {
 		IQRNormalizeFactor=0.0;
+		}
+	if (KwhPrice<0) {
+		KwhPrice=0;
 		}
 
 	SwitchSmaTimeChangeSeconds.FixRange();
@@ -358,6 +362,14 @@ GeneralConfig* GeneralConfig::fromJson(QString json)
 		gc->OverrideAMDBusIds=o.value("OverrideAMDBusIds").toString();
 		}
 
+	if (o.value("KwhPrice")!=QJsonValue::Undefined) {
+		gc->KwhPrice=o.value("KwhPrice").toDouble();
+		}
+
+	if (o.value("UseSmaCache")!=QJsonValue::Undefined) {
+		gc->UseSmaCache=o.value("UseSmaCache").toBool();
+		}
+
 	return gc;
 }
 
@@ -481,6 +493,10 @@ QString GeneralConfig::asJson(QJsonDocument::JsonFormat format)
 	o.insert("ForceSkipAMDNeoscryptLyraCheck", ForceSkipAMDNeoscryptLyraCheck);
 
 	o.insert("OverrideAMDBusIds", OverrideAMDBusIds);
+
+	o.insert("KwhPrice", KwhPrice);
+
+	o.insert("UseSmaCache", UseSmaCache);
 
 	return QString(QJsonDocument(o).toJson(format));
 }

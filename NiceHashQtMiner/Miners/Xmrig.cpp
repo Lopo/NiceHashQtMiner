@@ -3,7 +3,7 @@
 #include "Globals.h"
 #include "Configs/ConfigManager.h"
 #include "Configs/Data/GeneralConfig.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "Utils/Helpers.h"
 #include <QtConcurrent/QtConcurrentRun>
 #include <QRegularExpression>
@@ -21,7 +21,7 @@ void Xmrig::Start(QString url, QString btcAdress, QString worker)
 
 QStringList Xmrig::GetStartCommand(QString url, QString btcAdress, QString worker)
 {
-	return QStringList() << "-o" << url << "-u" << QString("%1.%2:x").arg(btcAdress).arg(worker) << "--nicehash" << ExtraLaunchParametersParser::ParseForMiningSetup(_MiningSetup, Enums::DeviceType::CPU) << "--api-port" << QString::number(ApiPort());
+	return QStringList() << "-o" << url << "-u" << QString("%1.%2:x").arg(btcAdress).arg(worker) << "--nicehash" << ExtraLaunchParametersParser::ParseForMiningSetup(MiningSetup_, Enums::DeviceType::CPU) << "--api-port" << QString::number(ApiPort());
 }
 
 void Xmrig::_Stop(Enums::MinerStopType willswitch)
@@ -44,7 +44,7 @@ QStringList Xmrig::BenchmarkCreateCommandLine(Algorithm* algorithm, int time)
 	QString server=Globals::GetLocationURL(algorithm->NiceHashID, Globals::MiningLocation[ConfigManager.generalConfig->ServiceLocation], _ConectionType);
 	_benchmarkTimeWait=time;
 	return GetStartCommand(server, Globals::GetBitcoinUser(), ConfigManager.generalConfig->WorkerName.trimmed())
-		<< "-l" << "benchmark_log.txt" << "--print-time=2";
+		<< "-l" << GetLogFileName() << "--print-time=2";
 }
 
 void Xmrig::BenchmarkThreadRoutine(QStringList commandLine)
@@ -85,11 +85,11 @@ void Xmrig::ProcessBenchLinesAlternate(QStringList lines)
 
 	if (sixtySecCount>0 && sixtySecTotal>0) {
 		// Run iff 60s averages are reported
-		BenchmarkAlgorithm->BenchmarkSpeed=sixtySecTotal/sixtySecCount;
+		BenchmarkAlgorithm->BenchmarkSpeed(sixtySecTotal/sixtySecCount);
 		}
 	else if (twoSecCount>0) {
 		// Run iff no 60s averages are reported but 2.5s are
-		BenchmarkAlgorithm->BenchmarkSpeed=twoSecTotal/twoSecCount;
+		BenchmarkAlgorithm->BenchmarkSpeed(twoSecTotal/twoSecCount);
 		}
 }
 

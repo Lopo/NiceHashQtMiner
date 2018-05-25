@@ -41,6 +41,9 @@ AlgorithmConfig* AlgorithmConfig::fromJsonObject(QJsonObject o)
 	if (o.value("LessThreads")!=QJsonValue::Undefined) {
 		ac->LessThreads=o.value("LessThreads").toInt();
 		}
+	if (o.value("PowerUsage")!=QJsonValue::Undefined) {
+		ac->PowerUsage=o.value("PowerUsage").toDouble();
+		}
 	return ac;
 }
 
@@ -57,5 +60,6 @@ QJsonObject AlgorithmConfig::asJsonObject()
 	o.insert("ExtraLaunchParameters", QJsonArray::fromStringList(ExtraLaunchParameters));
 	o.insert("Enabled", Enabled);
 	o.insert("LessThreads", LessThreads);
+	o.insert("PowerUsage", PowerUsage);
 	return o;
 }

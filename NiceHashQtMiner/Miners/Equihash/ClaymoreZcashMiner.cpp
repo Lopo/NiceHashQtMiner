@@ -1,18 +1,12 @@
 #include "Miners/Equihash/ClaymoreZcashMiner.h"
 
 
-const QString ClaymoreZcashMiner::LookForStart="ZEC - Total Speed:";
-
-
 ClaymoreZcashMiner::ClaymoreZcashMiner()
-	: ClaymoreBaseMiner("ClaymoreZcashMiner", LookForStart, 60*1000*5)
+	: ClaymoreBaseMiner("ClaymoreZcashMiner", 60*1000*5)
 {
 	IgnoreZero=true;
-}
-
-double ClaymoreZcashMiner::DevFee()
-{
-	return 2.0;
+	LookForStart="zec - total speed:";
+	DevFee=2.0;
 }
 
 void ClaymoreZcashMiner::Start(QString url, QString btcAdress, QString worker)
@@ -27,5 +21,5 @@ QStringList ClaymoreZcashMiner::BenchmarkCreateCommandLine(Algorithm* algorithm,
 {
 	BenchmarkTimeWait=time/3; // 3 times faster than sgminer
 
-	return QStringList() << "-mport" << "127.0.0.1:"+QString::number(ApiPort()) << "-benchmark" << "1" << GetDevicesCommandString();
+	return QStringList() << "-mport" << "127.0.0.1:"+QString::number(ApiPort()) << "-benchmark" << "1" << "-logfile" << GetLogFileName() << GetDevicesCommandString();
 }

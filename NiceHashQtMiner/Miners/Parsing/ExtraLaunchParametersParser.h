@@ -21,7 +21,7 @@ private:
 
 	static void IgnorePrintLogInit();
 	static void IgnorePrintLog(QString param, QString ignoreParam, QList<MinerOption*>* ignoreLogOptions=nullptr);
-	static QStringList Parse(QList<MiningPair*>* miningPairs, QList<MinerOption*>* options, bool useIfDefaults=true, QList<MinerOption*>* ignoreLogOptions=nullptr);
+	static QStringList Parse(QList<MiningPair*>* miningPairs, QList<MinerOption*>* options, bool useIfDefaults=true, QList<MinerOption*>* ignoreLogOptions=nullptr, bool ignoreDcri=false);
 
 	static Enums::MinerType GetMinerType(Enums::DeviceType deviceType, Enums::MinerBaseType minerBaseType, Enums::AlgorithmType algorithmType);
 

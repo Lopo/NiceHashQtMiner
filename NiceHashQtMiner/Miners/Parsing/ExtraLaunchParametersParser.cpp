@@ -5,11 +5,12 @@
 #include "Miners/Parsing/MinerOption.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Miners/Grouping/MiningSetup.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "Miners/Parsing/MinerOptionPackage.h"
 #include "Miners/Parsing/ExtraLaunchParameters.h"
 #include "Configs/ConfigManager.h"
 #include "Configs/Data/GeneralConfig.h"
+#include "Algorithms/DualAlgorithm.h"
 #include <QMap>
 #include <QSet>
 
@@ -76,7 +77,7 @@ void ExtraLaunchParametersParser::IgnorePrintLog(QString param, QString ignorePa
 	++_logCount;
 }
 
-QStringList ExtraLaunchParametersParser::Parse(QList<MiningPair*>* miningPairs, QList<MinerOption*>* options, bool useIfDefaults/*=true*/, QList<MinerOption*>* ignoreLogOptions/*=nullptr*/)
+QStringList ExtraLaunchParametersParser::Parse(QList<MiningPair*>* miningPairs, QList<MinerOption*>* options, bool useIfDefaults/*=true*/, QList<MinerOption*>* ignoreLogOptions/*=nullptr*/, bool ignoreDcri/*=false*/)
 {
 	const QString ignoreParam="Cannot parse \"%1\", not supported, set to ignore, or wrong extra launch parameter settings";
 	QList<QString>* optionsOrder=new QList<QString>;
@@ -107,26 +108,39 @@ QStringList ExtraLaunchParametersParser::Parse(QList<MiningPair*>* miningPairs, 
 		IgnorePrintLogInit();
 
 		QString currentFlag=MinerOptionTypeNone;
+		bool ignoringNextOption=false;
 		foreach (QString param, parameters) {
 			if (param=="") {
 				continue;
 				}
 			if (currentFlag==MinerOptionTypeNone) {
-				bool isIgnored=true;
+				bool isIngored=true;
 				foreach (MinerOption* option, *options) {
 					if (param==option->ShortName || param==option->LongName) {
-						isIgnored=false;
-						if (option->FlagType==Enums::MinerOptionFlagType::Uni) {
-							isOptionExist->insert(option->Type, true);
-							(*(*cdevOptions)[pair->Device->Uuid()])[option->Type]="notNull"; // if Uni param is null it is not present
+						isIngored=false;
+						if (ignoreDcri && option->Type=="ClaymoreDual_dcri") {
+							Helpers::ConsolePrint("CDTUNING", "Disabling dcri extra launch param");
+							ignoringNextOption=true;
 							}
-						else { // Single and Multi param
-							currentFlag=option->Type;
+						else {
+							if (option->FlagType==Enums::MinerOptionFlagType::Uni) {
+								isOptionExist->insert(option->Type, true);
+								(*cdevOptions->value(pair->Device->Uuid()))[option->Type]="notNull"; // if Uni param is null it is not present
+								}
+							else { // Single and Multi param
+								currentFlag=option->Type;
+								}
 							}
 						}
 					}
-				if (isIgnored) { // ignored
-					IgnorePrintLog(param, ignoreParam, ignoreLogOptions);
+				if (isIngored) { // ignored
+					if (ignoringNextOption) {
+						// This is a paramater for an ignored option, silently ignore it
+						ignoringNextOption=false;
+						}
+					else {
+						IgnorePrintLog(param, ignoreParam, ignoreLogOptions);
+						}
 					}
 				}
 			else if (currentFlag!=MinerOptionTypeNone) {
@@ -315,11 +329,16 @@ QStringList ExtraLaunchParametersParser::ParseForMiningPairs(const QList<MiningP
 
 	Enums::MinerBaseType minerBaseType=Enums::MinerBaseType::NONE;
 	Enums::AlgorithmType algorithmType=Enums::AlgorithmType::NONE;
+	bool ignoreDcri=false;
 	if (miningPairs->count()>0) {
 		Algorithm* algo=miningPairs->at(0)->algorithm;
 		if (algo!=nullptr) {
 			algorithmType=algo->NiceHashID;
 			minerBaseType=algo->MinerBaseType;
+			DualAlgorithm* dualAlgo=qobject_cast<DualAlgorithm*>(algo);
+			if (dualAlgo!=nullptr && dualAlgo->TuningEnabled) {
+				ignoreDcri=true;
+				}
 			}
 		}
 
@@ -396,7 +415,7 @@ QStringList ExtraLaunchParametersParser::ParseForMiningPairs(const QList<MiningP
 		}
 
 	QStringList ret;
-	QStringList general=Parse(setMiningPairs, minerOptionPackage->GeneralOptions, false, minerOptionPackage->TemperatureOptions);
+	QStringList general=Parse(setMiningPairs, minerOptionPackage->GeneralOptions, false, minerOptionPackage->TemperatureOptions, ignoreDcri);
 #if WITH_AMD
 	// temp control and parse
 	if (ConfigManager.generalConfig->DisableAMDTempControl) {
@@ -405,7 +424,7 @@ QStringList ExtraLaunchParametersParser::ParseForMiningPairs(const QList<MiningP
 		}
 	else {
 		LogParser("AMD parsing temperature control parameters");
-		QStringList temp=Parse(setMiningPairs, minerOptionPackage->TemperatureOptions, false, minerOptionPackage->GeneralOptions);
+		QStringList temp=Parse(setMiningPairs, minerOptionPackage->TemperatureOptions, false, minerOptionPackage->GeneralOptions, ignoreDcri);
 
 		ret=general+temp;
 		}
@@ -443,7 +462,7 @@ int ExtraLaunchParametersParser::GetThreadsNumber(MiningPair* cpuPair)
 				break;
 				}
 			}
-		if (i>-1 && strings.length()<i) {
+		if (i>-1 && strings.length()>i) {
 			int numTr=cDev->Threads();
 			bool ok;
 			int p=strings[i].toInt(&ok);

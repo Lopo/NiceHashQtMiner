@@ -1,7 +1,7 @@
 #include "Miners/Ccminer.h"
 #include "Utils/Helpers.h"
 #include "Parsing/ExtraLaunchParametersParser.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "PInvoke/NiceHashProcess.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "WinPort/Process.h"
@@ -21,12 +21,12 @@ void Ccminer::Start(QString url, QString btcAdress, QString worker)
 		}
 	QString username=GetUsername(btcAdress, worker);
 
-	_IsApiReadException=_MiningSetup->MinerPath==MinerPaths.Data.CcminerCryptonight;
+	_IsApiReadException=MiningSetup_->MinerPath==MinerPaths.Data.CcminerCryptonight;
 
 	QString algo="";
 	QString apiBind="";
 	if (!_IsApiReadException) {
-		algo="--algo="+_MiningSetup->MinerName;
+		algo="--algo="+MiningSetup_->MinerName;
 		apiBind="--api-bind="+QString::number(ApiPort());
 		}
 
@@ -35,7 +35,7 @@ void Ccminer::Start(QString url, QString btcAdress, QString worker)
 			<< "--userpass="+username+":x"
 			<< apiBind
 			<< "--devices" << GetDevicesCommandString()
-			<< ExtraLaunchParametersParser::ParseForMiningSetup(_MiningSetup, Enums::DeviceType::NVIDIA);
+			<< ExtraLaunchParametersParser::ParseForMiningSetup(MiningSetup_, Enums::DeviceType::NVIDIA);
 	LastCommandLine.removeAll("");
 
 	ProcessHandle=_Start();
@@ -52,7 +52,7 @@ QStringList Ccminer::BenchmarkCreateCommandLine(Algorithm* algorithm, int time)
 			<< "--no-color"
 			<< "--benchmark"
 			<< (_benchmarkException()? QStringList() : QStringList({"--time-limit", QString::number(time)}))
-			<< ExtraLaunchParametersParser::ParseForMiningSetup(_MiningSetup, Enums::DeviceType::NVIDIA)
+			<< ExtraLaunchParametersParser::ParseForMiningSetup(MiningSetup_, Enums::DeviceType::NVIDIA)
 			<< "--devices" << GetDevicesCommandString();
 
 	// cryptonight exception helper variables
@@ -94,21 +94,23 @@ bool Ccminer::BenchmarkParseLine(QString outdata)
 			_cryptonightTotalCount--;
 			}
 		if (_cryptonightTotalCount<=0) {
-			BenchmarkAlgorithm->BenchmarkSpeed=_cryptonightTotal/(BenchmarkTimeInSeconds/_cryptonightTotalDelim);
+			BenchmarkAlgorithm->BenchmarkSpeed(_cryptonightTotal/((double)BenchmarkTimeInSeconds/_cryptonightTotalDelim));
 			BenchmarkSignalFinnished=true;
 			}
+
+		return false;
 		}
 
 	double lastSpeed=BenchmarkParseLine_cpu_ccminer_extra(outdata);
 	if (lastSpeed>0.0d) {
-		BenchmarkAlgorithm->BenchmarkSpeed=lastSpeed;
+		BenchmarkAlgorithm->BenchmarkSpeed(lastSpeed);
 		return true;
 		}
 
 	bool ok;
 	lastSpeed=outdata.toDouble(&ok);
 	if (ok) {
-		BenchmarkAlgorithm->BenchmarkSpeed=lastSpeed;
+		BenchmarkAlgorithm->BenchmarkSpeed(lastSpeed);
 		return true;
 		}
 	return false;
@@ -138,26 +140,26 @@ ApiData* Ccminer::GetSummaryAsync()
 			return nullptr; // will restart outside
 			}
 		}
-	catch (std::invalid_argument ex) { // !!!
+	catch (std::invalid_argument& ex) { // !!!
 		CurrentMinerReadStatus=Enums::MinerApiReadStatus::RESTART;
 		Helpers::ConsolePrint(MinerTag(), ProcessTag()+" Could not read data from CryptoNight reason: "+ex.what());
 		return nullptr; // will restart outside
 		}
-	catch (std::exception ex) { // !!! InvalidOperationException
+	catch (std::exception& ex) { // !!! InvalidOperationException
 		CurrentMinerReadStatus=Enums::MinerApiReadStatus::RESTART;
 		Helpers::ConsolePrint(MinerTag(), ProcessTag()+" Could not read data from CryptoNight reason: "+ex.what());
 		return nullptr; // will restart outside
 		}
 
 	double totalSpeed=0.0d;
-	foreach (MiningPair* miningPair, *_MiningSetup->MiningPairs) {
+	foreach (MiningPair* miningPair, *MiningSetup_->MiningPairs) {
 		Algorithm* algo=miningPair->Device->GetAlgorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::CryptoNight, Enums::AlgorithmType::NONE);
 		if (algo!=nullptr) {
-			totalSpeed+=algo->BenchmarkSpeed;
+			totalSpeed+=algo->BenchmarkSpeed();
 			}
 		}
 
-	ApiData* cryptoNightData=new ApiData(_MiningSetup->CurrentAlgorithmType);
+	ApiData* cryptoNightData=new ApiData(MiningSetup_->CurrentAlgorithmType);
 	cryptoNightData->Speed=totalSpeed;
 	CurrentMinerReadStatus=Enums::MinerApiReadStatus::GOT_READ;
 	// check if speed zero

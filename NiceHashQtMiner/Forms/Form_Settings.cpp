@@ -36,7 +36,7 @@ void Form_Settings::InitializeComponent()
 
 	tabPageGeneral=new QWidget(tabControlGeneral);
 	tabPageGeneral->setObjectName("tabPageGeneral");
-	tabPageGeneral->setGeometry(8, 27, 596, 405);
+	tabPageGeneral->setGeometry(4, 22, 604, 414);
 //	tabPageGeneral->setContentsMargins(2, 3, 2, 3);
 
 	groupBox_Misc=new QGroupBox(tabPageGeneral);
@@ -54,7 +54,7 @@ void Form_Settings::InitializeComponent()
 
 	checkBox_RunScriptOnCUDA_GPU_Lost=new QCheckBox(groupBox_Misc);
 	checkBox_RunScriptOnCUDA_GPU_Lost->setObjectName("checkBox_RunScriptOnCUDA_GPU_Lost");
-	checkBox_RunScriptOnCUDA_GPU_Lost->setGeometry(6, 383, 204, 27);
+	checkBox_RunScriptOnCUDA_GPU_Lost->setGeometry(6, 383, 191, 17);
 	checkBox_RunScriptOnCUDA_GPU_Lost->setText("Run script when CUDA GPU is lost");
 	checkBox_RunScriptOnCUDA_GPU_Lost->setFont(f6);
 #endif
@@ -65,7 +65,7 @@ void Form_Settings::InitializeComponent()
 
 	checkBox_ShowInternetConnectionWarning=new QCheckBox(groupBox_Misc);
 	checkBox_ShowInternetConnectionWarning->setObjectName("checkBox_ShowInternetConnectionWarning");
-	checkBox_ShowInternetConnectionWarning->setGeometry(6, 361, 205, 27);
+	checkBox_ShowInternetConnectionWarning->setGeometry(6, 361, 192, 17);
 	checkBox_ShowInternetConnectionWarning->setText("Show Internet Connection Warning");
 	checkBox_ShowInternetConnectionWarning->setFont(f6);
 
@@ -79,35 +79,35 @@ void Form_Settings::InitializeComponent()
 
 	checkBox_RunAtStartup=new QCheckBox(groupBox_Misc);
 	checkBox_RunAtStartup->setObjectName("checkBox_RunAtStartup");
-	checkBox_RunAtStartup->setGeometry(6, 339, 133, 27);
+	checkBox_RunAtStartup->setGeometry(6, 339, 120, 17);
 	checkBox_RunAtStartup->setText("Start on logon");
 	checkBox_RunAtStartup->setFont(f6);
 	connect(checkBox_RunAtStartup, SIGNAL(stateChanged(int)), this, SLOT(CheckBox_RunAtStartup_CheckedChanged()));
 
 	checkBox_AllowMultipleInstances=new QCheckBox(groupBox_Misc);
 	checkBox_AllowMultipleInstances->setObjectName("checkBox_AllowMultipleInstances");
-	checkBox_AllowMultipleInstances->setGeometry(6, 317, 152, 27);
+	checkBox_AllowMultipleInstances->setGeometry(6, 317, 139, 17);
 	checkBox_AllowMultipleInstances->setText("Allow Multiple Instances");
 	checkBox_AllowMultipleInstances->setFont(f6);
 	connect(checkBox_AllowMultipleInstances, SIGNAL(stateChanged(int)), this, SLOT(CheckBox_DisableDefaultOptimizations_CheckedChanged()));
 
 	checkBox_DisableDefaultOptimizations=new QCheckBox(groupBox_Misc);
 	checkBox_DisableDefaultOptimizations->setObjectName("checkBox_DisableDefaultOptimizations");
-	checkBox_DisableDefaultOptimizations->setGeometry(6, 296, 176, 27);
+	checkBox_DisableDefaultOptimizations->setGeometry(6, 296, 163, 17);
 	checkBox_DisableDefaultOptimizations->setText("Disable Default Optimizations");
 	checkBox_DisableDefaultOptimizations->setFont(f6);
 	connect(checkBox_DisableDefaultOptimizations, SIGNAL(stateChanged(int)), this, SLOT(CheckBox_DisableDefaultOptimizations_CheckedChanged()));
 #if WITH_AMD
 	checkBox_AMD_DisableAMDTempControl=new QCheckBox(groupBox_Misc);
 	checkBox_AMD_DisableAMDTempControl->setObjectName("checkBox_AMD_DisableAMDTempControl");
-	checkBox_AMD_DisableAMDTempControl->setGeometry(6, 275, 158, 27);
+	checkBox_AMD_DisableAMDTempControl->setGeometry(6, 275, 145, 17);
 	checkBox_AMD_DisableAMDTempControl->setText("DisableAMDTempControl");
 	checkBox_AMD_DisableAMDTempControl->setFont(f6);
 	connect(checkBox_AMD_DisableAMDTempControl, SIGNAL(stateChanged(int)), this, SLOT(CheckBox_AMD_DisableAMDTempControl_CheckedChanged()));
 #endif
 	checkBox_AutoStartMining=new QCheckBox(groupBox_Misc);
 	checkBox_AutoStartMining->setObjectName("checkBox_AutoStartMining");
-	checkBox_AutoStartMining->setGeometry(6, 19, 115, 27);
+	checkBox_AutoStartMining->setGeometry(6, 19, 102, 17);
 	checkBox_AutoStartMining->setContentsMargins(2, 3, 2, 3);
 	checkBox_AutoStartMining->setText("Autostart Mining");
 	checkBox_AutoStartMining->setFont(f6);
@@ -121,7 +121,7 @@ void Form_Settings::InitializeComponent()
 
 	checkBox_MinimizeToTray=new QCheckBox(groupBox_Misc);
 	checkBox_MinimizeToTray->setObjectName("checkBox_MinimizeToTray");
-	checkBox_MinimizeToTray->setGeometry(6, 83, 113, 27);
+	checkBox_MinimizeToTray->setGeometry(6, 83, 100, 17);
 	checkBox_MinimizeToTray->setText("MinimizeToTray");
 	checkBox_MinimizeToTray->setFont(f6);
 
@@ -187,34 +187,34 @@ void Form_Settings::InitializeComponent()
 
 	checkBox_Use3rdPartyMiners=new QCheckBox(groupBox_Misc);
 	checkBox_Use3rdPartyMiners->setObjectName("checkBox_Use3rdPartyMiners");
-	checkBox_Use3rdPartyMiners->setGeometry(6, 104, 142, 27);
+	checkBox_Use3rdPartyMiners->setGeometry(6, 104, 129, 17);
 	checkBox_Use3rdPartyMiners->setText("Enable3rdPartyMiners");
 	checkBox_Use3rdPartyMiners->setFont(f6);
 	connect(checkBox_Use3rdPartyMiners, SIGNAL(stateChanged(int)), this, SLOT(CheckBox_Use3rdPartyMiners_CheckedChanged()));
 #if WITH_NVIDIA
 	checkBox_DisableDetectionNVIDIA=new QCheckBox(groupBox_Misc);
 	checkBox_DisableDetectionNVIDIA->setObjectName("checkBox_DisableDetectionNVIDIA");
-	checkBox_DisableDetectionNVIDIA->setGeometry(6, 125, 156, 27);
+	checkBox_DisableDetectionNVIDIA->setGeometry(6, 125, 143, 17);
 	checkBox_DisableDetectionNVIDIA->setText("DisableDetectionNVIDIA");
 	checkBox_DisableDetectionNVIDIA->setFont(f6);
 #endif
 #if WITH_AMD
 	checkBox_DisableDetectionAMD=new QCheckBox(groupBox_Misc);
 	checkBox_DisableDetectionAMD->setObjectName("checkBox_DisableDetectionAMD");
-	checkBox_DisableDetectionAMD->setGeometry(6, 147, 144, 27);
+	checkBox_DisableDetectionAMD->setGeometry(6, 147, 131, 17);
 	checkBox_DisableDetectionAMD->setText("DisableDetectionAMD");
 	checkBox_DisableDetectionAMD->setFont(f6);
 #endif
 #if WITH_NVIDIA
 	checkBox_NVIDIAP0State=new QCheckBox(groupBox_Misc);
 	checkBox_NVIDIAP0State->setObjectName("checkBox_NVIDIAP0State");
-	checkBox_NVIDIAP0State->setGeometry(6, 253, 113, 27);
+	checkBox_NVIDIAP0State->setGeometry(6, 253, 100, 17);
 	checkBox_NVIDIAP0State->setText("NVIDIAP0State");
 	checkBox_NVIDIAP0State->setFont(f6);
 #endif
 	checkBox_AutoScaleBTCValues=new QCheckBox(groupBox_Misc);
 	checkBox_AutoScaleBTCValues->setObjectName("checkBox_AutoScaleBTCValues");
-	checkBox_AutoScaleBTCValues->setGeometry(6, 168, 141, 27);
+	checkBox_AutoScaleBTCValues->setGeometry(6, 168, 128, 17);
 	checkBox_AutoScaleBTCValues->setText("AutoScaleBTCValues");
 	checkBox_AutoScaleBTCValues->setFont(f6);
 
@@ -222,19 +222,19 @@ void Form_Settings::InitializeComponent()
 
 	checkBox_StartMiningWhenIdle=new QCheckBox(groupBox_Misc);
 	checkBox_StartMiningWhenIdle->setObjectName("checkBox_StartMiningWhenIdle");
-	checkBox_StartMiningWhenIdle->setGeometry(6, 189, 138, 27);
+	checkBox_StartMiningWhenIdle->setGeometry(6, 189, 125, 17);
 	checkBox_StartMiningWhenIdle->setText("StartMiningWhenIdle");
 	checkBox_StartMiningWhenIdle->setFont(f6);
 
 	checkBox_ShowDriverVersionWarning=new QCheckBox(groupBox_Misc);
 	checkBox_ShowDriverVersionWarning->setObjectName("checkBox_ShowDriverVersionWarning");
-	checkBox_ShowDriverVersionWarning->setGeometry(6, 211, 169, 27);
+	checkBox_ShowDriverVersionWarning->setGeometry(6, 211, 156, 17);
 	checkBox_ShowDriverVersionWarning->setText("ShowDriverVersionWarning");
 	checkBox_ShowDriverVersionWarning->setFont(f6);
 
 	groupBox_Logging=new QGroupBox(tabPageGeneral);
 	groupBox_Logging->setObjectName("groupBox_Logging");
-	groupBox_Logging->setGeometry(6, 297, 346, 70);
+	groupBox_Logging->setGeometry(4, 339, 346, 70);
 	groupBox_Logging->setTitle("Logging:");
 	groupBox_Logging->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.4em;} QGroupBox::title { top: -8px; left: 10px;}");
 	groupBox_Logging->setFont(f6);
@@ -253,7 +253,7 @@ void Form_Settings::InitializeComponent()
 
 	checkBox_LogToFile=new QCheckBox(groupBox_Logging);
 	checkBox_LogToFile->setObjectName("checkBox_LogToFile");
-	checkBox_LogToFile->setGeometry(6, 19, 85, 27);
+	checkBox_LogToFile->setGeometry(6, 19, 72, 17);
 	checkBox_LogToFile->setText("Log to file");
 	checkBox_LogToFile->setFont(f6);
 
@@ -273,10 +273,28 @@ void Form_Settings::InitializeComponent()
 
 	groupBox_Main=new QGroupBox(tabPageGeneral);
 	groupBox_Main->setObjectName("groupBox_Main");
-	groupBox_Main->setGeometry(6, 6, 346, 214);
+	groupBox_Main->setGeometry(6, 6, 346, 256);
 	groupBox_Main->setTitle("Main:");
 	groupBox_Main->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.4em;} QGroupBox::title { top: -8px; left: 10px;}");
 	groupBox_Main->setFont(f6);
+
+	pictureBox_ElectricityCost=new QLabel(groupBox_Main);
+	pictureBox_ElectricityCost->setObjectName("pictureBox_ElectricityCost");
+	pictureBox_ElectricityCost->setGeometry(130, 211, 18, 18);
+	pictureBox_ElectricityCost->setPixmap(resources.info_black_18);
+
+	textBox_ElectricityCost=new QDoubleSpinBox(groupBox_Main);
+	textBox_ElectricityCost->setObjectName("textBox_ElectricityCost");
+	textBox_ElectricityCost->setGeometry(10, 231, 138, 20);
+	textBox_ElectricityCost->setRange(0, DBL_MAX);
+	textBox_ElectricityCost->setDecimals(4);
+	textBox_ElectricityCost->setFont(f6);
+
+	label_ElectricityCost=new QLabel(groupBox_Main);
+	label_ElectricityCost->setObjectName("label_ElectricityCost");
+	label_ElectricityCost->setGeometry(10, 211, 117, 13);
+	label_ElectricityCost->setText("Electricity Cost (/KWh):");
+	label_ElectricityCost->setFont(f6);
 
 	pictureBox_TimeUnit=new QLabel(groupBox_Main);
 	pictureBox_TimeUnit->setObjectName("pictureBox_TimeUnit");
@@ -311,13 +329,13 @@ void Form_Settings::InitializeComponent()
 
 	checkBox_UseIFTTT=new QCheckBox(groupBox_Main);
 	checkBox_UseIFTTT->setObjectName("checkBox_UseIFTTT");
-	checkBox_UseIFTTT->setGeometry(10, 168, 91, 27);
+	checkBox_UseIFTTT->setGeometry(10, 168, 78, 17);
 	checkBox_UseIFTTT->setText("Use IFTTT");
 	checkBox_UseIFTTT->setFont(f6);
 
 	checkBox_IdleWhenNoInternetAccess=new QCheckBox(groupBox_Main);
 	checkBox_IdleWhenNoInternetAccess->setObjectName("checkBox_IdleWhenNoInternetAccess");
-	checkBox_IdleWhenNoInternetAccess->setGeometry(10, 149, 218, 27);
+	checkBox_IdleWhenNoInternetAccess->setGeometry(10, 149, 205, 17);
 	checkBox_IdleWhenNoInternetAccess->setText("Continue Mining If No Internet Access");
 	checkBox_IdleWhenNoInternetAccess->setFont(f6);
 	connect(checkBox_IdleWhenNoInternetAccess, SIGNAL(stateChanged(int)), this, SLOT(GeneralCheckBoxes_CheckedChanged()));
@@ -395,7 +413,7 @@ void Form_Settings::InitializeComponent()
 
 	groupBox_Localization=new QGroupBox(tabPageGeneral);
 	groupBox_Localization->setObjectName("groupBox_Localization");
-	groupBox_Localization->setGeometry(6, 226, 346, 70);
+	groupBox_Localization->setGeometry(4, 268, 346, 70);
 	groupBox_Localization->setTitle("Localization:");
 	groupBox_Localization->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.4em;} QGroupBox::title { top: -8px; left: 10px;}");
 	groupBox_Localization->setFont(f6);
@@ -438,7 +456,7 @@ void Form_Settings::InitializeComponent()
 
 	tabPageAdvanced=new QWidget(tabControlGeneral);
 	tabPageAdvanced->setObjectName("tabPageAdvanced");
-	tabPageAdvanced->setGeometry(8, 27, 596, 405);
+	tabPageAdvanced->setGeometry(4, 22, 604, 414);
 	tabPageAdvanced->setFont(f6);
 
 	groupBox_Miners=new QGroupBox(tabPageAdvanced);
@@ -652,7 +670,7 @@ void Form_Settings::InitializeComponent()
 #endif
 	tabPageDevicesAlgos=new QWidget(tabControlGeneral);
 	tabPageDevicesAlgos->setObjectName("tabPageDevicesAlgos");
-	tabPageDevicesAlgos->setGeometry(8, 27, 596, 405);
+	tabPageDevicesAlgos->setGeometry(4, 22, 604, 414);
 	tabPageDevicesAlgos->setFont(f6);
 
 	devicesListViewEnableControl1=new DevicesListViewEnableControl(tabPageDevicesAlgos);
@@ -681,7 +699,7 @@ void Form_Settings::InitializeComponent()
 	algorithmsListView1->setGeometry(6, 15, 338, 191);
 	algorithmsListView1->BenchmarkCalculation=nullptr;
 	algorithmsListView1->ComunicationInterface=nullptr;
-	algorithmsListView1->setIsInBenchmark(false);
+	algorithmsListView1->IsInBenchmark(false);
 	algorithmsListView1->setFont(f6);
 
 	buttonAllProfit=new QPushButton(tabPageDevicesAlgos);
@@ -831,12 +849,12 @@ void Form_Settings::InitializeToolTip()
 	label_DagGeneration->setToolTip(International::GetText("Form_Settings_ToolTip_DagGeneration"));
 	pictureBox_DagGeneration->setToolTip(International::GetText("Form_Settings_ToolTip_DagGeneration"));
 
-	benchmarkLimitControlCPU->SetToolTip(toolTip1, "CPUs");
+	benchmarkLimitControlCPU->SetToolTip(/*toolTip1, */"CPUs");
 #if WITH_NVIDIA
-	benchmarkLimitControlNVIDIA->SetToolTip(toolTip1, "NVIDIA GPUs");
+	benchmarkLimitControlNVIDIA->SetToolTip(/*toolTip1, */"NVIDIA GPUs");
 #endif
 #if WITH_AMD
-	benchmarkLimitControlAMD->SetToolTip(toolTip1, "AMD GPUs");
+	benchmarkLimitControlAMD->SetToolTip(/*toolTip1, */"AMD GPUs");
 #endif
 
 #if WITH_NVIDIA
@@ -918,9 +936,14 @@ void Form_Settings::InitializeToolTip()
 	pictureBox_SwitchProfitabilityThreshold->setToolTip(International::GetText("Form_Settings_ToolTip_SwitchProfitabilityThreshold"));
 	label_SwitchProfitabilityThreshold->setToolTip(International::GetText("Form_Settings_ToolTip_SwitchProfitabilityThreshold"));
 
+	// Electricity cost
+	label_ElectricityCost->setToolTip(International::GetText("Form_Settings_ToolTip_ElectricityCost"));
+	textBox_ElectricityCost->setToolTip(International::GetText("Form_Settings_ToolTip_ElectricityCost"));
+	pictureBox_ElectricityCost->setToolTip(International::GetText("Form_Settings_ToolTip_ElectricityCost"));
+
 	setWindowTitle(International::GetText("Form_Settings_Title"));
 
-	algorithmSettingsControl1->InitLocale(toolTip1);
+	algorithmSettingsControl1->InitLocale(/*toolTip1*/);
 }
 
 void Form_Settings::InitializeFormTranslations()
@@ -990,6 +1013,8 @@ void Form_Settings::InitializeGeneralTabTranslations()
 	label_displayCurrency->setText(International::GetText("Form_Settings_DisplayCurrency"));
 
 	label_IFTTTAPIKey->setText(International::GetText("Form_Settings_IFTTTAPIKey"));
+
+	label_ElectricityCost->setText(International::GetText("Form_Settings_ElectricityCost"));
 
 	// Benchmark time limits
 	// internationalization change
@@ -1078,6 +1103,7 @@ void Form_Settings::InitializeGeneralTabCallbacks()
 		connect(textBox_ethminerDefaultBlockHeight, SIGNAL(valueChanged(int)), this, SLOT(GeneralTextBoxes_Leave())); connect(textBox_ethminerDefaultBlockHeight, SIGNAL(editingFinished()), this, SLOT(GeneralTextBoxes_Leave()));
 		connect(textBox_APIBindPortStart, SIGNAL(valueChanged(int)), this, SLOT(GeneralTextBoxes_Leave())); connect(textBox_APIBindPortStart, SIGNAL(editingFinished()), this, SLOT(GeneralTextBoxes_Leave()));
 		connect(textBox_MinProfit, SIGNAL(valueChanged(double)), this, SLOT(GeneralTextBoxes_Leave())); connect(textBox_MinProfit, SIGNAL(editingFinished()), this, SLOT(GeneralTextBoxes_Leave()));
+		connect(textBox_ElectricityCost, SIGNAL(valueChanged(double)), this, SLOT(GeneralTextBoxes_Leave())); connect(textBox_ElectricityCost, SIGNAL(editingFinished()), this, SLOT(GeneralTextBoxes_Leave()));
 	}/*
 	{ // set int only keypress
 		connect(textBox_SwitchMaxSeconds, SIGNAL(keyPressEvent()), this, SLOT(textBoxIntsOnly_KeyPress()));
@@ -1090,6 +1116,7 @@ void Form_Settings::InitializeGeneralTabCallbacks()
 		connect(textBox_APIBindPortStart, SIGNAL(keyPress()), this, SLOT(textBoxIntsOnly_KeyPress()));
 		// set double only keypress
 		connect(textBox_MinProfit, SIGNAL(keyPress()), this, SLOT(textBoxDoubleOnly_KeyPress()));
+		connect(textBox_ElectricityCost, SIGNAL(keyPress()), this, SLOT(textBoxDoubleOnly_KeyPress()));
 	}*/
 	{ // Add EventHandler for all the general tab's textboxes
 		connect(comboBox_Language, SIGNAL(currentIndexChanged(int)), this, SLOT(GeneralComboBoxes_Leave()));
@@ -1161,6 +1188,7 @@ void Form_Settings::InitializeGeneralTabFieldValuesReferences()
 		textBox_APIBindPortStart->setValue(ConfigManager.generalConfig->ApiBindPortPoolStart);
 		textBox_MinProfit->setValue(ConfigManager.generalConfig->MinimumProfit);
 		textBox_SwitchProfitabilityThreshold->setValue(ConfigManager.generalConfig->SwitchProfitabilityThreshold);
+		textBox_ElectricityCost->setValue(ConfigManager.generalConfig->KwhPrice);
 	}
 
 	{ // set custom control references
@@ -1306,7 +1334,7 @@ void Form_Settings::CheckBox_DisableDefaultOptimizations_CheckedChanged()
 				}
 			QList<Algorithm*>* deviceDefaultsAlgoSettings=GroupAlgorithms::CreateForDeviceList(cDev);
 			foreach (Algorithm* defaultAlgoSettings, *deviceDefaultsAlgoSettings) {
-				Algorithm* toSetAlgo=cDev->GetAlgorithm(defaultAlgoSettings->MinerBaseType, defaultAlgoSettings->NiceHashID, defaultAlgoSettings->SecondaryNiceHashID);
+				Algorithm* toSetAlgo=cDev->GetAlgorithm(defaultAlgoSettings);
 				if (toSetAlgo!=nullptr) {
 					toSetAlgo->ExtraLaunchParameters=defaultAlgoSettings->ExtraLaunchParameters;
 					toSetAlgo->ExtraLaunchParameters=ExtraLaunchParametersParser::ParseForMiningPair(new MiningPair(cDev, toSetAlgo), toSetAlgo->NiceHashID, cDev->DeviceType, false);
@@ -1367,6 +1395,8 @@ void Form_Settings::GeneralTextBoxes_Leave()
 
 	ConfigManager.generalConfig->IFTTTKey=textBox_IFTTTKey->text().trimmed();
 
+	ConfigManager.generalConfig->KwhPrice=textBox_ElectricityCost->value();
+
 	// Fix bounds
 	ConfigManager.generalConfig->FixSettingBounds();
 	// update strings
@@ -1380,6 +1410,7 @@ void Form_Settings::GeneralTextBoxes_Leave()
 	textBox_LogMaxFileSize->setValue(ConfigManager.generalConfig->LogMaxFileSize);
 	textBox_ethminerDefaultBlockHeight->setValue(ConfigManager.generalConfig->ethminerDefaultBlockHeight);
 	textBox_APIBindPortStart->setValue(ConfigManager.generalConfig->ApiBindPortPoolStart);
+	textBox_ElectricityCost->setValue(ConfigManager.generalConfig->KwhPrice);
 }
 
 void Form_Settings::GeneralComboBoxes_Leave()
@@ -1418,7 +1449,7 @@ void Form_Settings::ButtonSelectedProfit_Click()
 	QString url=Links::NhmProfitCheck+_selectedComputeDevice->Name;
 	foreach (Algorithm* algorithm, *_selectedComputeDevice->GetAlgorithmSettingsFastest()) {
 		int id=(int)algorithm->NiceHashID;
-		url+="&speed"+QString::number(id)+"="+QString::number(ProfitabilityCalculator::GetFormatedSpeed(algorithm->BenchmarkSpeed, algorithm->NiceHashID), 'f', 2);
+		url+="&speed"+QString::number(id)+"="+QString::number(ProfitabilityCalculator::GetFormatedSpeed(algorithm->BenchmarkSpeed(), algorithm->NiceHashID), 'f', 2);
 		}
 	url+="&nhqmver="+qApp->applicationVersion(); // Add version info
 	url+="&cost=1&power=1"; // Set default power and cost to 1
@@ -1432,10 +1463,10 @@ void Form_Settings::ButtonAllProfit_Click()
 	foreach (ComputeDevice* curCDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
 		foreach (Algorithm* algorithm, *curCDev->GetAlgorithmSettingsFastest()) {
 			if (total.contains(algorithm->NiceHashID)) {
-				total[algorithm->NiceHashID]+=algorithm->BenchmarkSpeed;
+				total[algorithm->NiceHashID]+=algorithm->BenchmarkSpeed();
 				}
 			else {
-				total[algorithm->NiceHashID]=algorithm->BenchmarkSpeed;
+				total[algorithm->NiceHashID]=algorithm->BenchmarkSpeed();
 				}
 			}
 		}
@@ -1541,7 +1572,7 @@ void Form_Settings::closeEvent(QCloseEvent* e) // FormSettings_FormClosing
 						}
 					}
 				}
-			catch (QException er) {
+			catch (QException& er) {
 				Helpers::ConsolePrint("REGISTRY", er.what());
 				}
 			}

@@ -5,6 +5,7 @@
 #include "Enums.h"
 #include "Configs/ConfigJsonFile/ConfigFile.h"
 #include "Configs/ConfigJsonFile/FOLDERS.h"
+#include <QJsonDocument>
 class Algorithm;
 class ComputeDevice;
 
@@ -13,10 +14,13 @@ class MinerPath
 {
 public:
 	MinerPath(Enums::AlgorithmType algo, QString path);
+	MinerPath(QJsonObject obj);
 
 	QString Name;
 	Enums::AlgorithmType Algorithm;
 	QString Path;
+
+	QJsonObject asJsonObject();
 };
 
 
@@ -24,21 +28,27 @@ class MinerTypePath
 {
 public:
 	MinerTypePath(Enums::MinerBaseType type, QList<MinerPath> paths);
+	MinerTypePath(QJsonObject obj);
 
 	QString Name;
 	Enums::MinerBaseType Type;
 	QList<MinerPath> Algorithms;
+
+	QJsonObject asJsonObject();
 };
 
 
 class MinerPathPackage
 {
 public:
-	MinerPathPackage(Enums::DeviceGroupType type, QList<MinerTypePath> paths);
+	MinerPathPackage(Enums::DeviceGroupType type, QList<MinerTypePath*> paths);
 
 	QString Name;
 	Enums::DeviceGroupType DeviceType;
-	QList<MinerTypePath> MinerTypes;
+	QList<MinerTypePath*> MinerTypes;
+
+	static MinerPathPackage* fromJson(QString json);
+	QString asJson(QJsonDocument::JsonFormat=QJsonDocument::JsonFormat::Indented);
 };
 
 
@@ -82,6 +92,7 @@ public:
 
 		static const QString XmrStackCpuMiner;
 		static const QString XmrStakAmd;
+		static const QString XmrStak;
 		static const QString Xmrig;
 
 		static const QString None;
@@ -90,8 +101,6 @@ public:
 
 		static const QString ClaymoreZcashMiner;
 		static const QString ClaymoreCryptoNightMiner;
-
-		static const QString ClaymoreCryptoNightMinerOld;
 
 		static const QString OptiminerZcashMiner;
 		static const QString ClaymoreDual;
@@ -130,7 +139,7 @@ private:
 		static QString GetPath(Enums::AlgorithmType algoType, Enums::DeviceGroupType devGroupType);
 		} Experimental;
 
-	static QList<MinerPathPackage>* MinerPathPackages;
+	static QList<MinerPathPackage*>* MinerPathPackages;
 	static QList<Enums::MinerBaseType>* ConfigurableMiners;
 };
 

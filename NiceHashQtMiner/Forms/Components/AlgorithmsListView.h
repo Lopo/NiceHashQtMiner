@@ -13,7 +13,6 @@ class AlgorithmsListView
 	: public QWidget
 {
 	Q_OBJECT
-	Q_PROPERTY(bool IsInBenchmark READ IsInBenchmark WRITE setIsInBenchmark)
 public:
 	explicit AlgorithmsListView(QWidget* parent=Q_NULLPTR);
 
@@ -38,8 +37,8 @@ public:
 	void ResetListItemColors();
 	void SetSpeedStatus(ComputeDevice* computeDevice, Algorithm* algorithm, QString status); // benchmark settings
 
-	inline bool IsInBenchmark() const { return IsInBenchmark_; };
-	void setIsInBenchmark(const bool value);
+	inline bool IsInBenchmark() const { return _isInBenchmark; };
+	void IsInBenchmark(const bool value);
 
 private:
 	QTableView* listViewAlgorithms=nullptr;
@@ -50,8 +49,9 @@ private:
 	static const int ENABLED=0;
 	static const int ALGORITHM=1;
 	static const int SPEED=2;
-	static const int RATIO=3;
-	static const int RATE=4;
+	static const int SECSPEED=3;
+	static const int RATIO=4;
+	static const int RATE=5;
 
 	class DefaultAlgorithmColorSeter
 		: public IListItemCheckColorSetter
@@ -67,7 +67,7 @@ private:
 	IListItemCheckColorSetter* _listItemCheckColorSetter=new DefaultAlgorithmColorSeter;
 
 	// disable checkboxes when in benchmark mode
-	bool IsInBenchmark_=false;
+	bool _isInBenchmark=false;
 
 Q_SIGNALS:
 	void itemSelectionChanged(int);
@@ -80,7 +80,9 @@ private Q_SLOTS:
 	void ToolStripMenuItemDisableAll_Click();
 	void ToolStripMenuItemClear_Click();
 	void ToolStripMenuItemTest_Click();
+	void toolStripMenuItemOpenDcri_Click();
 	void ToolStripMenuItemEnableBenched_Click();
+	void toolStripMenuItemTuningEnabled_Checked(bool checked);
 
 	void forwardSelectionChanged(const QItemSelection&, const QItemSelection&);
 };

@@ -3,7 +3,7 @@
 #include "Devices/ComputeDeviceManager.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Utils/Helpers.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include <QtConcurrent/QtConcurrentRun>
 #include <QJsonObject>
 #include <QJsonDocument>
@@ -32,10 +32,10 @@ void OptiminerZcashMiner::_Stop(Enums::MinerStopType willswitch)
 
 QStringList OptiminerZcashMiner::GetDevicesCommandString()
 {
-	QStringList extraParams=ExtraLaunchParametersParser::ParseForMiningSetup(_MiningSetup, Enums::DeviceType::AMD);
+	QStringList extraParams=ExtraLaunchParametersParser::ParseForMiningSetup(MiningSetup_, Enums::DeviceType::AMD);
 	QStringList deviceStringCommand({"-c", QString::number(ComputeDeviceManager.Avaliable.AmdOpenCLPlatformNum)});
 	QStringList ids;
-	foreach (MiningPair* mPair, *_MiningSetup->MiningPairs) {
+	foreach (MiningPair* mPair, *MiningSetup_->MiningPairs) {
 		ids.append({"-d", QString::number(mPair->Device->ID)});
 		}
 	deviceStringCommand << ids
@@ -47,7 +47,7 @@ QStringList OptiminerZcashMiner::GetDevicesCommandString()
 ApiData* OptiminerZcashMiner::GetSummaryAsync()
 {
 	CurrentMinerReadStatus=Enums::MinerApiReadStatus::NONE;
-	ApiData* ad=new ApiData(_MiningSetup->CurrentAlgorithmType);
+	ApiData* ad=new ApiData(MiningSetup_->CurrentAlgorithmType);
 
 	if (!_skipApiCheck) {
 		JsonApiResponse* resp=nullptr;
@@ -61,7 +61,7 @@ ApiData* OptiminerZcashMiner::GetSummaryAsync()
 					}
 				}
 			}
-		catch (std::exception ex) {
+		catch (std::exception& ex) {
 			Helpers::ConsolePrint("OptiminerZcashMiner", QString("GetSummary exception: ")+ex.what());
 			}
 
@@ -108,7 +108,7 @@ bool OptiminerZcashMiner::BenchmarkParseLine(QString outdata)
 		QStringList ar=itersAndVars.split(' ');
 		if (ar.count()>=4) {
 			// gets sols/s
-			BenchmarkAlgorithm->BenchmarkSpeed=Helpers::ParseDouble(ar.value(2));
+			BenchmarkAlgorithm->BenchmarkSpeed(Helpers::ParseDouble(ar.value(2)));
 			return true;
 			}
 		}

@@ -2,7 +2,7 @@
 #include "Miners/Grouping/MiningPair.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Miners/MinerFactory.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "Configs/ConfigManager.h"
 #include "Configs/Data/GeneralConfig.h"
 #include "Globals.h"
@@ -28,6 +28,7 @@ GroupMiner::GroupMiner(QList<MiningPair*>* miningPairs, QString key)
 			foreach (MiningPair* pair, *miningPairs) {
 				deviceNames->append(pair->Device->NameCount);
 				_DevIndexes->append(pair->Device->Index());
+				TotalPower_+=pair->algorithm->PowerUsage();
 				}
 			_DevicesInfoString="{ "+deviceNames->join(", ")+" }";
 		}

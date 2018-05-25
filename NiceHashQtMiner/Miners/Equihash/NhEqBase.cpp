@@ -26,7 +26,7 @@ void NhEqBase::InitMiningSetup(MiningSetup* miningSetup)
 #if WITH_AMD
 	QList<MiningPair*>* amds=new QList<MiningPair*>;
 #endif
-	foreach (MiningPair* pairs, *_MiningSetup->MiningPairs) {
+	foreach (MiningPair* pairs, *MiningSetup_->MiningPairs) {
 		switch (pairs->Device->DeviceType) {
 			case Enums::DeviceType::CPU:
 				cpus->append(pairs);
@@ -55,14 +55,14 @@ void NhEqBase::InitMiningSetup(MiningSetup* miningSetup)
 
 QStringList NhEqBase::BenchmarkCreateCommandLine(Algorithm* algorithm, int time)
 {
-	// @todo nvidia extras
+	// TODO nvidia extras
 	return QStringList() << "-b" << GetDevicesCommandString();
 }
 
 ApiData* NhEqBase::GetSummaryAsync()
 {
 	CurrentMinerReadStatus=Enums::MinerApiReadStatus::NONE;
-	ApiData* ad=new ApiData(_MiningSetup->CurrentAlgorithmType);
+	ApiData* ad=new ApiData(MiningSetup_->CurrentAlgorithmType);
 
 	JsonApiResponse* resp=nullptr;
 	try {
@@ -75,7 +75,7 @@ ApiData* NhEqBase::GetSummaryAsync()
 		resp=JsonApiResponse::fromJson(client.readAll());
 		client.close();
 		}
-	catch (QException ex) {
+	catch (QException& ex) {
 		Helpers::ConsolePrint("ERROR", ex.what());
 		}
 

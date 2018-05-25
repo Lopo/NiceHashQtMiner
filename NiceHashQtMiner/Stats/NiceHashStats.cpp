@@ -5,12 +5,15 @@
 #include "Utils/BitcoinAddress.h"
 #include "Devices/ComputeDeviceManager.h"
 #include "Switching/NHSmaData.h"
+#include "ExchangeRateAPI.h"
+#include "Stats/NiceHashSocket.h"
 
 #include <QtNetwork>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QApplication>
 #if WITH_DEBUG
 #include <iostream>
+#include <QException>
 #endif
 
 
@@ -71,8 +74,11 @@ void NiceHashStats::SocketOnOnDataReceived(QString e)
 		else if (method=="burn") {
 			emit VersionBurn(message.value("message").toString());
 			}
+		else if (method=="exchange_rates") {
+			SetExchangeRates(message.value("data").toString());
+			}
 		}
-	catch (QException er) {
+	catch (QException& er) {
 		Helpers::ConsolePrint("SOCKET", er.what());
 		}
 }
@@ -95,7 +101,7 @@ void NiceHashStats::SetAlgorithmRates(QJsonArray data)
 		NHSmaData::UpdateSmaPaying(payingDict);
 		emit SmaUpdate();
 		}
-	catch (QException e) {
+	catch (QException& e) {
 		Helpers::ConsolePrint("SOCKET", e.what());
 		}
 }
@@ -112,13 +118,14 @@ void NiceHashStats::SetStableAlgorithms(QJsonArray stable)
 void NiceHashStats::SetBalance(QString balance)
 {
 	try {
-		double bal=0.0;
 		bool ok=false;
-		bal=balance.toDouble(&ok);
-		Balance_=bal;
-		emit BalanceUpdate(bal);
+		double bal=balance.toDouble(&ok);
+		if (ok) {
+			Balance_=bal;
+			emit BalanceUpdate(bal);
+			}
 		}
-	catch (QException e) {
+	catch (QException& e) {
 		Helpers::ConsolePrint("SOCKET", e.what());
 		}
 }
@@ -129,6 +136,54 @@ void NiceHashStats::SetVersion(QString version)
 	emit VersionUpdate(version);
 }
 
+void NiceHashStats::SetExchangeRates(QString data)
+{
+	try {
+		ExchangeRateJson* exchange=ExchangeRateJson::fromJsonString(data);
+		if (exchange!=nullptr && !exchange->exchanges_fiat.empty() && !exchange->exchanges.empty()) {
+			QMap<QString, QString> exchangePair;
+			foreach (exchangePair, exchange->exchanges) {
+				if (exchangePair.contains("coin") && exchangePair.value("coin")=="BTC" && exchangePair.contains("USD")) {
+					bool ok=false;
+					double usdD=exchangePair.value("USD").toDouble(&ok);
+					if (ok) {
+						ExchangeRateApi::UsdBtcRate(usdD);
+						break;
+						}
+					}
+				}
+			ExchangeRateApi::UpdateExchangesFiat(&exchange->exchanges_fiat);
+			emit ExchangeUpdate();
+			}
+		}
+	catch (QException& e) {
+		Helpers::ConsolePrint("SOCKET", e.what());
+		}
+}
+/*
+void NiceHashStats::ExchangeUpdate(QJsonObject data)
+{
+	try {
+		ExchangeRateJson* exchange=ExchangeRateJson::fromJsonObject(data);
+		if (exchange!=nullptr && !exchange->exchanges_fiat.empty() && !exchange->exchanges.empty()) {
+			QMap<QString, QString> exchangePair;
+			foreach (exchangePair, exchange->exchanges) {
+				if (exchangePair.contains("coin") && exchangePair.value("coin")=="BTC" && exchangePair.contains("USD")) {
+					bool ok=false;
+					double usdD=exchangePair.value("USD").toDouble(&ok);
+					if (ok) {
+						ExchangeRateApi::UsdBtcRate(usdD);
+						break;
+						}
+					}
+				}
+			}
+		}
+	catch (QException& e) {
+		Helpers::ConsolePrint("SOCKET", e.what());
+		}
+}
+*/
 void NiceHashStats::SetCredentials(QString btc, QString worker)
 {
 	NicehashCredentials data;
@@ -152,13 +207,13 @@ void NiceHashStats::DeviceStatus_Tick()
 			array.append(device->Name);
 			int status=(int32_t)activeIDs->contains(device->Index())+((int)device->DeviceType+1)*2;
 			array.append(status);
-			array.append(QJsonValue((int)device->Load()));
-			array.append((int)device->Temp());
-			array.append((int)device->FanSpeed());
+			array.append((int)round(device->Load()));
+			array.append((int)round(device->Temp()));
+			array.append(device->FanSpeed());
 
 			deviceList->append(array);
 			}
-		catch (QException e) {
+		catch (QException& e) {
 			Helpers::ConsolePrint("SOCKET", e.what());
 			}
 		}
@@ -216,7 +271,7 @@ std::cout << "GetNiceHashAPIData Response: " << responseFromServer.toStdString()
 			}
 		return responseFromServer;
 		}
-	catch (QException e) {
+	catch (QException& e) {
 		Helpers::ConsolePrint("NICEHASH", e.what());
 		return nullptr;
 		}
@@ -246,4 +301,26 @@ QString NiceHashStats::NicehashDeviceStatus::asJson()
 		o.insert("devices", devo);
 		}
 	return QString(QJsonDocument(o).toJson());
+}
+
+NiceHashStats::ExchangeRateJson* NiceHashStats::ExchangeRateJson::fromJsonString(QString str)
+{
+	QJsonObject o=QJsonDocument::fromJson(str.toLatin1()).object();
+	NiceHashStats::ExchangeRateJson* ret=new NiceHashStats::ExchangeRateJson;
+
+	foreach (QJsonValue eV, o.value("exchanges").toArray()) {
+		QMap<QString, QString> m;
+		QJsonObject eVo=eV.toObject();
+		foreach (QString k, eVo.keys()) {
+			m.insert(k, eVo.value(k).toString());
+			}
+		ret->exchanges.append(m);
+		}
+
+	QJsonObject ef=o.value("exchanges_fiat").toObject();
+	foreach (QString key, ef.keys()) {
+		ret->exchanges_fiat.insert(key, ef.value(key).toDouble());
+		}
+	
+	return ret;
 }

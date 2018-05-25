@@ -106,6 +106,9 @@ public:
 	Interval SwitchSmaTicksStable=Interval(2, 3);
 	Interval SwitchSmaTicksUnstable=Interval(5, 13);
 
+	double KwhPrice=0; // Cost of electricity in kW-h
+	bool UseSmaCache=true; // True if NHQM should try to cache SMA values for next launch
+
 	void SetDefaults();
 	void FixSettingBounds();
 

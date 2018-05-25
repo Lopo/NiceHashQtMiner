@@ -3,7 +3,7 @@
 #include "Devices/ComputeDeviceManager.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Globals.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "Configs/ConfigManager.h"
 #include "Configs/Data/GeneralConfig.h"
 #include "Qt/LException.h"
@@ -16,6 +16,7 @@ extern QNetworkAccessManager* qnam;
 
 int ProspectorPlatforms::NVPlatform=-1;
 int ProspectorPlatforms::AmdPlatform=-1;
+QMutex ProspectorPlatforms::Lock(QMutex::Recursive);
 
 
 int ProspectorPlatforms::PlatformForDeviceType(Enums::DeviceType type)
@@ -51,18 +52,18 @@ double Prospector::ProspectorDatabase::QueryLastSpeed(QString device)
 		m.select();
 		return m.record(0).field("rate").value().toDouble();
 		}
-	catch (QException e) {
+	catch (QException& e) {
 		Helpers::ConsolePrint("PROSPECTORSQL", e.what());
 		return 0;
 		}
 }
 
-QVector<Prospector::hashrates> Prospector::ProspectorDatabase::QuerySpeedsForSession(int id)
+QVector<Prospector::hashrates> Prospector::ProspectorDatabase::QuerySpeedsForSessionDev(int id, QString device)
 {
 	try {
 		QSqlTableModel m(nullptr, _db);
 		m.setTable("hashrates");
-		m.setFilter(QString("session_id=%1").arg(id));
+		m.setFilter(QString("session_id=%1 AND device=%2").arg(id).arg(device));
 		m.select();
 		QVector<Prospector::hashrates> ret;
 		for (int i=0; i<m.rowCount(); i++) {
@@ -78,12 +79,12 @@ QVector<Prospector::hashrates> Prospector::ProspectorDatabase::QuerySpeedsForSes
 			}
 		return ret;
 		}
-	catch (QException e) {
+	catch (QException& e) {
 		Helpers::ConsolePrint("PROSPECTORSQL", e.what());
 		return QVector<Prospector::hashrates>();
 		}
 }
-Prospector::sessions Prospector::ProspectorDatabase::LastSession()
+Prospector::sessions* Prospector::ProspectorDatabase::LastSession(QString device)
 {
 	try {
 		QSqlTableModel m(nullptr, _db);
@@ -91,15 +92,22 @@ Prospector::sessions Prospector::ProspectorDatabase::LastSession()
 		m.select();
 		m.setSort(m.fieldIndex("id"), Qt::SortOrder::DescendingOrder);
 		m.select();
-		Prospector::sessions ret;
-		ret.id=m.record(0).value("id").toInt();
-		ret.start=m.record(0).value("start").toString();
-		return ret;
+		Prospector::sessions* ret=nullptr;
+		for (int i=0; i<m.rowCount(); i++) {
+			QSqlRecord s=m.record(0);
+			if (QuerySpeedsForSessionDev(s.value("id").toInt(), device).count()) {
+				ret=new Prospector::sessions;
+				ret->id=s.value("id").toInt();
+				ret->start=s.value("start").toString();
+				return ret;
+				}
+			}
 		}
-	catch (QException e) {
+	catch (QException& e) {
 		Helpers::ConsolePrint("PROSPECTORSQL", e.what());
-		return Prospector::sessions();
+		return nullptr;
 		}
+	return nullptr;
 }
 
 Prospector::Prospector()
@@ -127,25 +135,25 @@ QString Prospector::DeviceIDString(int id, Enums::DeviceType type)
 
 QString Prospector::GetConfigFileName()
 {
-	return QString("config_%1.toml").arg(_MiningSetup->MiningPairs->at(0)->Device->ID);
+	return QString("config_%1.toml").arg(GetDeviceID());
 }
 
 void Prospector::PrepareConfigFile(QString pool, QString wallet)
 {
-	if (_MiningSetup->MiningPairs->count()<=0) {
+	if (MiningSetup_->MiningPairs->count()<=0) {
 		return;
 		}
 	try {
 		QStringList sb;
 		sb << "[general]";
-		sb << QString("gpu-coin = \"%1\"").arg(_MiningSetup->MinerName);
+		sb << QString("gpu-coin = \"%1\"").arg(MiningSetup_->MinerName);
 		sb << QString("default-username = \"%1\"").arg(wallet);
 		sb << "default-password = \"x\"";
 
-		sb << QString("[pools.%1]").arg(_MiningSetup->MinerName);
+		sb << QString("[pools.%1]").arg(MiningSetup_->MinerName);
 		sb << QString("url = \"stratum+tcp://%1\"").arg(pool);
 
-		foreach (MiningPair* dev, *_MiningSetup->MiningPairs) {
+		foreach (MiningPair* dev, *MiningSetup_->MiningPairs) {
 			sb << QString("[gpus.%1]").arg(DeviceIDString(dev->Device->ID, dev->Device->DeviceType));
 			sb << "enabled = true";
 			sb << QString("label = \"%1\"").arg(dev->Device->Name);
@@ -164,67 +172,74 @@ void Prospector::PrepareConfigFile(QString pool, QString wallet)
 
 bool Prospector::InitPlatforms()
 {
-	if (ProspectorPlatforms::IsInit()) {
-		return true;
-		}
-
-	CleanAllOldLogs();
-	QProcess* handle=BenchmarkStartProcess({"list-devices"});
-	handle->start();
-
-	handle->waitForFinished(20*1000); // 20s
-	delete handle;
-	handle=nullptr;
-
-	try {
-		QString latestLogFile="";
-		QDir dirInfo(WorkingDirectory()+"logs/");
-		foreach (QString file, dirInfo.entryList(QDir::NoDotAndDotDot | QDir::Files)) {
-			latestLogFile=file;
-			break;
+	// We need to lock the platforms class
+	// If two devices start a prospector bench close together, the second one will delete the logs needed by the first
+	// Once the first one has finished getting platform defs, platforms class will be init so the lock only lasts one line
+	ProspectorPlatforms::Lock.lock();
+	{
+		if (ProspectorPlatforms::IsInit()) {
+			return true;
 			}
-		if (QFile::exists(dirInfo.path()+"/"+latestLogFile)) {
-			QFile f(dirInfo.path()+"/"+latestLogFile);
-			f.open(QIODevice::Text | QIODevice::ReadOnly);
-			QStringList lines=QString(f.readAll()).split('\n');
-			f.close();
-			foreach (QString line, lines) {
-				if (line.isEmpty()) {
-					continue;
-					}
-				QString lineLowered=line.toLower();
-				if (!lineLowered.contains(PlatformStart)) {
-					continue;
-					}
-				int platStart=lineLowered.indexOf(PlatformStart);
-				QString plat=lineLowered.mid(platStart, line.length()-platStart).remove(PlatformStart);
-				plat=plat.mid(0, plat.indexOf(PlatformEnd));
 
-				bool ok;
-				int platIndex=plat.toInt(&ok);
-				if (!ok) {
-					continue;
-					}
-				if (lineLowered.contains("nvidia")) {
-					Helpers::ConsolePrint(MinerTag(), QString("Setting nvidia platform: %1").arg(platIndex));
-					ProspectorPlatforms::NVPlatform=platIndex;
-					if (ProspectorPlatforms::AmdPlatform>=0) {
-						break;
+		CleanAllOldLogs();
+		QProcess* handle=BenchmarkStartProcess({"list-devices"});
+		handle->start();
+
+		handle->waitForFinished(20*1000); // 20s
+		delete handle;
+		handle=nullptr;
+
+		try {
+			QString latestLogFile="";
+			QDir dirInfo(WorkingDirectory()+"logs/");
+			foreach (QString file, dirInfo.entryList(QDir::NoDotAndDotDot | QDir::Files)) {
+				latestLogFile=file;
+				break;
+				}
+			if (QFile::exists(dirInfo.path()+"/"+latestLogFile)) {
+				QFile f(dirInfo.path()+"/"+latestLogFile);
+				f.open(QIODevice::Text | QIODevice::ReadOnly);
+				QStringList lines=QString(f.readAll()).split('\n');
+				f.close();
+				foreach (QString line, lines) {
+					if (line.isEmpty()) {
+						continue;
 						}
-					}
-				else if (lineLowered.contains("amd")) {
-					Helpers::ConsolePrint(MinerTag(), QString("Setting amd platform: %1").arg(platIndex));
-					ProspectorPlatforms::AmdPlatform=platIndex;
-					if (ProspectorPlatforms::NVPlatform>=0) {
-						break;
+					QString lineLowered=line.toLower();
+					if (!lineLowered.contains(PlatformStart)) {
+						continue;
+						}
+					int platStart=lineLowered.indexOf(PlatformStart);
+					QString plat=lineLowered.mid(platStart, line.length()-platStart).remove(PlatformStart);
+					plat=plat.mid(0, plat.indexOf(PlatformEnd));
+
+					bool ok;
+					int platIndex=plat.toInt(&ok);
+					if (!ok) {
+						continue;
+						}
+					if (lineLowered.contains("nvidia")) {
+						Helpers::ConsolePrint(MinerTag(), QString("Setting nvidia platform: %1").arg(platIndex));
+						ProspectorPlatforms::NVPlatform=platIndex;
+						if (ProspectorPlatforms::AmdPlatform>=0) {
+							break;
+							}
+						}
+					else if (lineLowered.contains("amd")) {
+						Helpers::ConsolePrint(MinerTag(), QString("Setting amd platform: %1").arg(platIndex));
+						ProspectorPlatforms::AmdPlatform=platIndex;
+						if (ProspectorPlatforms::NVPlatform>=0) {
+							break;
+							}
 						}
 					}
 				}
 			}
-		}
-	catch (QException e) {
-		Helpers::ConsolePrint(MinerTag(), e.what());
-		}
+		catch (QException& e) {
+			Helpers::ConsolePrint(MinerTag(), e.what());
+			}
+	}
+	ProspectorPlatforms::Lock.unlock();
 
 	return ProspectorPlatforms::IsInit();
 }
@@ -251,7 +266,7 @@ void Prospector::_Stop(Enums::MinerStopType willswitch)
 ApiData* Prospector::GetSummaryAsync()
 {
 	CurrentMinerReadStatus=Enums::MinerApiReadStatus::NONE;
-	ApiData* ad=new ApiData(_MiningSetup->CurrentAlgorithmType, _MiningSetup->CurrentSecondaryAlgorithmType);
+	ApiData* ad=new ApiData(MiningSetup_->CurrentAlgorithmType, MiningSetup_->CurrentSecondaryAlgorithmType);
 
 	QList<HashrateApiResponse>* resp=nullptr;
 	try {
@@ -273,14 +288,14 @@ ApiData* Prospector::GetSummaryAsync()
 			resp->append(r);
 			}
 		}
-	catch (QException ex) {
+	catch (QException& ex) {
 		Helpers::ConsolePrint(MinerTag(), QString("GetSummary exception: ")+ex.what());
 		}
 
 	if (resp!=nullptr && !resp->count()) {
 		ad->Speed=0;
 		foreach (HashrateApiResponse response, *resp) {
-			if (response.coin==_MiningSetup->MinerName) {
+			if (response.coin==MiningSetup_->MinerName) {
 				ad->Speed+=response.rate;
 				CurrentMinerReadStatus=Enums::MinerApiReadStatus::GOT_READ;
 				}
@@ -321,12 +336,12 @@ QStringList Prospector::BenchmarkCreateCommandLine(Algorithm* algorithm, int tim
 
 void Prospector::BenchmarkThreadRoutine(QStringList commandLine)
 {
-	QThread::msleep(ConfigManager.generalConfig->MinerRestartDelayMS);
-
 	BenchmarkSignalQuit=false;
 	BenchmarkSignalHanged=false;
 	BenchmarkSignalFinnished=false;
 	BenchmarkException=nullptr;
+
+	QThread::msleep(ConfigManager.generalConfig->MinerRestartDelayMS);
 
 	QDateTime startTime=QDateTime::currentDateTime();
 
@@ -368,39 +383,40 @@ void Prospector::BenchmarkThreadRoutine(QStringList commandLine)
 			}
 		BenchmarkHandle->waitForFinished(20*1000); // Wait up to 20s for exit
 		}
-	catch (LException ex) {
+	catch (LException& ex) {
 		BenchmarkThreadRoutineCatch(ex);
 		}
 //	finally {
-		BenchmarkAlgorithm->BenchmarkSpeed=0;
+		BenchmarkAlgorithm->BenchmarkSpeed(0);
 
 		if (_database==nullptr) {
 			try {
 				_database=new ProspectorDatabase(WorkingDirectory()+"info.db");
 				}
-			catch (QException e) {
+			catch (QException& e) {
 				Helpers::ConsolePrint(MinerTag(), e.what());
 				}
 			}
 
-		sessions session=_database->LastSession();
-		QDateTime sessionStart=QDateTime::fromString(session.start);
-		if (sessionStart<startTime) {
-			throw LException("Session not recorded!");
-			}
+		ComputeDevice* dev=miningSetup()->MiningPairs->value(0)->Device;
+		QString devString=DeviceIDString(dev->ID, dev->DeviceType);
 
-		QVector<hashrates> hashrates_=_database->QuerySpeedsForSession(session.id);
+		sessions* session=_database->LastSession(devString);
+		if (session!=nullptr) {
+			QDateTime sessionStart=QDateTime::fromString(session->start);
+			if (sessionStart>=startTime) {
+				double speed=0;
+				int speedRead=0;
+				foreach (hashrates hashrate, _database->QuerySpeedsForSessionDev(session->id, devString)) {
+					if (hashrate.coin==miningSetup()->MinerName && hashrate.rate>0) {
+						speed+=hashrate.rate;
+						speedRead++;
+						}
+					}
 
-		double speed=0;
-		int speedRead=0;
-		foreach (hashrates hashrate, hashrates_) {
-			if (hashrate.coin==_MiningSetup->MinerName && hashrate.rate>0) {
-				speed+=hashrate.rate;
-				speedRead++;
+				BenchmarkAlgorithm->BenchmarkSpeed((speed/std::max(1, speedRead))*(1-DevFee));
 				}
 			}
-
-		BenchmarkAlgorithm->BenchmarkSpeed=(speed/speedRead)*(1-DevFee);
 
 		BenchmarkThreadRoutineFinish();
 //		}

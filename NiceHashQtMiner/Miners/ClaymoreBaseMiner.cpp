@@ -3,24 +3,20 @@
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Parsing/ExtraLaunchParametersParser.h"
 #include "Devices/ComputeDeviceManager.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
+#include "Algorithms/DualAlgorithm.h"
 #include <QTcpSocket>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <cmath>
 
 
-ClaymoreBaseMiner::ClaymoreBaseMiner(QString minerDeviceName, QString lookForStart, int maxCDTime=60*1000*5)
+ClaymoreBaseMiner::ClaymoreBaseMiner(QString minerDeviceName, int maxCDTime=60*1000*5)
 	: Miner(minerDeviceName, maxCDTime)
 {
 	_ConectionType=Enums::NhmConectionType::STRATUM_SSL;
-	LookForStart=lookForStart.toLower();
 	IsKillAllUsedMinerProcs=true;
-}
-
-QString ClaymoreBaseMiner::SecondaryLookForStart()
-{
-	return "";
 }
 
 // return true if a secondary algo is being used
@@ -32,7 +28,7 @@ bool ClaymoreBaseMiner::IsDual()
 ApiData* ClaymoreBaseMiner::GetSummaryAsync()
 {
 	CurrentMinerReadStatus=Enums::MinerApiReadStatus::NONE;
-	ApiData* ad=new ApiData(_MiningSetup->CurrentAlgorithmType, _MiningSetup->CurrentSecondaryAlgorithmType);
+	ApiData* ad=new ApiData(MiningSetup_->CurrentAlgorithmType, MiningSetup_->CurrentSecondaryAlgorithmType);
 
 	JsonApiResponse* resp=nullptr;
 	try {
@@ -46,7 +42,7 @@ ApiData* ClaymoreBaseMiner::GetSummaryAsync()
 		resp=JsonApiResponse::fromJson(client.readAll());
 		client.close();
 		}
-	catch (QException ex) {
+	catch (QException& ex) {
 		Helpers::ConsolePrint(MinerTag(), QString("GetSummary exception: ")+ex.what());
 		}
 
@@ -106,15 +102,16 @@ QStringList ClaymoreBaseMiner::GetDevicesCommandString()
 {
 	// First by device type (AMD then NV), then by bus ID index
 	QList<MiningPair*>* sortedMinerPairs=new QList<MiningPair*>;
-	std::sort(_MiningSetup->MiningPairs->begin(), _MiningSetup->MiningPairs->end(), [](const MiningPair* a, const MiningPair* b){ return a->Device->DeviceType!=b->Device->DeviceType? a->Device->DeviceType>b->Device->DeviceType : a->Device->IDByBus < b->Device->IDByBus;});
+	std::sort(MiningSetup_->MiningPairs->begin(), MiningSetup_->MiningPairs->end(), [](const MiningPair* a, const MiningPair* b){ return a->Device->DeviceType!=b->Device->DeviceType? a->Device->DeviceType>b->Device->DeviceType : a->Device->IDByBus < b->Device->IDByBus;});
 	QStringList extraParams=ExtraLaunchParametersParser::ParseForMiningPairs(sortedMinerPairs, Enums::DeviceType::AMD);
 
 	QStringList ids;
+	QStringList intensities;
 
 	int amdDeviceCount=ComputeDeviceManager.Query.AmdDevices->count();
 	Helpers::ConsolePrint("ClaymoreIndexing", QString("Found %1 AMD devices").arg(amdDeviceCount));
 
-	foreach (MiningPair* mPair, *_MiningSetup->MiningPairs) {
+	foreach (MiningPair* mPair, *MiningSetup_->MiningPairs) {
 		int id=mPair->Device->IDByBus;
 		if (id<0) { // should never happen
 			Helpers::ConsolePrint("ClaymoreIndexing", QString("ID by Bus too low: %1 skipping device").arg(id));
@@ -136,14 +133,35 @@ QStringList ClaymoreBaseMiner::GetDevicesCommandString()
 		else {
 			ids.append(QString::number(id));
 			}
+
+		DualAlgorithm* algo=qobject_cast<DualAlgorithm*>(mPair->algorithm);
+		if (algo!=nullptr && algo->TuningEnabled) {
+			intensities << QString::number(algo->CurrentIntensity);
+			}
 		}
 	QStringList deviceStringCommand=DeviceCommand(amdDeviceCount) << ids.join("");
+	QStringList intensityStringCommand;
+	if (intensities.count()) {
+		intensityStringCommand << "-dcri" << intensities.join(',');
+		}
 
-	return deviceStringCommand << extraParams;
+	return deviceStringCommand << intensityStringCommand << extraParams;
 }
 
 void ClaymoreBaseMiner::BenchmarkThreadRoutine(QStringList commandLine)
 {
+	DualAlgorithm* dualBenchAlgo=qobject_cast<DualAlgorithm*>(BenchmarkAlgorithm);
+	if (dualBenchAlgo!=nullptr && dualBenchAlgo->TuningEnabled) {
+		int stepsLeft=(int)ceil((double)(dualBenchAlgo->TuningEnd-dualBenchAlgo->CurrentIntensity)/(dualBenchAlgo->TuningInterval))+1;
+		Helpers::ConsolePrint("CDTUNING", QString("%1 tuning steps remain, should complete in %2 seconds").arg(stepsLeft).arg(stepsLeft*BenchmarkTimeWait));
+		Helpers::ConsolePrint("CDTUNING", QString("Starting benchmark for intensity %1 out of %2").arg(dualBenchAlgo->CurrentIntensity).arg(dualBenchAlgo->TuningEnd));
+		}
+
+	_benchmarkReadCount=0;
+	_benchmarkSum=0;
+	_secondaryBenchmarkReadCount=0;
+	_secondaryBenchmarkSum=0;
+
 	BenchmarkThreadRoutineAlternate(commandLine, BenchmarkTimeWait);
 }
 
@@ -154,36 +172,35 @@ void ClaymoreBaseMiner::ProcessBenchLinesAlternate(QStringList lines)
 			BenchLines->append(line);
 			QString lineLowered=line.toLower();
 			if (lineLowered.contains(LookForStart)) {
-				if (IgnoreZero) {
-					double got=GetNumber(lineLowered);
-					if (got) {
-						_benchmarkSum+=got;
-						++_benchmarkReadCount;
-						}
-					}
-				else {
-					_benchmarkSum+=GetNumber(lineLowered);
+				double got=GetNumber(lineLowered);
+				if (!IgnoreZero || got>0) {
+					_benchmarkSum+=got;
 					++_benchmarkReadCount;
 					}
 				}
-			else if (!SecondaryLookForStart().isEmpty() && lineLowered.contains(SecondaryLookForStart())) {
-				if (IgnoreZero) {
-					double got=GetNumber(lineLowered, SecondaryLookForStart(), LookForEnd);
-					if (got) {
-						_secondaryBenchmarkSum+=got;
-						++_secondaryBenchmarkReadCount;
-						}
-					}
-				else {
-					_secondaryBenchmarkSum+=GetNumber(lineLowered);
+			else if (!SecondaryLookForStart.isEmpty() && lineLowered.contains(SecondaryLookForStart)) {
+				double got=GetNumber(lineLowered, SecondaryLookForStart, LookForEnd);
+				if (IgnoreZero || got>0) {
+					_secondaryBenchmarkSum+=got;
 					++_secondaryBenchmarkReadCount;
 					}
 				}
 			}
 		}
+
 	if (_benchmarkReadCount>0) {
-		BenchmarkAlgorithm->BenchmarkSpeed=_benchmarkSum/_benchmarkReadCount;
-		BenchmarkAlgorithm->SecondaryBenchmarkSpeed=_secondaryBenchmarkSum/_secondaryBenchmarkReadCount;
+		double speed=_benchmarkSum/_benchmarkReadCount;
+		BenchmarkAlgorithm->BenchmarkSpeed(speed);
+		DualAlgorithm* dualBenchAlgo=qobject_cast<DualAlgorithm*>(BenchmarkAlgorithm);
+		if (dualBenchAlgo!=nullptr) {
+			double secondarySpeed=_secondaryBenchmarkSum/std::max(1, _secondaryBenchmarkReadCount);
+			if (dualBenchAlgo->TuningEnabled) {
+				dualBenchAlgo->SetIntensitySpeedsForCurrent(speed, secondarySpeed);
+				}
+			else {
+				dualBenchAlgo->SecondaryBenchmarkSpeed(secondarySpeed);
+				}
+			}
 		}
 }
 
@@ -224,9 +241,9 @@ double ClaymoreBaseMiner::GetNumber(QString outdata, QString LOOK_FOR_START, QSt
 			speed=speed.remove(QChar('g'));
 			}
 		speed=speed.trimmed();
-		return (speed.toDouble()*mult)*(1.0-DevFee()*0.01);
+		return (speed.toDouble()*mult)*(1.0-DevFee*0.01);
 		}
-	catch (QException ex) {
+	catch (QException& ex) {
 		Helpers::ConsolePrint("GetNumber", QString(ex.what())+" | args => "+outdata+" | "+LOOK_FOR_END+" | "+LOOK_FOR_START);
 		}
 	return 0;

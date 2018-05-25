@@ -15,7 +15,7 @@ void NVML::Init()
 	try {
 		result=nvmlInit();
 		}
-	catch (std::exception e) {
+	catch (std::exception& e) {
 		Helpers::ConsolePrint("NVML", e.what());
 		return;
 		}

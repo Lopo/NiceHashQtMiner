@@ -8,7 +8,7 @@
 #include "Configs/Data/GeneralConfig.h"
 #include "Switching/NiceHashSma.h"
 #include "Qt/LException.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "International.h"
 #include "Switching/NHSmaData.h"
@@ -30,7 +30,7 @@ void Sgminer::KillSgminer()
 		try {
 			::kill(pid, SIGKILL);
 			}
-		catch (std::exception e) {
+		catch (std::exception& e) {
 			Helpers::ConsolePrint(MinerDeviceName, e.what());
 			}
 		}
@@ -41,13 +41,13 @@ void Sgminer::EndBenchmarkProcces()
 	if (_BenchmarkProcessStatus!=Enums::BenchmarkProcessStatus::Killing && _BenchmarkProcessStatus!=Enums::BenchmarkProcessStatus::DoneKilling) {
 		_BenchmarkProcessStatus=Enums::BenchmarkProcessStatus::Killing;
 		try {
-			Helpers::ConsolePrint("BENCHMARK", QString("Trying to kill benchmark process %1 algorithm %2").arg(BenchmarkProcessPath).arg(BenchmarkAlgorithm->AlgorithmName));
+			Helpers::ConsolePrint("BENCHMARK", QString("Trying to kill benchmark process %1 algorithm %2").arg(BenchmarkProcessPath).arg(BenchmarkAlgorithm->AlgorithmName()));
 			KillSgminer();
 			}
 		catch (...) {}
 //		finally {
 			_BenchmarkProcessStatus=Enums::BenchmarkProcessStatus::DoneKilling;
-			Helpers::ConsolePrint("BENCHMARK", QString("Benchmark process %1 algorithm %2 KILLED").arg(BenchmarkProcessPath).arg(BenchmarkAlgorithm->AlgorithmName));
+			Helpers::ConsolePrint("BENCHMARK", QString("Benchmark process %1 algorithm %2 KILLED").arg(BenchmarkProcessPath).arg(BenchmarkAlgorithm->AlgorithmName()));
 //			}
 		}
 }
@@ -66,13 +66,13 @@ void Sgminer::Start(QString url, QString btcAdress, QString worker)
 	QString username=GetUsername(btcAdress, worker);
 
 	LastCommandLine=QStringList() << "--gpu-platform" << QString::number(_gpuPlatformNumber)
-			<< "-k" << _MiningSetup->MinerName
+			<< "-k" << MiningSetup_->MinerName
 			<< "--url="+url
 			<< "--userpass="+username
 			<< "-p" << "x"
 			<< "--api-listen"
 			<< "--api-port="+QString::number(ApiPort())
-			<< ExtraLaunchParametersParser::ParseForMiningSetup(_MiningSetup, Enums::DeviceType::AMD)
+			<< ExtraLaunchParametersParser::ParseForMiningSetup(MiningSetup_, Enums::DeviceType::AMD)
 			<< "--device" << GetDevicesCommandString();
 
 	ProcessHandle=_Start();
@@ -103,7 +103,7 @@ QStringList Sgminer::BenchmarkCreateCommandLine(Algorithm* algorithm, int time)
 //			<< "--api-port="+QString::number(ApiPort())
 			<< "--sched-stop" << QDateTime::currentDateTime().addSecs(time).toString("HH:mm")
 			<< "-T" << "--log" << "10" << "--log-file" << "dump.txt"
-			<< ExtraLaunchParametersParser::ParseForMiningSetup(_MiningSetup, Enums::DeviceType::AMD)
+			<< ExtraLaunchParametersParser::ParseForMiningSetup(MiningSetup_, Enums::DeviceType::AMD)
 			<< "--device" << GetDevicesCommandString();
 
 //	commandLine+=" && rm dump.txt\"";
@@ -137,10 +137,10 @@ bool Sgminer::BenchmarkParseLine(QString outdata)
 			speed*=1000000000;
 			}
 
-		BenchmarkAlgorithm->BenchmarkSpeed=speed;
+		BenchmarkAlgorithm->BenchmarkSpeed(speed);
 		return true;
 		}
-	if (outdata.contains(QString("GPU%1").arg(_MiningSetup->MiningPairs->at(0)->Device->ID)) && outdata.contains("s):") && BenchmarkAlgorithm->NiceHashID==Enums::AlgorithmType::DaggerHashimoto) {
+	if (outdata.contains(QString("GPU%1").arg(MiningSetup_->MiningPairs->at(0)->Device->ID)) && outdata.contains("s):") && BenchmarkAlgorithm->NiceHashID==Enums::AlgorithmType::DaggerHashimoto) {
 		int i=outdata.indexOf("s):");
 		int k=outdata.indexOf("(avg)");
 
@@ -165,7 +165,7 @@ bool Sgminer::BenchmarkParseLine(QString outdata)
 		hashSpeed=hashSpeed.mid(0, hashSpeed.indexOf(' '));
 		double speed=hashSpeed.toDouble()*mult;
 
-		BenchmarkAlgorithm->BenchmarkSpeed=speed;
+		BenchmarkAlgorithm->BenchmarkSpeed(speed);
 
 		return true;
 		}
@@ -185,11 +185,12 @@ void Sgminer::BenchmarkThreadRoutineStartSettup()
 	double paying;
 	NHSmaData::TryGetPaying(nhDataIndex, paying);
 	if (!paying) {
-		Helpers::ConsolePrint("BENCHMARK", QString("Skipping sgminer benchmark because there is no work on Nicehash.com [algo: %1(%2)]").arg(BenchmarkAlgorithm->AlgorithmName).arg(nhDataIndex));
+		Helpers::ConsolePrint("BENCHMARK", QString("Skipping sgminer benchmark because there is no work on Nicehash.com [algo: %1(%2)]").arg(BenchmarkAlgorithm->AlgorithmName()).arg(nhDataIndex));
 		throw LException("No work can be used for benchmarking");
 		}
 
 	_benchmarkTimer->restart();
+	Miner::BenchmarkThreadRoutineStartSettup();
 }
 
 void Sgminer::BenchmarkOutputErrorDataReceivedImpl(QString outdata)
@@ -218,7 +219,7 @@ void Sgminer::BenchmarkOutputErrorDataReceivedImpl(QString outdata)
 
 QString Sgminer::GetFinalBenchmarkString()
 {
-	if (BenchmarkAlgorithm->BenchmarkSpeed<=0) {
+	if (BenchmarkAlgorithm->BenchmarkSpeed()<=0) {
 		Helpers::ConsolePrint("sgminer_GetFinalBenchmarkString", International::GetText("sgminer_precise_try"));
 		return International::GetText("sgminer_precise_try");
 		}
@@ -227,18 +228,19 @@ QString Sgminer::GetFinalBenchmarkString()
 
 void Sgminer::BenchmarkThreadRoutine(QStringList commandLine)
 {
-	QThread::msleep(ConfigManager.generalConfig->MinerRestartDelayMS*3); // increase wait for sgminer
 	BenchmarkSignalQuit=false;
 	BenchmarkSignalHanged=false;
 	BenchmarkSignalFinnished=false;
 	BenchmarkException=nullptr;
+
+	QThread::msleep(ConfigManager.generalConfig->MinerRestartDelayMS*3); // increase wait for sgminer
 
 	try {
 		Helpers::ConsolePrint("BENCHMARK", "Benchmark starts");
 		BenchmarkHandle=BenchmarkStartProcess(commandLine);
 		BenchmarkThreadRoutineStartSettup();
 		_BenchmarkProcessStatus=Enums::BenchmarkProcessStatus::Running;
-		while (true) {
+/*		while (true) {
 			QString outdata=BenchmarkHandle->readAll();
 			BenchmarkOutputErrorDataReceivedImpl(outdata);
 			// terminate process situations
@@ -270,12 +272,32 @@ void Sgminer::BenchmarkThreadRoutine(QStringList commandLine)
 				// wait a second reduce CPU load
 				QThread::msleep(1000);
 				}
+			}*/
+		bool exited=BenchmarkHandle->waitForFinished((BenchmarkTimeoutInSeconds(BenchmarkTimeInSeconds)+20)*1000);
+
+		if (!exited) {
+			KillSgminer();
+			}
+
+		if (BenchmarkSignalTimedout) {
+			throw LException("Benchmark timedout");
+			}
+		if (BenchmarkException!=nullptr) {
+			throw BenchmarkException;
+			}
+		if (BenchmarkSignalQuit) {
+			throw LException("Termined by user request");
+			}
+		if (BenchmarkSignalHanged || !exited) {
+			throw LException("SGMiner is not responding");
+			}
+		if (BenchmarkSignalFinnished) {
 			}
 		}
-	catch (LException ex) {
+	catch (LException& ex) {
 		BenchmarkThreadRoutineCatch(ex);
 		}
-	catch (std::exception ex) {
+	catch (std::exception& ex) {
 		BenchmarkThreadRoutineCatch(ex);
 		}
 //	finally {
@@ -285,7 +307,7 @@ void Sgminer::BenchmarkThreadRoutine(QStringList commandLine)
 
 ApiData* Sgminer::GetSummaryAsync()
 {
-	ApiData* ad=new ApiData(_MiningSetup->CurrentAlgorithmType);
+	ApiData* ad=new ApiData(MiningSetup_->CurrentAlgorithmType);
 
 	QString* resp=QtConcurrent::run(this, static_cast<QString*(Sgminer::*)(int, QString, bool, bool)>(&Miner::GetApiDataAsync), ApiPort(), QString("summary"), false, false).result();
 	if (resp==nullptr) {

@@ -14,49 +14,28 @@
 #include "Qt/LException.h"
 #include "Interfaces/IBenchmarkComunicator.h"
 #include "PInvoke/NiceHashProcess.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Configs/Data/MinerSystemVariablesConfig.h"
 #include "WinPort/Process.h"
+#include "Algorithms/DualAlgorithm.h"
 #include <QDir>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QApplication>
 #include <QTcpSocket>
 #include <boost/thread.hpp>
 #include <exception>
-#include <signal.h>
+#include <csignal>
 
 
 ApiData::ApiData(Enums::AlgorithmType algorithmID, Enums::AlgorithmType secondaryAlgorithmID/*=Enums::AlgorithmType::NONE*/)
 {
 	AlgorithmID=algorithmID;
 	SecondaryAlgorithmID=secondaryAlgorithmID;
-	AlgorithmName=AlgorithmNiceHashNames::GetName(DualAlgorithmID());
+	AlgorithmName=AlgorithmNiceHashNames::GetName(Helpers::DualAlgoFromAlgos(algorithmID, secondaryAlgorithmID));
 	Speed=0.0;
 	SecondarySpeed=0.0;
-}
-
-Enums::AlgorithmType ApiData::DualAlgorithmID()
-{
-	if (AlgorithmID==Enums::AlgorithmType::DaggerHashimoto) {
-		switch (SecondaryAlgorithmID) {
-			case Enums::AlgorithmType::Decred:
-				return Enums::AlgorithmType::DaggerDecred;
-			case Enums::AlgorithmType::Lbry:
-				return Enums::AlgorithmType::DaggerLbry;
-			case Enums::AlgorithmType::Pascal:
-				return Enums::AlgorithmType::DaggerPascal;
-			case Enums::AlgorithmType::Sia:
-				return Enums::AlgorithmType::DaggerSia;
-			case Enums::AlgorithmType::Blake2s:
-				return Enums::AlgorithmType::DaggerBlake2s;
-			case Enums::AlgorithmType::Keccak:
-				return Enums::AlgorithmType::DaggerKeccak;
-			default: // prevent warning: enumeration value not handled in switch
-				return AlgorithmID;
-			}
-		}
-	return AlgorithmID;
+	PowerUsage=0.0;
 }
 
 long Miner::_MinerIDCount=0;
@@ -64,7 +43,7 @@ long Miner::_MinerIDCount=0;
 Miner::Miner(QString minerDeviceName, int maxCDTime)
 {
 	_ConectionType=Enums::NhmConectionType::STRATUM_TCP;
-	_MiningSetup=new MiningSetup(nullptr);
+	MiningSetup_=new MiningSetup(nullptr);
 	_IsInit=false;
 	MinerID=_MinerIDCount++;
 
@@ -107,7 +86,7 @@ void Miner::SetWorkingDirAndProgName(QString fullPath)
 void Miner::SetApiPort()
 {
 	if (_IsInit) {
-		QList<int>* reservedPorts=MinersSettingsManager::GetPortsListFor(_MiningSetup->MiningPairs->at(0)->algorithm->MinerBaseType, _MiningSetup->MinerPath, _MiningSetup->MiningPairs->at(0)->algorithm->NiceHashID);
+		QList<int>* reservedPorts=MinersSettingsManager::GetPortsListFor(MiningSetup_->MiningPairs->at(0)->algorithm->MinerBaseType, MiningSetup_->MinerPath, MiningSetup_->MiningPairs->at(0)->algorithm->NiceHashID);
 		_ApiPort=-1; // not set
 		foreach (int reservedPort, *reservedPorts) {
 			if (MinersApiPortsManager::IsPortAvailable(reservedPort)) {
@@ -123,10 +102,10 @@ void Miner::SetApiPort()
 
 void Miner::InitMiningSetup(MiningSetup* miningSetup)
 {
-	_MiningSetup=miningSetup;
-	_IsInit=_MiningSetup->IsInit;
+	MiningSetup_=miningSetup;
+	_IsInit=MiningSetup_->IsInit;
 	SetApiPort();
-	SetWorkingDirAndProgName(_MiningSetup->MinerPath);
+	SetWorkingDirAndProgName(MiningSetup_->MinerPath);
 }
 
 void Miner::InitBenchmarkSetup(MiningPair* benchmarkPair)
@@ -145,7 +124,7 @@ QString Miner::MinerTag()
 			}
 		// contains ids
 		QStringList ids;
-		foreach (MiningPair* cdevs, *_MiningSetup->MiningPairs) {
+		foreach (MiningPair* cdevs, *MiningSetup_->MiningPairs) {
 			ids.append(QString::number(cdevs->Device->ID));
 			}
 		_minerTag=new QString(mask.arg(MinerDeviceName).arg(MinerID).arg(ids.join(",")));
@@ -177,13 +156,13 @@ void Miner::KillAllUsedMinerProcesses()
 				throw std::exception();
 				}
 			try {
-				::kill(pidData->Pid, SIGTERM);
+				kill(pidData->Pid, SIGTERM);
 				}
-			catch (std::exception e) {
+			catch (std::exception& e) {
 				Helpers::ConsolePrint(MinerTag(), QString("Exception killing %1, exMsg %2").arg(ProcessTag(*pidData)).arg(e.what()));
 				}
 			}
-		catch (std::exception e) {
+		catch (std::exception& e) {
 			toRemovePidData.append(pidData);
 			Helpers::ConsolePrint(MinerTag(), QString("Nothing to kill %1, exMsg %2").arg(ProcessTag(*pidData)).arg(e.what()));
 			}
@@ -255,7 +234,7 @@ QStringList Miner::GetDevicesCommandString()
 {
 	QStringList ids;
 
-	foreach (MiningPair* mPair, *_MiningSetup->MiningPairs) {
+	foreach (MiningPair* mPair, *MiningSetup_->MiningPairs) {
 		ids.append(QString::number(mPair->Device->ID));
 		}
 	return QStringList() << ids.join(',');
@@ -263,6 +242,9 @@ QStringList Miner::GetDevicesCommandString()
 
 int Miner::BenchmarkTimeoutInSeconds(int timeInSeconds)
 {
+	if (TimeoutStandard) {
+		return timeInSeconds;
+		}
 	if (BenchmarkAlgorithm->NiceHashID==Enums::AlgorithmType::DaggerHashimoto) {
 		return 5*60+120; // 5 minutes +2 minutes
 		}
@@ -290,7 +272,7 @@ void Miner::BenchmarkStart(int time, IBenchmarkComunicator* benchmarkComunicator
 	catch (...) {}
 	if (BenchLines!=nullptr) {delete BenchLines;}
 	BenchLines=new QStringList;
-	_benchmarkLogPath=QString("%1Log_%2_%3").arg(Logger.LogPath).arg(_MiningSetup->MiningPairs->at(0)->Device->Uuid()).arg(_MiningSetup->MiningPairs->at(0)->algorithm->AlgorithmStringID);
+	_benchmarkLogPath=QString("%1Log_%2_%3").arg(Logger.LogPath).arg(MiningSetup_->MiningPairs->at(0)->Device->Uuid()).arg(MiningSetup_->MiningPairs->at(0)->algorithm->AlgorithmStringID());
 
 	QStringList commandLine=BenchmarkCreateCommandLine(BenchmarkAlgorithm, time);
 
@@ -386,9 +368,13 @@ void Miner::BenchmarkOutputErrorDataReceived(/*QString data*/)
 		|| BenchmarkSignalTimedout
 		|| BenchmarkException!=nullptr
 		) {
+		FinishUpBenchmark();
 		EndBenchmarkProcces();
 		}
 }
+
+void Miner::FinishUpBenchmark()
+{ }
 
 void Miner::CheckOutdata(QString outdata)
 {
@@ -412,6 +398,10 @@ void Miner::CheckOutdata(QString outdata)
 	// Ethminer
 	if (outdata.contains("No GPU device with sufficient memory was found")) {
 		BenchmarkException=new LException("[daggerhashimoto] No GPU device with sufficient memory was found.");
+		}
+	// xmr-stak
+	if (outdata.contains("Press any key to exit")) {
+		BenchmarkException=new LException("Xmr-Stak erred, check its logs");
 		}
 
 	// lastly parse data
@@ -471,7 +461,7 @@ void Miner::EndBenchmarkProcces()
 	if (BenchmarkHandle!=nullptr && _BenchmarkProcessStatus!=Enums::BenchmarkProcessStatus::Killing && _BenchmarkProcessStatus!=Enums::BenchmarkProcessStatus::DoneKilling) {
 		_BenchmarkProcessStatus=Enums::BenchmarkProcessStatus::Killing;
 		try {
-			Helpers::ConsolePrint("BENCHMARK", QString("Trying to kill benchmark process %1 algorithm %2").arg(BenchmarkProcessPath).arg(BenchmarkAlgorithm->AlgorithmName));
+			Helpers::ConsolePrint("BENCHMARK", QString("Trying to kill benchmark process %1 algorithm %2").arg(BenchmarkProcessPath).arg(BenchmarkAlgorithm->AlgorithmName()));
 			BenchmarkHandle->kill();
 			BenchmarkHandle->close();
 			KillAllUsedMinerProcesses();
@@ -481,7 +471,7 @@ void Miner::EndBenchmarkProcces()
 			}
 //		finally {
 			_BenchmarkProcessStatus=Enums::BenchmarkProcessStatus::DoneKilling;
-			Helpers::ConsolePrint("BENCHMARK", QString("Benchmark process %1 algorithm %2 KILLED").arg(BenchmarkProcessPath).arg(BenchmarkAlgorithm->AlgorithmName));
+			Helpers::ConsolePrint("BENCHMARK", QString("Benchmark process %1 algorithm %2 KILLED").arg(BenchmarkProcessPath).arg(BenchmarkAlgorithm->AlgorithmName()));
 //			}
 		}
 }
@@ -494,7 +484,7 @@ void Miner::BenchmarkThreadRoutineStartSettup()
 
 void Miner::BenchmarkThreadRoutineCatch(LException ex)
 {
-	BenchmarkAlgorithm->BenchmarkSpeed=0;
+	BenchmarkAlgorithm->BenchmarkSpeed(0);
 
 	Helpers::ConsolePrint(MinerTag(), QString("Benchmark exception: ")+ex.what());
 	if (BenchmarkCommunicator!=nullptr && !OnBenchmarkCompleteCalled) {
@@ -505,7 +495,7 @@ void Miner::BenchmarkThreadRoutineCatch(LException ex)
 
 void Miner::BenchmarkThreadRoutineCatch(QException ex)
 {
-	BenchmarkAlgorithm->BenchmarkSpeed=0;
+	BenchmarkAlgorithm->BenchmarkSpeed(0);
 
 	Helpers::ConsolePrint(MinerTag(), QString("Benchmark exception: ")+ex.what());
 	if (BenchmarkCommunicator!=nullptr && !OnBenchmarkCompleteCalled) {
@@ -516,7 +506,7 @@ void Miner::BenchmarkThreadRoutineCatch(QException ex)
 
 void Miner::BenchmarkThreadRoutineCatch(std::exception ex)
 {
-	BenchmarkAlgorithm->BenchmarkSpeed=0;
+	BenchmarkAlgorithm->BenchmarkSpeed(0);
 
 	Helpers::ConsolePrint(MinerTag(), QString("Benchmark exception: ")+ex.what());
 	if (BenchmarkCommunicator!=nullptr && !OnBenchmarkCompleteCalled) {
@@ -527,7 +517,7 @@ void Miner::BenchmarkThreadRoutineCatch(std::exception ex)
 
 QString Miner::GetFinalBenchmarkString()
 {
-	return BenchmarkSignalTimedout
+	return BenchmarkSignalTimedout && !TimeoutStandard
 		? International::GetText("Benchmark_Timedout")
 		: International::GetText("Benchmark_Terminated");
 }
@@ -536,18 +526,32 @@ void Miner::BenchmarkThreadRoutineFinish()
 {
 	Enums::BenchmarkProcessStatus status=Enums::BenchmarkProcessStatus::Finished;
 
-	if (BenchmarkAlgorithm->BenchmarkSpeed>0) {
+	if (!BenchmarkAlgorithm->BenchmarkNeeded()) {
 		status=Enums::BenchmarkProcessStatus::Success;
 		}
-	QFile f(_benchmarkLogPath);
-	f.open(QIODevice::Append|QIODevice::Text);
-	QTextStream sw(&f);
-	foreach (QString line, *BenchLines) {
-		sw << line << endl;
+	try {
+		QFile f(_benchmarkLogPath);
+		f.open(QIODevice::Append|QIODevice::Text);
+		QTextStream sw(&f);
+		foreach (QString line, *BenchLines) {
+			sw << line << endl;
+			}
+		f.close();
 		}
-	f.close();
+	catch (...) {}
+
 	_BenchmarkProcessStatus=status;
-	Helpers::ConsolePrint("BENCHMARK", "Final Speed: "+Helpers::FormatDualSpeedOutput(BenchmarkAlgorithm->NiceHashID, BenchmarkAlgorithm->BenchmarkSpeed, BenchmarkAlgorithm->SecondaryBenchmarkSpeed));
+	DualAlgorithm* dualAlg=qobject_cast<DualAlgorithm*>(BenchmarkAlgorithm);
+	if (dualAlg!=nullptr) {
+		if (!dualAlg->TuningEnabled) {
+			// Tuning will report speed
+			Helpers::ConsolePrint("BENCHMARK", "Final speed: "+Helpers::FormatDualSpeedOutput(dualAlg->BenchmarkSpeed(), dualAlg->SecondaryBenchmarkSpeed(), dualAlg->DualNiceHashID()));
+			}
+		}
+	else {
+		Helpers::ConsolePrint("BENCHMARK", "Final Speed: "+Helpers::FormatDualSpeedOutput(BenchmarkAlgorithm->BenchmarkSpeed(), 0, BenchmarkAlgorithm->NiceHashID));
+		}
+
 	Helpers::ConsolePrint("BENCHMARK", "Benchmark ends");
 	if (BenchmarkCommunicator!=nullptr && !OnBenchmarkCompleteCalled) {
 		OnBenchmarkCompleteCalled=true;
@@ -559,12 +563,12 @@ void Miner::BenchmarkThreadRoutineFinish()
 
 void Miner::BenchmarkThreadRoutine(QStringList commandLine)
 {
-	QThread::msleep(ConfigManager.generalConfig->MinerRestartDelayMS);
-
 	BenchmarkSignalQuit=false;
 	BenchmarkSignalHanged=false;
 	BenchmarkSignalFinnished=false;
 	BenchmarkException=nullptr;
+
+	QThread::msleep(ConfigManager.generalConfig->MinerRestartDelayMS);
 
 	try {
 		Helpers::ConsolePrint("BENCHMARK", "Benchmark starts");
@@ -573,8 +577,8 @@ void Miner::BenchmarkThreadRoutine(QStringList commandLine)
 		BenchmarkThreadRoutineStartSettup();
 		// don't use wait for it breaks everything
 		_BenchmarkProcessStatus=Enums::BenchmarkProcessStatus::Running;
-		BenchmarkHandle->waitForFinished(-1);
-		if (BenchmarkSignalTimedout) {
+		bool exited=BenchmarkHandle->waitForFinished((BenchmarkTimeoutInSeconds(BenchmarkTimeInSeconds)+20)*1000);
+		if (BenchmarkSignalTimedout && !TimeoutStandard) {
 			throw LException("Benchmark timedout");
 			}
 		if (BenchmarkException!=nullptr) {
@@ -583,13 +587,13 @@ void Miner::BenchmarkThreadRoutine(QStringList commandLine)
 		if (BenchmarkSignalQuit) {
 			throw LException("Termined by user request");
 			}
-		if (BenchmarkSignalHanged) {
-			throw LException("SGMiner is not responding");
+		if (BenchmarkSignalHanged || !exited) {
+			throw LException("Miner is not responding");
 			}
 		if (BenchmarkSignalFinnished) {
 			}
 		}
-	catch (LException ex) {
+	catch (LException& ex) {
 		BenchmarkThreadRoutineCatch(ex);
 //		return;
 		}
@@ -600,14 +604,14 @@ void Miner::BenchmarkThreadRoutine(QStringList commandLine)
 
 void Miner::BenchmarkThreadRoutineAlternate(QStringList commandLine, int benchmarkTimeWait)
 {
-	CleanAllOldLogs();
-
-	QThread::msleep(ConfigManager.generalConfig->MinerRestartDelayMS);
+	CleanOldLogs();
 
 	BenchmarkSignalQuit=false;
 	BenchmarkSignalHanged=false;
 	BenchmarkSignalFinnished=false;
 	BenchmarkException=nullptr;
+
+	QThread::msleep(ConfigManager.generalConfig->MinerRestartDelayMS);
 
 	try {
 		Helpers::ConsolePrint("BENCHMARK", "Benchmark starts");
@@ -646,18 +650,20 @@ void Miner::BenchmarkThreadRoutineAlternate(QStringList commandLine, int benchma
 			QThread::msleep(1000); // wait a second reduce CPU load
 			}
 		}
-	catch (LException ex) {
+	catch (LException& ex) {
 		BenchmarkThreadRoutineCatch(ex);
 		}
 //	finally {
-		BenchmarkAlgorithm->BenchmarkSpeed=0;
+		BenchmarkAlgorithm->BenchmarkSpeed(0);
 		QString latestLogFile="";
 		QDir dirInfo(_WorkingDirectory);
-		foreach (QString file, dirInfo.entryList({"*_log.txt"}, QDir::Files)) {
+		foreach (QString file, dirInfo.entryList({GetLogFileName()}, QDir::Files)) {
 			latestLogFile=file;
 			break;
 			}
-		BenchmarkHandle->waitForFinished(10000);
+		if (BenchmarkHandle!=nullptr) {
+			BenchmarkHandle->waitForFinished(10000);
+			}
 		// read file log
 		if (QFile::exists(_WorkingDirectory+latestLogFile)) {
 			QFile file(_WorkingDirectory+latestLogFile);
@@ -670,18 +676,43 @@ void Miner::BenchmarkThreadRoutineAlternate(QStringList commandLine, int benchma
 //		}
 }
 
-void Miner::CleanAllOldLogs()
+void Miner::CleanOldLogs()
 {
 	// clean old logs
 	try {
 		QDir dirInfo(_WorkingDirectory);
 		if (dirInfo.exists()) {
-			foreach (QString file, dirInfo.entryList({"*_log.txt"}, QDir::Files)) {
+			foreach (QString file, dirInfo.entryList({GetLogFileName()}, QDir::Files)) {
 				QFile::remove(_WorkingDirectory+file);
 				}
 			}
 		}
 	catch (...) {}
+}
+
+QString Miner::GetDeviceID()
+{
+	QStringList ids;
+	foreach (MiningPair* x, *MiningSetup_->MiningPairs) {
+		ids << QString::number(x->Device->ID);
+		}
+	QString idStr=ids.join(',');
+
+	if (!IsMultiType) {
+		return idStr;
+		}
+
+	// Miners that use multiple dev types need to also discriminate based on that
+	QStringList types;
+	foreach (MiningPair* x, *MiningSetup_->MiningPairs) {
+		types << QMetaEnum::fromType<Enums::DeviceType>().valueToKey((int)x->Device->DeviceType);
+		}
+	return types.join(',')+"-"+idStr;
+}
+
+QString Miner::GetLogFileName()
+{
+	return GetDeviceID()+"_log.txt";
 }
 
 void Miner::ProcessBenchLinesAlternate(QStringList lines)
@@ -756,11 +787,11 @@ NiceHashProcess* Miner::_Start()
 		Helpers::ConsolePrint(MinerTag(), "NOT STARTED "+ProcessTag()+" "+LastCommandLine.join(' '));
 		return nullptr;
 		}
-	catch (LException ex) {
+	catch (LException& ex) {
 		Helpers::ConsolePrint(MinerTag(), ProcessTag()+" _Start: "+ex.what());
 		return nullptr;
 		}
-	catch (QException ex) {
+	catch (QException& ex) {
 		Helpers::ConsolePrint(MinerTag(), ProcessTag()+" _Start: "+ex.what());
 		return nullptr;
 		}
@@ -893,7 +924,7 @@ QString* Miner::GetApiDataAsync(int port, QString dataToSend, bool exitHack/*=fa
 			responseFromServer=new QString(incomingBuffer);
 			}
 		}
-	catch (std::exception ex) {
+	catch (std::exception& ex) {
 		Helpers::ConsolePrint(MinerTag(), ProcessTag()+" GetAPIData reason: "+ex.what());
 		return nullptr;
 		}
@@ -902,7 +933,7 @@ QString* Miner::GetApiDataAsync(int port, QString dataToSend, bool exitHack/*=fa
 
 ApiData* Miner::GetSummaryCpuAsync(QString method/*=""*/, bool overrideLoop/*=false*/)
 {
-	ApiData* ad=new ApiData(_MiningSetup->CurrentAlgorithmType);
+	ApiData* ad=new ApiData(MiningSetup_->CurrentAlgorithmType);
 
 	try {
 		CurrentMinerReadStatus=Enums::MinerApiReadStatus::WAIT;
@@ -943,7 +974,7 @@ ApiData* Miner::GetSummaryCpuAsync(QString method/*=""*/, bool overrideLoop/*=fa
 			throw LException(QString("Response does not contain speed data: %1").arg(respStr->trimmed()).toLatin1());
 			}
 		}
-	catch (LException ex) {
+	catch (LException& ex) {
 		Helpers::ConsolePrint(MinerTag(), ex.what());
 		}
 
@@ -961,7 +992,7 @@ QString Miner::GetHttpRequestNhmAgentStrin(QString cmd)
 ApiData* Miner::GetSummaryCpuCcminerAsync()
 {
 //	QString aname;
-	ApiData* ad=new ApiData(_MiningSetup->CurrentAlgorithmType);
+	ApiData* ad=new ApiData(MiningSetup_->CurrentAlgorithmType);
 
 	QString dataToSend=GetHttpRequestNhmAgentStrin("summary");
 
@@ -1065,19 +1096,29 @@ void Miner::Miner_Exited(int exitCode, QProcess::ExitStatus exitStatus)
 //	qint64 ba=proc->bytesAvailable();
 //	QProcess::ProcessError er=proc->error();
 //Helpers::ConsolePrint("DEBUG", QString("Miner::Miner_Exited(%1, %2): %3").arg(exitCode).arg(exitStatus).arg(proc!=nullptr? QString(proc->readAll()) : ""));
-Helpers::ConsolePrint("DEBUG", QString("Miner::Miner_Exited(%1, %2)").arg(exitCode).arg(exitStatus));
+#if WITH_DEBUG
+	Helpers::ConsolePrint("DEBUG", QString("Miner::Miner_Exited(%1, %2)").arg(exitCode).arg(exitStatus));
+	QProcess* sender=qobject_cast<QProcess*>(QObject::sender());
+	Helpers::ConsolePrint("DEBUG", QString("stdErr: %1").arg(QString(sender->readAllStandardError())));
+#endif
 	ScheduleRestart(5000);
 }
 
 void Miner::Miner_Error(QProcess::ProcessError error)
 {
-Helpers::ConsolePrint("DEBUG", QString("Miner::Miner_Error: %1").arg(error));
+#if WITH_DEBUG
+	Helpers::ConsolePrint("DEBUG", QString("Miner::Miner_Error: %1").arg(error));
+	QProcess* sender=qobject_cast<QProcess*>(QObject::sender());
+	Helpers::ConsolePrint("DEBUG", QString("stdErr: %1").arg(QString(sender->readAllStandardError())));
+#endif
 	ScheduleRestart(5000);
 }
 #if WITH_DEBUG
 void Miner::BenchmarkErrorOccurred(QProcess::ProcessError error)
 {
 	Helpers::ConsolePrint("DEBUG", QString("Miner::BenchmarkErrorOccurred: %1").arg(error));
+	QProcess* sender=qobject_cast<QProcess*>(QObject::sender());
+	Helpers::ConsolePrint("DEBUG", QString("stdErr: %1").arg(QString(sender->readAllStandardError())));
 }
 
 void Miner::BenchmarkStateChanged(QProcess::ProcessState newState)

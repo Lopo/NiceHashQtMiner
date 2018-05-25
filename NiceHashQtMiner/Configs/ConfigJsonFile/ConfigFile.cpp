@@ -61,7 +61,7 @@ T* ConfigFile<T>::ReadFile()
 			fr.close();
 			}
 		}
-	catch (QException ex) {
+	catch (QException& ex) {
 		Helpers::ConsolePrint(_tag, QString("ReadFile %1: exception %2").arg(FilePath).arg(ex.what()));
 		return nullptr;
 		}
@@ -82,7 +82,7 @@ void ConfigFile<T>::Commit(T* file)
 		f.write(file->asJson(QJsonDocument::Indented).toLatin1());
 		f.close();
 		}
-	catch (QException ex) {
+	catch (QException& ex) {
 		Helpers::ConsolePrint(_tag, QString("Commit %1: exception %2").arg(FilePath).arg(ex.what()));
 		}
 }
@@ -109,3 +109,5 @@ template class ConfigFile<DeviceBenchmarkConfig>;
 template class ConfigFile<MinerOptionPackage>;
 #include "Configs/Data/MinerSystemVariablesConfig.h"
 template class ConfigFile<MinerSystemVariablesConfig>;
+#include "Miners/Grouping/MinerPaths.h"
+template class ConfigFile<MinerPathPackage>;

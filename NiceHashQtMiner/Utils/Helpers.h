@@ -20,7 +20,7 @@ public:
 	static uint32_t GetIdleTime();
 //	static void DisableWindowsErrorReporting(bool en);
 	static QString FormatSpeedOutput(double speed, QString separator=" ");
-	static QString FormatDualSpeedOutput(Enums::AlgorithmType algorithmID, double primarySpeed, double secondarySpeed=0);
+	static QString FormatDualSpeedOutput(double primarySpeed, double secondarySpeed=0, Enums::AlgorithmType algo=Enums::AlgorithmType::NONE);
 	static QString GetMotherboardID();
 	static QString GetCpuID();
 	static bool WebRequestTestGoogle();
@@ -32,6 +32,7 @@ public:
 //	static void InstallVcRedist();
 	static void SetDefaultEnvironmentVariables();
 	static void SetNvidiaP0State();
+	static Enums::AlgorithmType DualAlgoFromAlgos(Enums::AlgorithmType primary, Enums::AlgorithmType secondary);
 
 private:
 	static const bool is64BitProcess=sizeof(int*)==8;

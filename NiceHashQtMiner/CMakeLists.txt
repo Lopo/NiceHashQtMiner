@@ -1,4 +1,5 @@
 set(forms
+	DcriValues
 	Main
 	Settings
 	Benchmark
@@ -15,6 +16,8 @@ set(formComponents
 	AlgorithmsListViewModel
 	AlgorithmSettingsControl
 	GroupProfitControl
+	Field
+	IntensitiesModel
 	)
 set(utils
 	DownloadSetup
@@ -30,6 +33,16 @@ set(utils
 	CommandLineParser
 	)
 
+list(APPEND NHQTM_algorithms_SRCS
+	Algorithms/Algorithm.cpp
+	Algorithms/DualAlgorithm.cpp
+	)
+list(APPEND NHQTM_benchmarking_SRCS
+	Benchmarking/BenchmarkHandler.cpp
+	Benchmarking/BenchHelpers/ClaymoreZcashBenchHelper.cpp
+	Benchmarking/BenchHelpers/CpuBenchHelper.cpp
+	Benchmarking/BenchHelpers/PowerHelper.cpp
+	)
 list(APPEND NHQTM_devices_SRCS
 	Devices/ComputeDeviceManager.cpp
 	Devices/GroupAlgorithms.cpp
@@ -103,16 +116,18 @@ list(APPEND NHQTM_miners_SRCS
 	Miners/Parsing/ExtraLaunchParameters.cpp
 	Miners/Parsing/ExtraLaunchParametersParser.cpp
 
-	Miners/XmrStak/XmrStakConfig.cpp
+	Miners/XmrStak/Configs/XmrStakConfig.cpp
+	Miners/XmrStak/Configs/XmrStakConfigCpu.cpp
+	Miners/XmrStak/Configs/XmrStakConfigGpu.cpp
+	Miners/XmrStak/Configs/XmrStakConfigPool.cpp
 	Miners/XmrStak/XmrStak.cpp
-	Miners/XmrStak/XmrStackCPUMiner.cpp
-	Miners/XmrStak/XmrStakAMD.cpp
 	)
 list(APPEND NHQTM_configs_SRCS
 	Configs/ConfigManager.cpp
 
 	Configs/Data/GeneralConfig.cpp
 	Configs/Data/AlgorithmConfig.cpp
+	Configs/Data/DualAlgorithmConfig.cpp
 	Configs/Data/DeviceDetectionConfig.cpp #done
 	Configs/Data/BenchmarkTimeLimitsConfig.cpp
 	Configs/Data/DeviceBenchmarkConfig.cpp
@@ -142,6 +157,7 @@ list(APPEND NHQTM_Switching_SRCS
 	Switching/AlgorithmHistory.cpp
 	)
 list(APPEND NHQTM_Stats_SRCS
+	Stats/ExchangeRateAPI.cpp
 	Stats/NiceHashSocket.cpp
 	Stats/NiceHashStats.cpp
 	)
@@ -183,6 +199,7 @@ include_directories(
 	BEFORE
 	${Boost_INCLUDE_DIR}
 	${QtSingleApplication_SRC}
+	${managedCuda_SRC}
 	)
 if (WITH_AMD)
 include_directories(
@@ -201,8 +218,6 @@ endif ()
 add_executable(${PROJECT_NAME}
 	main.cpp #done
 	Enums.cpp
-	ExchangeRateAPI.cpp
-	Algorithm.cpp
 	Globals.cpp
 	IFTTT.cpp
 	International.cpp
@@ -211,6 +226,8 @@ add_executable(${PROJECT_NAME}
 	Qt/LException.cpp
 #	Qt/LLineEditInt.cpp
 #	Qt/LLineEditDouble.cpp
+	${NHQTM_algorithms_SRCS}
+	${NHQTM_benchmarking_SRCS}
 	${NHQTM_3rdParty_SRCS}
 	${NHQTM_forms_SRCS}
 	${NHQTM_formComponents_SRCS}
@@ -239,6 +256,7 @@ target_link_libraries(${PROJECT_NAME}
 #	${CRYPTO_LIBRARIES}
 	${HW_LIBRARIES}
 	${QtSingleApplication_LIB}
+	${managedCuda_LIB}
 #	${ADL_LIBRARY}
 	${DL_LIBRARY}
 	${LOG4_LIBRARY}

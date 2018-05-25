@@ -2,7 +2,7 @@
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Miners/Grouping/GroupSetupUtils.h"
 #include "Miners/Grouping/MinerPaths.h"
-#include "Algorithm.h"
+#include "Algorithms/Algorithm.h"
 #include "Miners/Grouping/MiningPair.h"
 #include "Switching/NiceHashSma.h"
 #if (SWITCH_TESTING)
@@ -80,7 +80,7 @@ double MiningDevice::GetCurrentMostProfitValue()
 {
 	int mostProfitableIndex=GetMostProfitableIndex();
 	if (mostProfitableIndex>-1) {
-		return (*Algorithms)[mostProfitableIndex]->CurrentProfit;
+		return (*Algorithms)[mostProfitableIndex]->CurrentProfit();
 		}
 	return 0;
 }
@@ -89,7 +89,7 @@ double MiningDevice::GetPrevMostProfitValue()
 {
 	int mostProfitableIndex=GetPrevProfitableIndex();
 	if (mostProfitableIndex>-1) {
-		return (*Algorithms)[mostProfitableIndex]->CurrentProfit;
+		return (*Algorithms)[mostProfitableIndex]->CurrentProfit();
 		}
 	return 0;
 }
@@ -130,25 +130,13 @@ void MiningDevice::CalculateProfits(QMap<Enums::AlgorithmType, double> profits)
 	_MostProfitableMinerBaseType=Enums::MinerBaseType::NONE;
 	// calculate new profits
 	foreach (Algorithm* algo, *Algorithms) {
-		Enums::AlgorithmType key=algo->NiceHashID;
-		Enums::AlgorithmType secondaryKey=algo->SecondaryNiceHashID;
-		if (profits.contains(key)) {
-			algo->CurNhmSmaDataVal=profits.value(key);
-			algo->CurrentProfit=algo->CurNhmSmaDataVal*algo->AveragedSpeed*0.000000001;
-			if (profits.contains(secondaryKey)) {
-				algo->SecondaryCurNhmSmaDataVal=profits.value(secondaryKey);
-				algo->CurrentProfit+=algo->SecondaryCurNhmSmaDataVal*algo->SecondaryAveragedSpeed*0.000000001;
-				}
-			}
-		else {
-			algo->CurrentProfit=0;
-			}
+		algo->UpdateCurProfit(profits);
 		}
 	// find max paying value and save key
 	double maxProfit=0;
 	foreach (Algorithm* algo, *Algorithms) {
-		if (maxProfit<algo->CurrentProfit) {
-			maxProfit=algo->CurrentProfit;
+		if (maxProfit<algo->CurrentProfit()) {
+			maxProfit=algo->CurrentProfit();
 			_MostProfitableAlgorithmType=algo->DualNiceHashID();
 			_MostProfitableMinerBaseType=algo->MinerBaseType;
 			}

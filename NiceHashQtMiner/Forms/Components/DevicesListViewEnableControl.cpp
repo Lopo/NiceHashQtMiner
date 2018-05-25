@@ -145,7 +145,7 @@ void DevicesListViewEnableControl::SetDeviceSelectionChangedCallback(void (*call
 	connect(this, SIGNAL(ItemSelectionChanged(int)), this, SLOT((*callback)(int)));
 }
 /*
-void DevicesListViewEnableControl::listViewDevices_MouseClick(QTreeWidgetItem* item, int column)
+void DevicesListViewEnableControl::ListViewDevices_MouseClick(QTreeWidgetItem* item, int column)
 {
 	if (IsInBenchmark()) {
 		return;
@@ -156,9 +156,18 @@ void DevicesListViewEnableControl::listViewDevices_MouseClick(QTreeWidgetItem* i
 //	if (listViewDevices.se)
 }
 
+void DevicesListViewEnableControl::ToolStripMenuItem_Click(bool justTuning)
+{
+}
+
 void DevicesListViewEnableControl::toolStripMenuItemCopySettings_Click()
 {
-//	ComputeDevice* CDevice=
+//	ToolStripMenuItem_Click(false);
+}
+
+void DevicesListViewEnableControl::ToolStripMenuItemCopyTuning_Click()
+{
+//	ToolStripMenuItem_Click(true);
 }
 
 void DevicesListViewEnableControl::DevicesListViewEnableControl_Resize()

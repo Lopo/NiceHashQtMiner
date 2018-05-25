@@ -18,6 +18,7 @@ class GroupMiner
 	Q_PROPERTY(Enums::DeviceType DeviceType READ DeviceType) // for now used only for dagger identification AMD or NVIDIA
 	Q_PROPERTY(QString Key READ Key)
 	Q_PROPERTY(QList<int> DevIndexes READ DevIndexes)
+	Q_PROPERTY(double TotalPower READ TotalPower)
 public:
 	GroupMiner(QList<MiningPair*>* miningPairs, QString key);
 
@@ -29,6 +30,7 @@ public:
 	double CurrentRate=0;
 	inline QString Key() const { return _Key; };
 	inline QList<int>* DevIndexes() const { return _DevIndexes; };
+	inline double TotalPower() const { return TotalPower_;};
 
 	void Stop();
 	void End();
@@ -44,6 +46,7 @@ private:
 	Enums::DeviceType _DeviceType;
 	QString _Key;
 	QList<int>* _DevIndexes=nullptr;
+	double TotalPower_=0;
 };
 
 #endif

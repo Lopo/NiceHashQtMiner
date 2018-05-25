@@ -9,7 +9,6 @@
 const QVector<QString> Globals::MiningLocation={"eu", "usa", "hk", "jp", "in", "br"};
 QString Globals::DemoUser="1QATWNM7AePyHMGuQxBLTuq76avoDoWsFc";
 int Globals::CurrentTosVer=3;
-double Globals::BitcoinUsdRate=0;
 int Globals::ThreadsPerCpu=0;
 bool Globals::IsFirstNetworkCheckTimeout=true;
 int Globals::FirstNetworkCheckTimeoutTimeMs=500;
