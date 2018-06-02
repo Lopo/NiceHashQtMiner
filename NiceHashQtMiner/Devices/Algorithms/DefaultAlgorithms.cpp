@@ -43,6 +43,7 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Cpu()
 	return ret;
 }
 
+#if WITH_AMD
 const QStringList DefaultAlgorithms::RemDis={"--remove-disabled"};
 const QStringList DefaultAlgorithms::DefaultParam=QStringList(RemDis) << AmdGpuDevice::DefaultParam();
 
@@ -94,7 +95,8 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Amd()
 		}
 	return ret;
 }
-
+#endif
+#if WITH_NVIDIA
 QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Nvidia()
 {
 	QMap<Enums::MinerBaseType, QList<Algorithm*>*>* ret=new QMap<Enums::MinerBaseType, QList<Algorithm*>*>({
@@ -155,3 +157,4 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Nvidia()
 		}
 	return ret;
 }
+#endif

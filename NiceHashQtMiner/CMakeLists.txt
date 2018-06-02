@@ -1,204 +1,198 @@
-set(forms
-	DcriValues
-	Main
-	Settings
-	Benchmark
-	Loading
-	ChooseLanguage
-	3rdParty_TOS
+set(fl_3rdParty
 	)
-set(formComponents
-	DevicesListViewEnableControl
-	DevicesListViewEnableControlModel
-	BenchmarkLimitControl
-	BenchmarkOptions
-	AlgorithmsListView
-	AlgorithmsListViewModel
-	AlgorithmSettingsControl
-	GroupProfitControl
-	Field
-	IntensitiesModel
+set(fl_Algorithms
+	Algorithm
+	DualAlgorithm
 	)
-set(utils
-	DownloadSetup
-	Links
-	BitcoinAddress
-	Helpers
-	MinersDownloader
-	MinersExistanceChecker
+set(fl_Benchmarking
+	BenchHelpers/ClaymoreZcashBenchHelper
+	BenchHelpers/CpuBenchHelper
+	BenchHelpers/PowerHelper
+
+	BenchmarkHandler
+	)
+set(fl_Configs
+	ConfigJsonFile/ConfigFile
+	ConfigJsonFile/DeviceBenchmarkConfigFile
+	ConfigJsonFile/FOLDERS
+	ConfigJsonFile/GeneralConfigFile
+
+	Data/AlgorithmConfig
+	Data/BenchmarkTimeLimitsConfig
+#	Data/ComputeDeviceConfig
+	Data/DeviceBenchmarkConfig
+	Data/DeviceDetectionConfig
+	Data/DualAlgorithmConfig
+	Data/GeneralConfig
+
+	ConfigManager
+
+	ConfigJsonFile/MinerSystemVariablesConfigFile
+	Data/MinerSystemVariablesConfig
+	)
+set(fl_Devices
+	Algorithms/DefaultAlgorithms
+	Algorithms/GroupAlgorithms
+
+	ComputeDevice/ComputeDevice
+	ComputeDevice/CpuComputeDevice
+
+#	Querying/OpenCLJsonData
+#	Querying/VideoControllerData
+
+	ComputeDeviceManager
+	CPUUtils
+	GroupNames
+#	OpenCLDevice
+	)
+set(fl_Forms
+	Components/AlgorithmSettingsControl
+	Components/AlgorithmsListView
+	Components/BenchmarkLimitControl
+	Components/BenchmarkOptions
+	Components/DevicesListViewEnableControl
+	Components/Field
+	Components/GroupProfitControl
+
+	DriverVersionConfirmationDialog
+	Form_3rdParty_TOS
+	Form_Benchmark
+	Form_DcriValues
+	Form_ChooseLanguage
+	Form_Loading
+	Form_Main
+	Form_Settings
+#	MinerFileNotFoundDialog
+
+	Components/AlgorithmsListViewModel
+	Components/DevicesListViewEnableControlModel
+	Components/IntensitiesModel
+	)
+set(fl_Miners
+	Equihash/NhEqBase
+	Equihash/NhEqMiner
+
+	ethminer/Ethereum
+	ethminer/MinerEtherum
+
+	Grouping/GroupingLogic
+	Grouping/GroupMiner
+	Grouping/GroupSetupUtils
+	Grouping/MinerPaths
+	Grouping/MiningDevice
+	Grouping/MiningPair
+	Grouping/MiningSetup
+
+	Parsing/ExtraLaunchParameters
+	Parsing/ExtraLaunchParametersParser
+	Parsing/MinerOption
+	Parsing/MinerOptionPackage
+
+	XmrStak/Configs/XmrStakConfig
+	XmrStak/Configs/XmrStakConfigCpu
+	XmrStak/Configs/XmrStakConfigGpu
+	XmrStak/Configs/XmrStakConfigPool
+	XmrStak/XmrStak
+
+	ClaymoreBaseMiner
+	ClaymoreDual
+	CpuMiner
+	Miner
+	MinerFactory
+	MinersApiPortsManager
+	MinersManager
+	MinersSettingsManager
+	MiningSession
+	Prospector
+	Xmrig
+	)
+set(fl_PInvoke
+	CPUID
+	NiceHashProcess
+	PInvokeHelpers
+	)
+set(fl_Stats
+	ExchangeRateAPI
+	NiceHashSocket
+	NiceHashStats
+	)
+set(fl_Switching
+	AlgorithmHistory
+	AlgorithmSwitchingManager
+	Interval
+#	Models
+	NHSmaData
+	)
+set(fl_Utils
 	AlgorithmNiceHashNames
-	Logger
-	ProfitabilityCalculator
-	Extensions
+#	BINS_CODEGEN
+#	BINS_CODEGEN_3rd
+	BitcoinAddress
 	CommandLineParser
+	DownloadSetup
+	Extensions
+	Helpers
+	Links
+	Logger
+#	MemoryHelper
+	MinersDownloader
+#	MinersDownloadManager
+	MinersExistanceChecker
+	ProfitabilityCalculator
 	)
 
-list(APPEND NHQTM_algorithms_SRCS
-	Algorithms/Algorithm.cpp
-	Algorithms/DualAlgorithm.cpp
-	)
-list(APPEND NHQTM_benchmarking_SRCS
-	Benchmarking/BenchmarkHandler.cpp
-	Benchmarking/BenchHelpers/ClaymoreZcashBenchHelper.cpp
-	Benchmarking/BenchHelpers/CpuBenchHelper.cpp
-	Benchmarking/BenchHelpers/PowerHelper.cpp
-	)
-list(APPEND NHQTM_devices_SRCS
-	Devices/ComputeDeviceManager.cpp
-	Devices/GroupNames.cpp
-	Devices/CPUUtils.cpp
-
-	Devices/Algorithms/DefaultAlgorithms.cpp
-	Devices/Algorithms/GroupAlgorithms.cpp
-
-	Devices/ComputeDevice/ComputeDevice.cpp #done
-	Devices/ComputeDevice/CpuComputeDevice.cpp
-
-	Devices/Querying/AmdQuery.cpp
-	)
-list(APPEND NHQTM_3rdParty_SRCS
-	)
 if (WITH_AMD)
-	list(APPEND NHQTM_devices_SRCS
-		Devices/AmdGpuDevice.cpp
-		Devices/ComputeDevice/AmdComputeDevice.cpp #done
+	list(APPEND fl_Devices
+		ComputeDevice/AmdComputeDevice
+		Querying/AmdQuery
+		AmdGpuDevice
 		)
-	list(APPEND NHQTM_3rdParty_SRCS
-		3rdParty/ADL.cpp
+	list(APPEND fl_Miners
+		Equihash/ClaymoreZcashMiner
+		Equihash/OptiminerZcashMiner
+		ethminer/MinerEtherumOCL
+		ClaymoreCryptoNightMiner
+		Sgminer
 		)
+	if (ADL_FOUND)
+		list(APPEND fl_3rdParty
+			ADL
+			)
+	endif ()
 endif ()
 if (WITH_NVIDIA)
-	list(APPEND NHQTM_devices_SRCS
-		Devices/CudaDevice.cpp #done
-		Devices/CUDA_Unsupported.cpp #done
-		Devices/ComputeDevice/CudaComputeDevice.cpp
+	list(APPEND fl_3rdParty
+#		NVAPI
+		NVML
 		)
-	list(APPEND NHQTM_3rdParty_SRCS
-#		3rdParty/NVAPI.cpp
-		3rdParty/NVML.cpp
+	list(APPEND fl_Devices
+		ComputeDevice/CudaComputeDevice
+		CUDA_Unsupported
+		CudaDevice
+		)
+	list(APPEND fl_Miners
+		Equihash/Dtsm
+		ethminer/MinerEtherumCUDA
+		Excavator
+		Ccminer
+		Ewbf
 		)
 endif ()
-list(APPEND NHQTM_miners_SRCS
-	Miners/Miner.cpp
-	Miners/MinerFactory.cpp
-	Miners/MiningSession.cpp
-	Miners/MinersManager.cpp
-	Miners/MinersSettingsManager.cpp #done
-	Miners/MinersApiPortsManager.cpp #done
 
-	Miners/Ccminer.cpp
-	Miners/ClaymoreBaseMiner.cpp
-	Miners/ClaymoreDual.cpp
-	Miners/ClaymoreCryptoNightMiner.cpp
-	Miners/CpuMiner.cpp
-	Miners/Sgminer.cpp
-	Miners/Ewbf.cpp
-	Miners/Excavator.cpp
-	Miners/Xmrig.cpp
-	Miners/Prospector.cpp
+foreach (d 3rdParty Algorithms Benchmarking Configs Devices Forms Miners PInvoke Stats Switching Utils)
+	foreach (f ${fl_${d}})
+		list(APPEND NHQTM_${d}_SRCS
+			${d}/${f}.cpp
+			)
+	endforeach ()
+endforeach ()
 
-	Miners/ethminer/Ethereum.cpp
-	Miners/ethminer/MinerEtherum.cpp
-	Miners/ethminer/MinerEtherumOCL.cpp
-	Miners/ethminer/MinerEtherumCUDA.cpp
-
-	Miners/Equihash/NhEqBase.cpp
-	Miners/Equihash/NhEqMiner.cpp
-	Miners/Equihash/OptiminerZcashMiner.cpp
-	Miners/Equihash/ClaymoreZcashMiner.cpp
-	Miners/Equihash/Dtsm.cpp
-
-	Miners/Grouping/MinerPaths.cpp #done
-	Miners/Grouping/MiningPair.cpp #done
-	Miners/Grouping/MiningSetup.cpp #done
-	Miners/Grouping/MiningDevice.cpp
-	Miners/Grouping/GroupSetupUtils.cpp #done
-	Miners/Grouping/GroupMiner.cpp #done
-	Miners/Grouping/GroupingLogic.cpp
-
-	Miners/Parsing/MinerOption.cpp
-	Miners/Parsing/MinerOptionPackage.cpp
-	Miners/Parsing/ExtraLaunchParameters.cpp
-	Miners/Parsing/ExtraLaunchParametersParser.cpp
-
-	Miners/XmrStak/Configs/XmrStakConfig.cpp
-	Miners/XmrStak/Configs/XmrStakConfigCpu.cpp
-	Miners/XmrStak/Configs/XmrStakConfigGpu.cpp
-	Miners/XmrStak/Configs/XmrStakConfigPool.cpp
-	Miners/XmrStak/XmrStak.cpp
-	)
-list(APPEND NHQTM_configs_SRCS
-	Configs/ConfigManager.cpp
-
-	Configs/Data/GeneralConfig.cpp
-	Configs/Data/AlgorithmConfig.cpp
-	Configs/Data/DualAlgorithmConfig.cpp
-	Configs/Data/DeviceDetectionConfig.cpp #done
-	Configs/Data/BenchmarkTimeLimitsConfig.cpp
-	Configs/Data/DeviceBenchmarkConfig.cpp
-	Configs/Data/MinerSystemVariablesConfig.cpp
-
-	Configs/ConfigJsonFile/ConfigFile.cpp;
-	Configs/ConfigJsonFile/GeneralConfigFile.cpp;
-	Configs/ConfigJsonFile/DeviceBenchmarkConfigFile.cpp;
-	Configs/ConfigJsonFile/MinerSystemVariablesConfigFile.cpp;
-#	Configs/ConfigJsonFile/FOLDERS.cpp;
-	)
-list(APPEND NHQTM_pinvoke_SRCS
-	PInvoke/CPUID.cpp
-	PInvoke/NiceHashProcess.cpp
-	PInvoke/PInvokeHelpers.cpp
-	)
-list(APPEND NHQTM_WinPort_SRCS
-	WinPort/Process.cpp
-	)
-list(APPEND NHQTM_Properties_SRCS
-	Properties/Resources.cpp
-	)
-list(APPEND NHQTM_Switching_SRCS
-	Switching/NHSmaData.cpp
-	Switching/Interval.cpp
-	Switching/AlgorithmSwitchingManager.cpp
-	Switching/AlgorithmHistory.cpp
-	)
-list(APPEND NHQTM_Stats_SRCS
-	Stats/ExchangeRateAPI.cpp
-	Stats/NiceHashSocket.cpp
-	Stats/NiceHashStats.cpp
-	)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-#set(NHQTM_forms_UI MainWindow.ui)
-#set(NHQTM_forms_SRCS Form_Main.cpp)
-
-foreach (form ${forms})
-#	list(APPEND NHQTM_forms_UI
-#		Forms/Form_${form}.ui
-#		)
-	list(APPEND NHQTM_forms_SRCS
-		Forms/Form_${form}.cpp
-		)
-endforeach ()
-list(APPEND NHQTM_forms_SRCS Forms/DriverVersionConfirmationDialog.cpp)
-
-foreach (component ${formComponents})
-#	list(APPEND NHQTM_forms_UI
-#		Forms/Form_${form}.ui
-#		)
-	list(APPEND NHQTM_formComponents_SRCS
-		Forms/Components/${component}.cpp
-		)
-endforeach ()
-
-foreach (util ${utils})
-	list(APPEND NHQTM_utils_SRCS
-		Utils/${util}.cpp
-		)
-endforeach ()
 
 include_directories(
 	BEFORE
@@ -206,46 +200,46 @@ include_directories(
 	${QtSingleApplication_SRC}
 	${managedCuda_SRC}
 	)
-if (WITH_AMD)
-include_directories(
-	BEFORE
-	${ADL_INCLUDE_DIR}
-	)
+if (WITH_AMD AND ADL_FOUND)
+	include_directories(
+		BEFORE
+		${ADL_INCLUDE_DIR}
+		)
 endif ()
 if (WITH_NVIDIA)
-include_directories(
-	BEFORE
-	${NVML_INCLUDE_DIR}
-#	${NVCtrlLib_INCLUDE_DIR}
-	)
+	include_directories(
+		BEFORE
+		${NVML_INCLUDE_DIR}
+#		${NVCtrlLib_INCLUDE_DIR}
+		)
 endif ()
 
 add_executable(${PROJECT_NAME}
-	main.cpp #done
+	${NHQTM_3rdParty_SRCS}
+	${NHQTM_Algorithms_SRCS}
+	${NHQTM_Benchmarking_SRCS}
+	${NHQTM_Configs_SRCS}
+	${NHQTM_Devices_SRCS}
+	${NHQTM_Forms_SRCS}
+	${NHQTM_Miners_SRCS}
+	${NHQTM_PInvoke_SRCS}
+	${NHQTM_Stats_SRCS}
+	${NHQTM_Switching_SRCS}
+	${NHQTM_Utils_SRCS}
+
+	main.cpp
 	Enums.cpp
 	Globals.cpp
 	IFTTT.cpp
 	International.cpp
+
+
+	Properties/Resources.cpp
 	Qt/ClickableLabel.cpp
 	Qt/NHMCashRegisterBitcoin.cpp
 	Qt/LException.cpp
-#	Qt/LLineEditInt.cpp
-#	Qt/LLineEditDouble.cpp
-	${NHQTM_algorithms_SRCS}
-	${NHQTM_benchmarking_SRCS}
-	${NHQTM_3rdParty_SRCS}
-	${NHQTM_forms_SRCS}
-	${NHQTM_formComponents_SRCS}
-	${NHQTM_utils_SRCS}
-	${NHQTM_devices_SRCS}
-	${NHQTM_miners_SRCS}
-	${NHQTM_configs_SRCS}
-	${NHQTM_pinvoke_SRCS}
-	${NHQTM_WinPort_SRCS}
-	${NHQTM_Properties_SRCS}
-	${NHQTM_Switching_SRCS}
-	${NHQTM_Stats_SRCS}
-	${UI_HEADERS}
+	WinPort/Process.cpp
+#	${UI_HEADERS}
 	${UI_RESOURCES}
 	../resources.qrc
 	)
@@ -257,17 +251,18 @@ target_link_libraries(${PROJECT_NAME}
 	Qt5::WebSockets
 	Qt5::Sql
 	${Boost_LIBRARIES}
-#	${NSJson_LIBRARY}
-#	${CRYPTO_LIBRARIES}
 	${HW_LIBRARIES}
 	${QtSingleApplication_LIB}
 	${managedCuda_LIB}
-#	${ADL_LIBRARY}
 	${DL_LIBRARY}
 	${LOG4_LIBRARY}
-#	${UDEV_LIBRARY}
 	${OPENCL_LIBRARIES}
 	)
+if (WITH_AMD AND ADL_FOUND)
+	target_link_libraries(${PROJECT_NAME}
+		${ADL_LIBRARY}
+		)
+endif ()
 if (WITH_NVIDIA)
 	target_link_libraries(${PROJECT_NAME}
 		${NVML_LIBRARY}
@@ -279,16 +274,6 @@ if (LIBXSS_FOUND)
 		X11
 		)
 endif ()
-#SET_TARGET_PROPERTIES(${PROJECT_NAME}
- #   PROPERTIES INSTALL_RPATH "$ORIGIN/../lib:$ORIGIN/"
-#	)
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	set_target_properties(BSEd PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
-	set_target_properties(BSEd PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
-endif ()
-
-#qt5_use_modules(${PROJECT_NAME} Widgets)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/langs
 	DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}

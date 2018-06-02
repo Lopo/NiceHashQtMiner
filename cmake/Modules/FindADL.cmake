@@ -44,8 +44,8 @@ if (NOT ADL_LIBRARY)
 	MESSAGE(STATUS "Library not found, finding file instead.")
 	FIND_FILE(ADL_LIBRARY
 		NAMES
-			atiadlxx.dll
-			atiadlxy.dll
+			atiadlxx.so
+			atiadlxy.so
 		PATHS /usr/lib/fglrx
 		DOC "ADL library location"
 		)

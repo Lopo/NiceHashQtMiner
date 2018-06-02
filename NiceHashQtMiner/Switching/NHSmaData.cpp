@@ -1,6 +1,6 @@
 #include "Switching/NHSmaData.h"
 #include "Enums.h"
-#include "Switching/NiceHashSma.h"
+#include "Switching/Models.h"
 #include "Utils/Helpers.h"
 #include "Configs/ConfigManager.h"
 #include "Configs/Data/GeneralConfig.h"

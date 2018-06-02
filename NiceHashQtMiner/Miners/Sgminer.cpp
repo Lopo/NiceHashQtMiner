@@ -6,7 +6,7 @@
 #include "Configs/ConfigManager.h"
 #include "Globals.h"
 #include "Configs/Data/GeneralConfig.h"
-#include "Switching/NiceHashSma.h"
+#include "Switching/Models.h"
 #include "Qt/LException.h"
 #include "Algorithms/Algorithm.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"

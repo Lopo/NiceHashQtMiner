@@ -1,6 +1,7 @@
 #include <hd.h>
 #include <cstdio>
 
+#include "config.h"
 #include "Forms/Form_Main.h"
 #include "Devices/ComputeDeviceManager.h"
 #include "Configs/ConfigManager.h"
@@ -632,6 +633,7 @@ void Form_Main::MinerStatsCheck_Tick()
 
 void Form_Main::ComputeDevicesCheckTimer_Tick()
 {
+#if WITH_NVIDIA
 	if (ComputeDeviceManager.Query.CheckVideoControllersCountMismath()) {
 		// less GPUs than before, ACT!
 		try {
@@ -641,6 +643,7 @@ void Form_Main::ComputeDevicesCheckTimer_Tick()
 			Helpers::ConsolePrint("NICEHASH", QString("OnGPUsMismatch.sh error: ")+ex.what());
 			}
 		}
+#endif
 }
 
 void Form_Main::InitFlowPanelStart()

@@ -293,9 +293,9 @@ Enums::MinerType ExtraLaunchParametersParser::GetMinerType(Enums::DeviceType dev
 #if WITH_NVIDIA
 				case Enums::DeviceType::NVIDIA:
 					return Enums::MinerType::eqm_CUDA;
+#endif
 				default:
 					break;
-#endif
 				}
 			break;
 		case Enums::MinerBaseType::eqm:
@@ -429,7 +429,7 @@ QStringList ExtraLaunchParametersParser::ParseForMiningPairs(const QList<MiningP
 		ret=general+temp;
 		}
 #else
-	ret=general+temp;
+	ret=general;
 #endif
 	return ret;
 }

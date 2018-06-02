@@ -12,9 +12,12 @@ NiceHash Qt Miner is a try for Linux port of [NiceHash Miner Legacy](https://git
 - Qt5
 - CUDA
 - OpenCL
+- ADL
 - Boost
 	- filesystem
 	- thread
+- hwinfo
+- libcpuid
 
 
 ## Build

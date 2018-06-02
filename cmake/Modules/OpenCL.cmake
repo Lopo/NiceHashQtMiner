@@ -8,7 +8,6 @@ find_path(OpenCL_INCLUDE_DIR
         ENV "OpenCL_ROOT"
         ENV AMDAPPSDKROOT
         ENV ATISTREAMSDKROOT
-        ENV "PROGRAMFILES(X86)"
     PATH_SUFFIXES
         include
         OpenCL/common/inc
@@ -24,7 +23,6 @@ if (CMAKE_SIZEOF_VOID_P EQUAL 8)
         ENV "OpenCL_ROOT"
         ENV AMDAPPSDKROOT
         ENV ATISTREAMSDKROOT
-        ENV "PROGRAMFILES(X86)"
     PATH_SUFFIXES
         "AMD APP/lib/x86_64"
         lib/x86_64
@@ -40,7 +38,6 @@ else()
         ENV "OpenCL_ROOT"
         ENV AMDAPPSDKROOT
         ENV ATISTREAMSDKROOT
-        ENV "PROGRAMFILES(X86)"
     PATH_SUFFIXES
         "AMD APP/lib/x86"
         lib/x86

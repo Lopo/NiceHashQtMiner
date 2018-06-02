@@ -82,6 +82,7 @@ include(CheckInSourceBuild)
 #include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(CheckLibraryExists)
+include(cmake/util.cmake)
 
 set(BUILDTYPE_DOCSTRING
 	"Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel"
@@ -120,8 +121,9 @@ if (OPENSSL_FOUND)
 endif ()
 endif(false)
 
-set(WITH_AMD false)
-find_package(OpenCL 1.2 REQUIRED)
+set(WITH_AMD FALSE)
+if (ENABLE_AMD)
+	find_package(OpenCL 1.2 REQUIRED)
 #MESSAGE( STATUS "OPENCL_INCLUDE_DIRS=${OPENCL_INCLUDE_DIRS}" )
 #if (NOT OPENCL_HAS_CXX)
 #	message(WARNING "C++ bindings not found.  Using Kronos supplied reference OpenCL v1.1 C++ bindings.")
@@ -129,22 +131,22 @@ find_package(OpenCL 1.2 REQUIRED)
 #endif ()
 #include_directories(SYSTEM ${OPENCL_INCLUDE_DIRS})
 #add_definitions(${OPENCL_CXX_DEFINITIONS})
-foreach (lib ${OPENCL_LIBRARIES})
-	get_filename_component(fname ${lib} NAME)
-	get_filename_component(rpath ${lib} REALPATH)
-	get_filename_component(rfname ${rpath} NAME)
-	message("Copying ${lib} to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-	file(COPY ${rpath}
-		DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-		)
-	file(RENAME "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${rfname}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${fname}")
-endforeach ()
-if (ENABLE_AMD)
+#	foreach (lib ${OPENCL_LIBRARIES})
+#		get_filename_component(fname ${lib} NAME)
+#		get_filename_component(rpath ${lib} REALPATH)
+#		get_filename_component(rfname ${rpath} NAME)
+#		message("Copying ${lib} to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+#		file(COPY ${rpath}
+#			DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+#			)
+#		file(RENAME "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${rfname}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${fname}")
+#	endforeach ()
 #	check_library_exists(atiadlxx ADL_MAIN_CONTROL_CREATE "" HAVE_LIBADL)
-	find_package(ADL)
-	if (OPENCL_FOUND AND ADL_FOUND)
+	if (OPENCL_FOUND)
 		set(WITH_AMD true)
 	endif ()
+#	check_library_exists(atiadlxx ADL_MAIN_CONTROL_CREATE "" HAVE_LIBADL)
+	find_package(ADL)
 endif ()
 
 set(WITH_NVIDIA FALSE)
@@ -213,7 +215,6 @@ find_library(DL_LIBRARY
 find_library(LOG4_LIBRARY
 	log4qt
 	)
-find_package(udev REQUIRED)
 
 configure_file(
 	${ROOT_DIR}/cmake/config.h.in

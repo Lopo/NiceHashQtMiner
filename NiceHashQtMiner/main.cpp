@@ -1,3 +1,4 @@
+#include "config.h"
 #include "version.h"
 #include "Utils/Logger.h"
 #include "Configs/ConfigManager.h"
@@ -17,14 +18,6 @@
 
 
 QNetworkAccessManager* qnam;
-
-//prevents startup segfault - duno why it is required here instead of appropriate cpp
-const QVector<int> BenchmarkTimeLimitsConfig::DefaultCpuNvidia={10, 20, 60};
-#if WITH_AMD
-const QVector<int> BenchmarkTimeLimitsConfig::DefaultAmd={120, 180, 240};
-#endif
-QString Folders::Config="configs/";
-QString Folders::Internals="internals/";
 
 
 int main(int argc, char *argv[])

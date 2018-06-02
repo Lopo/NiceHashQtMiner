@@ -7,7 +7,7 @@
 #	include "Devices/AmdGpuDevice.h"
 #endif
 #include "Utils/Helpers.h"
-#include "DefaultAlgorithms.h"
+#include "Devices/Algorithms/DefaultAlgorithms.h"
 
 
 QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateForDevice(ComputeDevice* device)

@@ -1,5 +1,4 @@
 #include "Devices/ComputeDevice/AmdComputeDevice.h"
-#include "3rdParty/ADL.h"
 #include "Utils/Helpers.h"
 #include "Devices/AmdGpuDevice.h"
 #include "International.h"
@@ -8,11 +7,14 @@
 #include "Devices/ComputeDeviceManager.h"
 
 
+#if ADL_FOUND
 using namespace  ATI::ADL;
+#endif
 
 
 int AmdComputeDevice::FanSpeed()
 {
+#if ADL_FOUND
 	if (!ADL::Init()) {
 		return -1;
 		}
@@ -24,10 +26,14 @@ int AmdComputeDevice::FanSpeed()
 		return -1;
 		}
 	return adlf.iFanSpeed;
+#else
+	return -1;
+#endif
 }
 
 float AmdComputeDevice::Temp()
 {
+#if ADL_FOUND
 	if (!ADL::Init()) {
 		return -1;
 		}
@@ -38,10 +44,14 @@ float AmdComputeDevice::Temp()
 		return -1;
 		}
 	return adlt.iTemperature*0.001f;
+#else
+	return -1;
+#endif
 }
 
 float AmdComputeDevice::Load()
 {
+#if ADL_FOUND
 	if (!ADL::Init()) {
 		return -1;
 		}
@@ -52,10 +62,14 @@ float AmdComputeDevice::Load()
 		return -1;
 		}
 	return adlp.iActivityPercent;
+#else
+	return -1;
+#endif
 }
 
-double AmdComputeDevice::PowerUsage() // @todo
+double AmdComputeDevice::PowerUsage()
 {
+#if ADL_FOUND
 	if (!ADL::Init()) {
 		return -1;
 		}
@@ -70,6 +84,9 @@ double AmdComputeDevice::PowerUsage() // @todo
 		_powerHasFailed=true;
 		}
 	return power;
+#else
+	return -1;
+#endif
 }
 
 AmdComputeDevice::AmdComputeDevice(AmdGpuDevice* amdDevice, int gpuCount, bool isDetectionFallback, int adl2Index)
@@ -86,6 +103,8 @@ AmdComputeDevice::AmdComputeDevice(AmdGpuDevice* amdDevice, int gpuCount, bool i
 	Index_=ID+ComputeDeviceManager.Available.AvailCpus()+ComputeDeviceManager.Available.AvailNVGpus();
 	_adapterIndex=amdDevice->AdapterIndex;
 
-//	ADL::ADL2_Main_Control_Create
+#if ADL_FOUND
+	ADL::ADL2_Main_Control_Create(ADL_Main_Memory_Alloc, 0, _adlContext);
+#endif
 	_adapterIndex2=adl2Index;
 }

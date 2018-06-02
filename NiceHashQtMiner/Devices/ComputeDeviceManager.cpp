@@ -34,11 +34,12 @@
 #include "Devices/OpenCLDevice.h"
 #include "Forms/DriverVersionConfirmationDialog.h"
 #if WITH_AMD
-#	include "3rdParty/ADL.h"
 #	include "Devices/AmdGpuDevice.h"
 #	include "Devices/ComputeDevice/AmdComputeDevice.h"
 #include "Querying/AmdQuery.h"
 #endif
+#include "Devices/Querying/VideoControllerData.h"
+#include "Devices/Querying/OpenCLJsonData.h"
 #include <QProcess>
 #include <QException>
 #include <QMessageBox>
@@ -59,9 +60,6 @@
 //using namespace NVIDIA::NVML;
 #endif
 using namespace NiceHashQtMiner; // cpuid
-#if WITH_AMD
-using namespace ATI::ADL;
-#endif
 
 
 const QString ComputeDeviceManager::Query::Tag="ComputeDeviceManager.Query";

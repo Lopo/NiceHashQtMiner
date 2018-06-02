@@ -20,7 +20,9 @@ public:
 		static int CpuCount;
 		static int GpuCount;
 		static IMessageNotifier* MessageNotifier() { return MessageNotifier_;};
+#if WITH_NVIDIA
 		static bool CheckVideoControllersCountMismath();
+#endif
 		static void QueryDevices(IMessageNotifier* messageNotifier);
 	private:
 		const static QString Tag;

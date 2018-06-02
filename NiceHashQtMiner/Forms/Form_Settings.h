@@ -167,8 +167,10 @@ private:
 	QLineEdit* textBox_IFTTTKey=nullptr;
 	QLabel* pictureBox_ShowInternetConnectionWarning=nullptr;
 	QCheckBox* checkBox_ShowInternetConnectionWarning=nullptr;
+#if WITH_NVIDIA
 	QLabel* pictureBox_RunScriptOnCUDA_GPU_Lost=nullptr;
 	QCheckBox* checkBox_RunScriptOnCUDA_GPU_Lost=nullptr;
+#endif
 	QLabel* pictureBox_TimeUnit=nullptr;
 	QLabel* label_TimeUnit=nullptr;
 	QComboBox* comboBox_TimeUnit=nullptr;

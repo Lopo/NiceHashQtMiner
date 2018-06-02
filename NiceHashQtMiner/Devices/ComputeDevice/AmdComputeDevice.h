@@ -2,7 +2,9 @@
 #define DEVICES_COMPUTEDEVICE_AMDCOMPUTEDEVICE_H_
 
 #include "Devices/ComputeDevice/ComputeDevice.h"
-#include <3rdParty/ADL.h>
+#if ADL_FOUND
+#	include "3rdParty/ADL.h"
+#endif
 
 
 class AmdComputeDevice
@@ -19,7 +21,9 @@ public:
 private:
 	int _adapterIndex; // For ADL
 	int _adapterIndex2; // For ADL2
+#if ADL_FOUND
 	ADL_CONTEXT_HANDLE _adlContext=nullptr;
+#endif
 	bool _powerHasFailed=false;
 };
 

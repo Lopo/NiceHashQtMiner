@@ -889,13 +889,13 @@ void Form_Settings::InitializeToolTip()
 
 	checkBox_ShowInternetConnectionWarning->setToolTip(International::GetText("Form_Settings_ToolTip_checkBox_ShowInternetConnectionWarning"));
 	pictureBox_ShowInternetConnectionWarning->setToolTip(International::GetText("Form_Settings_ToolTip_checkBox_ShowInternetConnectionWarning"));
-
+#if WITH_NVIDIA
 	checkBox_NVIDIAP0State->setToolTip(International::GetText("Form_Settings_ToolTip_checkBox_NVIDIAP0State"));
 	pictureBox_NVIDIAP0State->setToolTip(International::GetText("Form_Settings_ToolTip_checkBox_NVIDIAP0State"));
 
 	checkBox_RunScriptOnCUDA_GPU_Lost->setToolTip(International::GetText("Form_Settings_ToolTip_checkBox_RunScriptOnCUDA_GPU_Lost"));
 	pictureBox_RunScriptOnCUDA_GPU_Lost->setToolTip(International::GetText("Form_Settings_ToolTip_checkBox_RunScriptOnCUDA_GPU_Lost"));
-
+#endif
 	checkBox_RunAtStartup->setToolTip(International::GetText("Form_Settings_ToolTip_checkBox_RunAtStartup"));
 	pictureBox_RunAtStartup->setToolTip(International::GetText("Form_Settings_ToolTip_checkBox_RunAtStartup"));
 
@@ -916,11 +916,11 @@ void Form_Settings::InitializeToolTip()
 	comboBox_CPU0_ForceCPUExtension->setToolTip(International::GetText("Form_Settings_ToolTip_CPU_ForceCPUExtension"));
 	label_CPU0_ForceCPUExtension->setToolTip(International::GetText("Form_Settings_ToolTip_CPU_ForceCPUExtension"));
 	pictureBox_CPU0_ForceCPUExtension->setToolTip(International::GetText("Form_Settings_ToolTip_CPU_ForceCPUExtension"));
-
+#if WITH_AMD
 	// amd disable temp control
 	checkBox_AMD_DisableAMDTempControl->setToolTip(International::GetText("Form_Settings_ToolTip_DisableAMDTempControl"));
 	pictureBox_AMD_DisableAMDTempControl->setToolTip(International::GetText("Form_Settings_ToolTip_DisableAMDTempControl"));
-
+#endif
 	// disable default optimizations
 	checkBox_DisableDefaultOptimizations->setToolTip(International::GetText("Form_Settings_ToolTip_DisableDefaultOptimizations"));
 	pictureBox_DisableDefaultOptimizations->setToolTip(International::GetText("Form_Settings_ToolTip_DisableDefaultOptimizations"));
@@ -1087,7 +1087,9 @@ void Form_Settings::InitializeGeneralTabCallbacks()
 		connect(checkBox_AllowMultipleInstances, SIGNAL(stateChanged(int)), this, SLOT(GeneralCheckBoxes_CheckedChanged()));
 //		connect(checkBox_MinimizeMiningWindows, SIGNAL(stateChanged(int)), this, SLOT(GeneralCheckBoxes_CheckedChanged()));
 		connect(checkBox_UseIFTTT, SIGNAL(stateChanged(int)), this, SLOT(CheckBox_UseIFTTT_CheckChanged()));
+#if WITH_NVIDIA
 		connect(checkBox_RunScriptOnCUDA_GPU_Lost, SIGNAL(stateChanged(int)), this, SLOT(GeneralCheckBoxes_CheckedChanged()));
+#endif
 	}
 	{ // Add EventHandler for all the general tab's textboxes
 		connect(textBox_BitcoinAddress, SIGNAL(returnPressed()), this, SLOT(GeneralTextBoxes_Leave())); connect(textBox_BitcoinAddress, SIGNAL(editingFinished()), this, SLOT(GeneralTextBoxes_Leave()));
@@ -1170,7 +1172,9 @@ void Form_Settings::InitializeGeneralTabFieldValuesReferences()
 //	checkBox_MinimizeMiningWindows->setChecked(ConfigManager.generalConfig->MinimizeMiningWindows);
 //	checkBox_MinimizeMiningWindows->setEnabled(ConfigManager.generalConfig->HideMiningWindows);
 	checkBox_UseIFTTT->setChecked(ConfigManager.generalConfig->UseIFTTT);
+#if WITH_NVIDIA
 	checkBox_RunScriptOnCUDA_GPU_Lost->setChecked(ConfigManager.generalConfig->RunScriptOnCUDA_GPU_Lost);
+#endif
 	}
 
 	{ // Textboxes
@@ -1280,7 +1284,9 @@ void Form_Settings::GeneralCheckBoxes_CheckedChanged()
 	ConfigManager.generalConfig->UseIFTTT=checkBox_UseIFTTT->isChecked();
 	ConfigManager.generalConfig->AllowMultipleInstances=checkBox_AllowMultipleInstances->isChecked();
 //	ConfigManager.generalConfig->MinimizeMiningWindows=checkBox_MinimizeMiningWindows->isChecked();
+#if WITH_NVIDIA
 	ConfigManager.generalConfig->RunScriptOnCUDA_GPU_Lost=checkBox_RunScriptOnCUDA_GPU_Lost->isChecked();
+#endif
 }
 #if WITH_AMD
 void Form_Settings::CheckBox_AMD_DisableAMDTempControl_CheckedChanged()

@@ -149,28 +149,38 @@ QString MinerPaths::GetPathFor(Enums::MinerBaseType minerBaseType, Enums::Algori
 		}
 
 	switch (minerBaseType) {
+#if WITH_NVIDIA
 		case Enums::MinerBaseType::ccminer:
 			return NvidiaGroups.Ccminer_path(algoType, devGroupType);
+#endif
+#if WITH_AMD
 		case Enums::MinerBaseType::sgminer:
 			return AmdGroup.SgminerPath(algoType);
+#endif
 		case Enums::MinerBaseType::nheqminer:
 			return Data.NhEqMiner;
 		case Enums::MinerBaseType::ethminer:
 			return Data.Ethminer;
+#if WITH_AMD
 		case Enums::MinerBaseType::Claymore:
 			return AmdGroup.ClaymorePath(algoType);
 		case Enums::MinerBaseType::OptiminerAMD:
 			return Data.OptiminerZcashMiner;
+#endif
 		case Enums::MinerBaseType::excavator:
 			return Data.Excavator;
 		case Enums::MinerBaseType::XmrStak:
 			return Data.XmrStak;
+#if WITH_NVIDIA
 		case Enums::MinerBaseType::ccminer_alexis:
 			return NvidiaGroups.CcminerUnstablePath(algoType, devGroupType);
+#endif
 		case Enums::MinerBaseType::experimental:
 			return Experimental.GetPath(algoType, devGroupType);
+#if WITH_NVIDIA
 		case Enums::MinerBaseType::EWBF:
 			return Data.Ewbf;
+#endif
 		case Enums::MinerBaseType::Prospector:
 			return Data.Prospector;
 		case Enums::MinerBaseType::Xmrig:
@@ -211,6 +221,7 @@ QList<Algorithm*>* MinerPaths::GetAndInitAlgorithmsMinerPaths(QList<Algorithm*>*
 	return retAlgos;
 }
 
+#if WITH_NVIDIA
 QString MinerPaths::NvidiaGroups::CcminerSM21(Enums::AlgorithmType algorithmType)
 {
 	return algorithmType==Enums::AlgorithmType::CryptoNight
@@ -286,7 +297,8 @@ QString MinerPaths::NvidiaGroups::CcminerUnstablePath(Enums::AlgorithmType algor
 		}
 	return Data.None; // should not happen
 }
-
+#endif
+#if WITH_AMD
 QString MinerPaths::AmdGroup::SgminerPath(Enums::AlgorithmType type)
 {
 	if (type==Enums::AlgorithmType::CryptoNight || type==Enums::AlgorithmType::DaggerHashimoto) {
@@ -310,12 +322,16 @@ QString MinerPaths::AmdGroup::ClaymorePath(Enums::AlgorithmType type)
 		}
 	return Data.None; // should not happen
 }
-
+#endif
 QString MinerPaths::Experimental::GetPath(Enums::AlgorithmType algoType, Enums::DeviceGroupType devGroupType)
 {
-	return devGroupType==Enums::DeviceGroupType::NVIDIA_6_x
+	return
+#if WITH_NVIDIA
+	devGroupType==Enums::DeviceGroupType::NVIDIA_6_x
 		? NvidiaGroups.Ccminer_path(algoType, devGroupType)
-		: Data.None;
+		:
+#endif
+			Data.None;
 }
 
 void MinerPaths::InitializePackages() // @todo finish & verify
@@ -325,7 +341,7 @@ void MinerPaths::InitializePackages() // @todo finish & verify
 		QMap<Enums::MinerBaseType, QList<Algorithm*>*>* package=GroupAlgorithms::CreateDefaultsForGroup((Enums::DeviceGroupType)i);
 		QList<MinerTypePath*> minerTypePaths;
 		foreach (Enums::MinerBaseType type, *ConfigurableMiners) {
-			if (!package->contains(type)) {
+			if (package==nullptr || !package->contains(type)) {
 				continue;
 				}
 			QList<MinerPath> minerPaths;

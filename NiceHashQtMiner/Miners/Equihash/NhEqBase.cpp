@@ -13,7 +13,9 @@ QString NhEqBase::SolsPerSec="Sols/s";
 NhEqBase::NhEqBase(QString minerDevicename)
 	: Miner(minerDevicename, 60*1000*5)
 {
+#if WITH_AMD
 	AmdOclPlatform=ComputeDeviceManager.Available.AmdOpenCLPlatformNum;
+#endif
 }
 
 void NhEqBase::InitMiningSetup(MiningSetup* miningSetup)
@@ -41,6 +43,8 @@ void NhEqBase::InitMiningSetup(MiningSetup* miningSetup)
 				amds->append(pairs);
 				break;
 #endif
+			default:
+				break;
 			}
 		}
 	// reinit

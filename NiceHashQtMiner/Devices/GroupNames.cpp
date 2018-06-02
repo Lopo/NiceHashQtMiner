@@ -35,6 +35,8 @@ QString GroupNames::GetNameGeneral(Enums::DeviceType type)
 		case Enums::DeviceType::AMD:
 			return "AMD";
 #endif
+		default:
+			return "UnknownDeviceType";
 		}
 	return "UnknownDeviceType";
 }

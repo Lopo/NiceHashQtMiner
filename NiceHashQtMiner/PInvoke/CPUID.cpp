@@ -1,9 +1,9 @@
 #include "CPUID.h"
+#include "config.h"
 #include "Utils/Helpers.h"
 #include <QDir>
 #include <QFile>
 #include <QProcess>
-#define HAVE_STDINT_H
 #include <libcpuid/libcpuid.h>
 
 using namespace NiceHashQtMiner;

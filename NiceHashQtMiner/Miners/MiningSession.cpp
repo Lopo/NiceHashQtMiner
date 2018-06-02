@@ -6,7 +6,7 @@
 #include "Devices/GroupNames.h"
 #include "Globals.h"
 #include "Miners/Grouping/GroupingLogic.h"
-#include "Switching/NiceHashSma.h"
+#include "Switching/Models.h"
 #include "International.h"
 #include "Interfaces/IMainFormRatesComunication.h"
 #include "Miners/Grouping/GroupMiner.h"

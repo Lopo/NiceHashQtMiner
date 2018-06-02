@@ -1,8 +1,10 @@
 #include "Configs/Data/BenchmarkTimeLimitsConfig.h"
 
 
-//const QVector<int> BenchmarkTimeLimitsConfig::DefaultCpuNvidia={10, 20, 60};
-//const QVector<int> BenchmarkTimeLimitsConfig::DefaultAmd={120, 180, 240};
+const QVector<int> BenchmarkTimeLimitsConfig::DefaultCpuNvidia={10, 20, 60};
+#if WITH_AMD
+const QVector<int> BenchmarkTimeLimitsConfig::DefaultAmd={120, 180, 240};
+#endif
 
 
 bool BenchmarkTimeLimitsConfig::IsValid(const QVector<int>* value) const
@@ -23,4 +25,5 @@ int BenchmarkTimeLimitsConfig::GetBenchmarktime(Enums::BenchmarkPerformanceType 
 #if WITH_NVIDIA
 	return NVIDIA()[(int)benchmarkPerformanceType];
 #endif
+	return 0;
 }

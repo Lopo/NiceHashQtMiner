@@ -2,7 +2,7 @@
 #include "Utils/BitcoinAddress.h"
 #include "Configs/ConfigManager.h"
 #include "Configs/Data/GeneralConfig.h"
-#include "Switching/NiceHashSma.h"
+#include "Switching/Models.h"
 #include "Switching/NHSmaData.h"
 
 

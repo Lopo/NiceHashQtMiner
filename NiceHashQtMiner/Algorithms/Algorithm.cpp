@@ -1,7 +1,7 @@
 #include "Algorithms/Algorithm.h"
 #include "Utils/AlgorithmNiceHashNames.h"
 #include "Globals.h"
-#include "Switching/NiceHashSma.h"
+#include "Switching/Models.h"
 #include "Utils/Helpers.h"
 #include "International.h"
 #include "Switching/NHSmaData.h"

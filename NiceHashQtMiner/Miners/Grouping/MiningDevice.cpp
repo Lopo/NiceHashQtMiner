@@ -4,7 +4,7 @@
 #include "Miners/Grouping/MinerPaths.h"
 #include "Algorithms/Algorithm.h"
 #include "Miners/Grouping/MiningPair.h"
-#include "Switching/NiceHashSma.h"
+#include "Switching/Models.h"
 #if (SWITCH_TESTING)
 #	include "Utils/AlgorithmNiceHashNames.h"
 #	include "Utils/Helpers.h"

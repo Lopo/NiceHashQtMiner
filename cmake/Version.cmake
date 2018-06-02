@@ -50,7 +50,7 @@ set(nhqtm_new_version
 #define NHQTM_VERSION_BUILD \"${NHQTM_VERSION_BUILD}\"
 #define NHQTM_VERSION_STRING \"${NHQTM_VERSION_STRING}\"
 
-#endif // NHQTM_VERSION_H
+#endif
 ")
 
 # Read in the old file (if it exists)
