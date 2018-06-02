@@ -152,6 +152,15 @@ void Form_Benchmark::InitializeComponent()
 	devicesListViewEnableControl1->setIsMining(false);
 	devicesListViewEnableControl1->SaveToGeneralConfig=false;
 
+	setTabOrder(devicesListViewEnableControl1, StartStopBtn);
+	setTabOrder(StartStopBtn, CloseBtn);
+	setTabOrder(CloseBtn, benchmarkOptions1);
+	setTabOrder(benchmarkOptions1, groupBoxBenchmarkProgress);
+	setTabOrder(groupBoxBenchmarkProgress, algorithmsListView1);
+	setTabOrder(algorithmsListView1, radioButton_SelectedUnbenchmarked);
+	setTabOrder(radioButton_SelectedUnbenchmarked, radioButton_RE_SelectedUnbenchmarked);
+	setTabOrder(radioButton_RE_SelectedUnbenchmarked, checkBox_StartMiningAfterBenchmark);
+
 	resize(604, 401);
 	setFixedSize(604, 401);
 	setObjectName("Form_Benchmark");

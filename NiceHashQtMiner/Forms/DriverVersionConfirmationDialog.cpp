@@ -44,6 +44,9 @@ void DriverVersionConfirmationDialog::InitializeComponent()
 	linkToDriverDownloadPage->setText("<a href=\"#\">&Link to Driver Download Page</a>");
 	connect(linkToDriverDownloadPage, SIGNAL(linkActivated(const QString&)), this, SLOT(LinkToDriverDownloadPage_LinkClicked(const QString&)));
 
+	setTabOrder(buttonOK, linkToDriverDownloadPage);
+	setTabOrder(linkToDriverDownloadPage, chkBoxDontShowAgain);
+
 	setObjectName("DriverVersionConfirmationDialog");
 	resize(497, 97);
 	QFont f;

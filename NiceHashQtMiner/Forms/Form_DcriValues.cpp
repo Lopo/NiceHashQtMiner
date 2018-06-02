@@ -85,6 +85,16 @@ void FormDcriValues::InitializeComponent()
 	field_Speed->setGeometry(400, 27, 224, 47);
 	field_Speed->LabelText("Speed (H/s)");
 
+	setTabOrder(listView_Intensities, button_Close);
+	setTabOrder(button_Close, button_Save);
+	setTabOrder(button_Save, checkBox_TuningEnabled);
+	setTabOrder(checkBox_TuningEnabled, field_Speed);
+	setTabOrder(field_Speed, field_SecondarySpeed);
+	setTabOrder(field_SecondarySpeed, field_TuningStart);
+	setTabOrder(field_TuningStart, field_TuningInterval);
+	setTabOrder(field_TuningInterval, field_TuningEnd);
+	setTabOrder(field_TuningEnd, field_Power);
+
 	setObjectName("FormDcriValues");
 	resize(632, 411);
 	setMinimumSize(609, 380);

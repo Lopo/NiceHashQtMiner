@@ -286,6 +286,19 @@ void Form_Main::InitializeComponent()
 
 //	toolTip1=new QToolTip;
 
+	setTabOrder(comboBoxLocation, textBoxBTCAddress);
+	setTabOrder(textBoxBTCAddress, textBoxWorkerName);
+	setTabOrder(textBoxWorkerName, buttonBenchmark);
+	setTabOrder(buttonBenchmark, buttonSettings);
+	setTabOrder(buttonSettings, buttonStartMining);
+	setTabOrder(buttonStartMining, buttonStopMining);
+	setTabOrder(buttonStopMining, buttonHelp);
+	setTabOrder(buttonHelp, linkLabelCheckStats);
+	setTabOrder(linkLabelCheckStats, linkLabelChooseBTCWallet);
+	setTabOrder(linkLabelChooseBTCWallet, buttonLogo);
+	setTabOrder(buttonLogo, devicesListViewEnableControl1);
+	setTabOrder(devicesListViewEnableControl1, linkLabelNewVersion);
+
 	setEnabled(false);
 	setMinimumSize(576, 316);
 	setObjectName("Form_Main");

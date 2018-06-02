@@ -47,6 +47,8 @@ void Form_3rdParty_TOS::InitializeComponent()
 	label_Tos->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 //	sa->setWidget(label_Tos);
 
+	setTabOrder(button_Agree, button_Decline);
+
 	setObjectName("Form_ClaymoreTOS");
 	resize(384, 295);
 	setWindowTitle("Disclaimer on usage of 3rd party software");
