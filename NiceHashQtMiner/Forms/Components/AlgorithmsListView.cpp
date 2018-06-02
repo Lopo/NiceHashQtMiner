@@ -362,5 +362,5 @@ void AlgorithmsListView::toolStripMenuItemTuningEnabled_Checked(bool checked)
 void AlgorithmsListView::forwardSelectionChanged(const QItemSelection&, const QItemSelection&)
 {
 	const QModelIndex index=listViewAlgorithms->selectionModel()->currentIndex();
-	emit itemSelectionChanged(index.isValid()? index.row() : -1);
+	Q_EMIT itemSelectionChanged(index.isValid()? index.row() : -1);
 }

@@ -77,12 +77,12 @@ bool DevicesListViewEnableControlModel::setData(const QModelIndex& index, const 
 	switch (role) {
 		case Qt::CheckStateRole:
 			_data[row].Checked=value.value<Qt::CheckState>();
-			emit dataChanged(index, index, {role});
-			emit ItemChecked(row);
+			Q_EMIT dataChanged(index, index, {role});
+			Q_EMIT ItemChecked(row);
 			return true;
 		case Qt::BackgroundColorRole:
 			_data[row].color=value.value<QColor>();
-			emit dataChanged(index, index, {role});
+			Q_EMIT dataChanged(index, index, {role});
 			return true;
 		case Qt::EditRole:
 			{
@@ -90,7 +90,7 @@ bool DevicesListViewEnableControlModel::setData(const QModelIndex& index, const 
 			_data[row].Tag=cd;
 			_data[row].Checked= cd->Enabled? Qt::Checked : Qt::Unchecked;
 			}
-			emit dataChanged(index, index, {role});
+			Q_EMIT dataChanged(index, index, {role});
 			return true;
 		}
 	return false;

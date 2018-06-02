@@ -69,7 +69,7 @@ void AlgorithmSwitchingManager::SmaCheckTimerOnElapsed()
 		_hasStarted=true;
 		}
 
-	emit SmaCheck(SmaUpdateEventArgs(_lastLegitPaying));
+	Q_EMIT SmaCheck(SmaUpdateEventArgs(_lastLegitPaying));
 }
 
 /**

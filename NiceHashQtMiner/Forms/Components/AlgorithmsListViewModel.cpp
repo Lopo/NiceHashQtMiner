@@ -40,12 +40,12 @@ bool AlgorithmsListViewModel::setData(const QModelIndex& index, const QVariant& 
 	switch (role) {
 		case Qt::CheckStateRole:
 			_data[row].Checked=value.value<Qt::CheckState>();
-			emit dataChanged(index, index, {role});
-			emit ItemChecked(row);
+			Q_EMIT dataChanged(index, index, {role});
+			Q_EMIT ItemChecked(row);
 			return true;
 		case Qt::BackgroundColorRole:
 			_data[row].color=value.value<QColor>();
-			emit dataChanged(index, index, {role});
+			Q_EMIT dataChanged(index, index, {role});
 			return true;
 		case Qt::EditRole:
 			int col=index.column();
@@ -57,7 +57,7 @@ bool AlgorithmsListViewModel::setData(const QModelIndex& index, const QVariant& 
 				_data[row].Tag=algo;
 				_data[row].Checked= algo->Enabled? Qt::Checked : Qt::Unchecked;
 				}
-			emit dataChanged(index, index, {role});
+			Q_EMIT dataChanged(index, index, {role});
 			return true;
 		}
 	return false;

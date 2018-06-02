@@ -200,10 +200,10 @@ void DevicesListViewEnableControl::resizeEvent(QResizeEvent* event)
 bool DevicesListViewEnableControl::event(QEvent* event)
 {
 	if (event->type()==QEvent::Resize) {
-		emit Resize();
+		Q_EMIT Resize();
 		}
 	if (event->type()==QEvent::ContextMenu) {
-		emit MouseClick();
+		Q_EMIT MouseClick();
 		}
 //	auto t=event->type();
 //printf("%s\n", QMetaEnum::fromType<QEvent::Type>().valueToKey(t));
@@ -213,5 +213,5 @@ bool DevicesListViewEnableControl::event(QEvent* event)
 void DevicesListViewEnableControl::forwardSelectionChanged(const QItemSelection&/* newSel*/, const QItemSelection&/* oldSel*/)
 {
 	const QModelIndex index=listViewDevices->selectionModel()->currentIndex();
-	emit ItemSelectionChanged(index.isValid()? index.row() : -1);
+	Q_EMIT ItemSelectionChanged(index.isValid()? index.row() : -1);
 }

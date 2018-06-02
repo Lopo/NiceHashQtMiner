@@ -575,5 +575,5 @@ void Form_Benchmark::ResetBenchmarkProgressStatus()
 
 void Form_Benchmark::closeEvent(QCloseEvent* ev)
 {
-	emit closing(ev);
+	Q_EMIT closing(ev);
 }

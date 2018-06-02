@@ -51,7 +51,7 @@ void NiceHashSocket::ConnectCallback()
 		login.version="NHQM/"+qApp->applicationVersion();
 		SendData(login.asJson());
 
-		emit ConnectionEstablished();
+		Q_EMIT ConnectionEstablished();
 		}
 	catch (QException& er) {
 		Helpers::ConsolePrint("SOCKET", er.what());
@@ -60,7 +60,7 @@ void NiceHashSocket::ConnectCallback()
 
 void NiceHashSocket::ReceiveCallback(QString e)
 {
-	emit DataReceived(e);
+	Q_EMIT DataReceived(e);
 }
 
 void NiceHashSocket::ErrorCallback(QAbstractSocket::SocketError e)
@@ -154,6 +154,6 @@ bool NiceHashSocket::AttemptReconnect()
 		QThread::msleep(1000);
 		}
 	_attemptingReconnect=false;
-	emit ConnectionLost();
+	Q_EMIT ConnectionLost();
 	return false;
 }

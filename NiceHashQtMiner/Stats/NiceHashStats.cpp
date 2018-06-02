@@ -49,7 +49,7 @@ void NiceHashStats::StartConnection(QString address)
 
 void NiceHashStats::SocketOnOnConnectionLost()
 {
-	emit ConnectionLost();
+	Q_EMIT ConnectionLost();
 }
 
 void NiceHashStats::SocketOnOnDataReceived(QString e)
@@ -72,7 +72,7 @@ void NiceHashStats::SocketOnOnDataReceived(QString e)
 //			SetVersion(message.value("qt").toString());
 			}
 		else if (method=="burn") {
-			emit VersionBurn(message.value("message").toString());
+			Q_EMIT VersionBurn(message.value("message").toString());
 			}
 		else if (method=="exchange_rates") {
 			SetExchangeRates(message.value("data").toString());
@@ -86,7 +86,7 @@ void NiceHashStats::SocketOnOnDataReceived(QString e)
 void NiceHashStats::SocketOnOnConnectionEstablished()
 {
 	DeviceStatus_Tick(); // Send device to populate rig stats
-	emit ConnectionEstablished();
+	Q_EMIT ConnectionEstablished();
 }
 
 void NiceHashStats::SetAlgorithmRates(QJsonArray data)
@@ -99,7 +99,7 @@ void NiceHashStats::SetAlgorithmRates(QJsonArray data)
 			payingDict.insert(algoKey, algoArr[1].toString().toDouble());
 			}
 		NHSmaData::UpdateSmaPaying(payingDict);
-		emit SmaUpdate();
+		Q_EMIT SmaUpdate();
 		}
 	catch (QException& e) {
 		Helpers::ConsolePrint("SOCKET", e.what());
@@ -122,7 +122,7 @@ void NiceHashStats::SetBalance(QString balance)
 		double bal=balance.toDouble(&ok);
 		if (ok) {
 			Balance_=bal;
-			emit BalanceUpdate(bal);
+			Q_EMIT BalanceUpdate(bal);
 			}
 		}
 	catch (QException& e) {
@@ -133,7 +133,7 @@ void NiceHashStats::SetBalance(QString balance)
 void NiceHashStats::SetVersion(QString version)
 {
 	Version_=version;
-	emit VersionUpdate(version);
+	Q_EMIT VersionUpdate(version);
 }
 
 void NiceHashStats::SetExchangeRates(QString data)
@@ -153,7 +153,7 @@ void NiceHashStats::SetExchangeRates(QString data)
 					}
 				}
 			ExchangeRateApi::UpdateExchangesFiat(&exchange->exchanges_fiat);
-			emit ExchangeUpdate();
+			Q_EMIT ExchangeUpdate();
 			}
 		}
 	catch (QException& e) {

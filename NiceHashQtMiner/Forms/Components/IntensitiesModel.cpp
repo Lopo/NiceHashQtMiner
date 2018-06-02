@@ -48,7 +48,7 @@ bool IntensitiesModel::setData(const QModelIndex& index, const QVariant& value, 
 				int intensity=value.value<int>();
 				_data[row].Tag=intensity;
 				}*/
-			emit dataChanged(index, index, {role});
+			Q_EMIT dataChanged(index, index, {role});
 			return true;
 		case Qt::EditRole: // 2
 //			int col=index.column();
@@ -58,7 +58,7 @@ bool IntensitiesModel::setData(const QModelIndex& index, const QVariant& value, 
 			else {*/
 				_data[row].Tag=value.value<int>();
 //				}
-			emit dataChanged(index, index, {role});
+			Q_EMIT dataChanged(index, index, {role});
 			return true;
 		}
 	return false;

@@ -29,21 +29,21 @@ void Field<T>::InitializeComponent()
 		QSpinBox* rtb=(QSpinBox*)textBox;
 		rtb->setButtonSymbols(QDoubleSpinBox::ButtonSymbols::NoButtons);
 		rtb->setMaximum(INT_MAX);
-		connect(rtb, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=]{emit TextChanged();});
-		connect(rtb, &QSpinBox::editingFinished, [=]{emit TextLeave();});
+		connect(rtb, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=]{Q_EMIT TextChanged();});
+		connect(rtb, &QSpinBox::editingFinished, [=]{Q_EMIT TextLeave();});
 		}
 	else if (std::is_same<T, double>::value) {
 		textBox=new QDoubleSpinBox(this);
 		QDoubleSpinBox* rtb=(QDoubleSpinBox*)textBox;
 		rtb->setButtonSymbols(QDoubleSpinBox::ButtonSymbols::NoButtons);
 		rtb->setMaximum(DBL_MAX);
-		connect(rtb, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=]{emit TextChanged();});
-		connect(rtb, &QDoubleSpinBox::editingFinished, [=]{emit TextLeave();});
+		connect(rtb, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=]{Q_EMIT TextChanged();});
+		connect(rtb, &QDoubleSpinBox::editingFinished, [=]{Q_EMIT TextLeave();});
 		}
 	else if (std::is_same<T, QString>::value) {
 		textBox=new QLineEdit(this);
-		connect((QLineEdit*)textBox, &QLineEdit::textChanged, [=]{emit TextChanged();});
-		connect((QLineEdit*)textBox, &QLineEdit::editingFinished, [=]{emit TextLeave();});
+		connect((QLineEdit*)textBox, &QLineEdit::textChanged, [=]{Q_EMIT TextChanged();});
+		connect((QLineEdit*)textBox, &QLineEdit::editingFinished, [=]{Q_EMIT TextLeave();});
 		}
 	textBox->setObjectName("textBox");
 	textBox->setGeometry(3, 24, 214, 20);
