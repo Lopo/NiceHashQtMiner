@@ -68,7 +68,9 @@ public:
 		Sia=27,
 		Blake2s=28,
 		Skunk=29,
-		CryptoNightV7=30
+		CryptoNightV7=30,
+		CryptoNightHeavy=31,
+		Lyra2z=32
 		};
 	Q_ENUM(AlgorithmType)
 

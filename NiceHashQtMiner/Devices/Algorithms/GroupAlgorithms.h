@@ -1,11 +1,8 @@
-#ifndef DEVICES_GROUPALGORITHMS_H_
-#define DEVICES_GROUPALGORITHMS_H_
+#ifndef DEVICES_ALGORITHMS_GROUPALGORITHMS_H_
+#define DEVICES_ALGORITHMS_GROUPALGORITHMS_H_
 
 
-//#include "Algorithm.h"
 #include "Enums.h"
-//#include "Devices/ComputeDevice/ComputeDevice.h"
-//#include <QMap>
 #include <QList>
 class Algorithm;
 class ComputeDevice;

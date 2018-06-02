@@ -9,18 +9,22 @@ XmrStakConfigPool::XmrStakPoolItem::XmrStakPoolItem(QString pool, QString worker
 	pool_weight=weight;
 }
 
-void XmrStakConfigPool::SetupPools(QString poolAddr, QString wallet)
+void XmrStakConfigPool::SetupPools(QString poolAddr, QString wallet, bool isHeavy)
 {
-	SetupPools({poolAddr}, wallet);
+	SetupPools({poolAddr}, wallet, isHeavy);
 }
 
-void XmrStakConfigPool::SetupPools(QStringList poolAddrs, QString wallet)
+void XmrStakConfigPool::SetupPools(QStringList poolAddrs, QString wallet, bool isHeavy)
 {
 	pool_list.clear();
 	int i=1;
 	foreach (QString poolAddr, poolAddrs) {
 		pool_list.append(XmrStakPoolItem(poolAddr, wallet, i));
 		i++;
+		}
+
+	if (isHeavy) {
+		currency="cryptonight_heavy";
 		}
 }
 

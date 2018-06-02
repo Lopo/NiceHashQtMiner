@@ -1,7 +1,7 @@
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Devices/GroupNames.h"
 #include "International.h"
-#include "Devices/GroupAlgorithms.h"
+#include "Devices/Algorithms/GroupAlgorithms.h"
 #if WITH_NVIDIA
 #	include "Devices/CudaDevice.h"
 #endif

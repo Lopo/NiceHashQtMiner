@@ -94,6 +94,9 @@ public:
 		static const QString XmrStakAmd;
 		static const QString XmrStak;
 		static const QString Xmrig;
+		static const QString XmrStakHeavy;
+
+		static const QString CpuMiner;
 
 		static const QString None;
 

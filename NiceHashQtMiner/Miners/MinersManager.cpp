@@ -49,7 +49,7 @@ double MinersManager::GetTotalRate()
 bool MinersManager::StartInitialize(IMainFormRatesComunication* mainFormRatesCommunication, QString miningLocation, QString worker, QString btcAddress)
 {
 	if (_curMiningSession!=nullptr) {delete _curMiningSession;}
-	_curMiningSession=new MiningSession(ComputeDeviceManager.Avaliable.AllAvailableDevices, mainFormRatesCommunication, miningLocation, worker, btcAddress);
+	_curMiningSession=new MiningSession(ComputeDeviceManager.Available.Devices, mainFormRatesCommunication, miningLocation, worker, btcAddress);
 	return _curMiningSession->IsMiningEnabled();
 }
 

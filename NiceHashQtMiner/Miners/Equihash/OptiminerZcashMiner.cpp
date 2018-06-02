@@ -33,7 +33,7 @@ void OptiminerZcashMiner::_Stop(Enums::MinerStopType willswitch)
 QStringList OptiminerZcashMiner::GetDevicesCommandString()
 {
 	QStringList extraParams=ExtraLaunchParametersParser::ParseForMiningSetup(MiningSetup_, Enums::DeviceType::AMD);
-	QStringList deviceStringCommand({"-c", QString::number(ComputeDeviceManager.Avaliable.AmdOpenCLPlatformNum)});
+	QStringList deviceStringCommand({"-c", QString::number(ComputeDeviceManager.Available.AmdOpenCLPlatformNum)});
 	QStringList ids;
 	foreach (MiningPair* mPair, *MiningSetup_->MiningPairs) {
 		ids.append({"-d", QString::number(mPair->Device->ID)});

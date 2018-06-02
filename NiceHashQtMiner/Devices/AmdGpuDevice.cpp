@@ -3,7 +3,7 @@
 #include "Devices/ComputeDevice/ComputeDevice.h"
 
 
-const QStringList AmdGpuDevice::DefaultParam={"--keccak-unroll", "0", "--hamsi-expand-big", "4", "--remove-disabled"};
+QStringList AmdGpuDevice::DefaultParam() {return {"--keccak-unroll", "0", "--hamsi-expand-big", "4", "--remove-disabled"};};
 const QStringList AmdGpuDevice::TemperatureParam={"--gpu-fan", "30-95", "--temp-cutoff", "95", "--temp-overhat", "90", "--temp-target", "75", "--auto-fan", "--auto-gpu"};
 
 

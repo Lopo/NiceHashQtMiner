@@ -4,7 +4,7 @@
 #include "Devices/AmdGpuDevice.h"
 #include "International.h"
 #include "Devices/GroupNames.h"
-#include "Devices/GroupAlgorithms.h"
+#include "Devices/Algorithms/GroupAlgorithms.h"
 #include "Devices/ComputeDeviceManager.h"
 
 
@@ -60,15 +60,14 @@ double AmdComputeDevice::PowerUsage() // @todo
 		return -1;
 		}
 	int power=-1;
-	if (_adlContext!=nullptr) {
+	if (!_powerHasFailed && _adlContext!=nullptr) {
 		int result=ADL::ADL2_Overdrive6_CurrentPower_Get(_adlContext, _adapterIndex2, 1, &power);
 		if (result==ADL::ADL_SUCCESS) {
 			return (double)power/(1<<8);
 			}
-		if (result!=ADL::ADL_NOT_SUPPORTED) {
-			// Don't alert if not supported
-			Helpers::ConsolePrint("ADL", QString("ADL power getting failed with code %1").arg(result));
-			}
+		// Only alert once
+		Helpers::ConsolePrint("ADL", QString("ADL power getting failed with code %1 for GPU %2. Turning off power for this GPU.").arg(result).arg(NameCount));
+		_powerHasFailed=true;
 		}
 	return power;
 }
@@ -84,7 +83,7 @@ AmdComputeDevice::AmdComputeDevice(AmdGpuDevice* amdDevice, int gpuCount, bool i
 	_InfSection=amdDevice->InfSection;
 	AlgorithmSettings=GroupAlgorithms::CreateForDeviceList(this);
 	_DriverDisableAlgos=amdDevice->DriverDisableAlgos;
-	Index_=ID+ComputeDeviceManager.Avaliable.AvailCpus()+ComputeDeviceManager.Avaliable.AvailNVGpus();
+	Index_=ID+ComputeDeviceManager.Available.AvailCpus()+ComputeDeviceManager.Available.AvailNVGpus();
 	_adapterIndex=amdDevice->AdapterIndex;
 
 //	ADL::ADL2_Main_Control_Create

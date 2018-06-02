@@ -197,7 +197,7 @@ void NiceHashStats::SetCredentials(QString btc, QString worker)
 
 void NiceHashStats::DeviceStatus_Tick()
 {
-	QList<ComputeDevice*>* devices=ComputeDeviceManager.Avaliable.AllAvailableDevices;
+	QList<ComputeDevice*>* devices=ComputeDeviceManager.Available.Devices;
 	QList<QJsonArray>* deviceList=new QList<QJsonArray>;
 	QList<int>* activeIDs=MinersManager::GetActiveMinersIndexes();
 	foreach (ComputeDevice* device, *devices) {

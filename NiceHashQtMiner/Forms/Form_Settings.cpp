@@ -7,7 +7,7 @@
 #include "Configs/Data/GeneralConfig.h"
 #include "Miners/ethminer/MinerEtherum.h"
 #include "Miners/Parsing/ExtraLaunchParametersParser.h"
-#include "Devices/GroupAlgorithms.h"
+#include "Devices/Algorithms/GroupAlgorithms.h"
 #include "Utils/Links.h"
 #include "Utils/ProfitabilityCalculator.h"
 #include "Stats/NiceHashStats.h"
@@ -773,8 +773,8 @@ Form_Settings::Form_Settings(QWidget *parent)
 	algorithmsListView1->ComunicationInterface=algorithmSettingsControl1;
 
 	// set first device selected
-	if (ComputeDeviceManager.Avaliable.AllAvailableDevices->count()>0) {
-		_selectedComputeDevice=ComputeDeviceManager.Avaliable.AllAvailableDevices->first();
+	if (ComputeDeviceManager.Available.Devices->count()>0) {
+		_selectedComputeDevice=ComputeDeviceManager.Available.Devices->first();
 		algorithmsListView1->SetAlgorithms(_selectedComputeDevice, _selectedComputeDevice->Enabled);
 		groupBoxAlgorithmSettings->setTitle(International::GetText("FormSettings_AlgorithmsSettings").arg(_selectedComputeDevice->Name));
 		}
@@ -1201,7 +1201,7 @@ void Form_Settings::InitializeGeneralTabFieldValuesReferences()
 #endif
 
 		// here we want all devices
-		devicesListViewEnableControl1->SetComputeDevices(ComputeDeviceManager.Avaliable.AllAvailableDevices);
+		devicesListViewEnableControl1->SetComputeDevices(ComputeDeviceManager.Available.Devices);
 		devicesListViewEnableControl1->SetAlgorithmsListView(algorithmsListView1);
 		devicesListViewEnableControl1->IsSettingsCopyEnabled=true;
 	}
@@ -1292,7 +1292,7 @@ void Form_Settings::CheckBox_AMD_DisableAMDTempControl_CheckedChanged()
 	// indicate there has been a change
 	setIsChange(true);
 	ConfigManager.generalConfig->DisableAMDTempControl=checkBox_AMD_DisableAMDTempControl->isChecked();
-	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Available.Devices) {
 		if (cDev->DeviceType==Enums::DeviceType::AMD) {
 			foreach (Algorithm* algorithm, *cDev->GetAlgorithmSettings()) {
 				if (algorithm->NiceHashID!=Enums::AlgorithmType::DaggerHashimoto) {
@@ -1315,7 +1315,7 @@ void Form_Settings::CheckBox_DisableDefaultOptimizations_CheckedChanged()
 	setIsChange(true);
 	ConfigManager.generalConfig->DisableDefaultOptimizations=checkBox_DisableDefaultOptimizations->isChecked();
 	if (ConfigManager.generalConfig->DisableDefaultOptimizations) {
-		foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+		foreach (ComputeDevice* cDev, *ComputeDeviceManager.Available.Devices) {
 			foreach (Algorithm* algorithm, *cDev->GetAlgorithmSettings()) {
 				algorithm->ExtraLaunchParameters.clear();
 #if WITH_AMD
@@ -1328,7 +1328,7 @@ void Form_Settings::CheckBox_DisableDefaultOptimizations_CheckedChanged()
 			}
 		}
 	else {
-		foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+		foreach (ComputeDevice* cDev, *ComputeDeviceManager.Available.Devices) {
 			if (cDev->DeviceType==Enums::DeviceType::CPU) { // cpu has no defaults
 				continue;
 				}
@@ -1434,7 +1434,7 @@ void Form_Settings::DevicesListView1_ItemSelectionChanged(int row)
 {
 	algorithmSettingsControl1->Deselect();
 	// show algorithms
-	_selectedComputeDevice=ComputeDeviceManager.Avaliable.GetCurrentlySelectedComputeDevice(row, ShowUniqueDeviceList);
+	_selectedComputeDevice=ComputeDeviceManager.Available.GetCurrentlySelectedComputeDevice(row, ShowUniqueDeviceList);
 	algorithmsListView1->SetAlgorithms(_selectedComputeDevice, _selectedComputeDevice->Enabled);
 	groupBoxAlgorithmSettings->setTitle(International::GetText("FormSettings_AlgorithmsSettings").arg(_selectedComputeDevice->Name));
 }
@@ -1460,7 +1460,7 @@ void Form_Settings::ButtonAllProfit_Click()
 {
 	QString url=Links::NhmProfitCheck+"CUSTOM";
 	QMap<Enums::AlgorithmType, double> total;
-	foreach (ComputeDevice* curCDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* curCDev, *ComputeDeviceManager.Available.Devices) {
 		foreach (Algorithm* algorithm, *curCDev->GetAlgorithmSettingsFastest()) {
 			if (total.contains(algorithm->NiceHashID)) {
 				total[algorithm->NiceHashID]+=algorithm->BenchmarkSpeed();
@@ -1590,7 +1590,7 @@ void Form_Settings::CurrencyConverterCombobox_SelectedIndexChanged(int index)
 void Form_Settings::TabControlGeneral_Selected(int)
 {
 	// set first device selected {
-	if (ComputeDeviceManager.Avaliable.AllAvailableDevices->count()>0) {
+	if (ComputeDeviceManager.Available.Devices->count()>0) {
 		algorithmSettingsControl1->Deselect();
 		}
 }

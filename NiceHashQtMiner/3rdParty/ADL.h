@@ -1,5 +1,5 @@
-#ifndef ADL_H
-#define ADL_H
+#ifndef RDPARTY_ADL_H_
+#define RDPARTY_ADL_H_
 
 #ifndef LINUX
 #	define LINUX

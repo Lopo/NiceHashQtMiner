@@ -82,9 +82,13 @@ QMap<Enums::DeviceType, QString> XmrStak::PrepareConfigFiles(QString url, QStrin
 {
 	QMap<Enums::DeviceType, QString> configs;
 	QList<Enums::DeviceType> types;
+	bool isHeavy=false;
 	foreach (MiningPair* pair, *MiningSetup_->MiningPairs) {
 		if (!types.contains(pair->Device->DeviceType)) {
 			types.append(pair->Device->DeviceType);
+			}
+		if (pair->algorithm->NiceHashID==Enums::AlgorithmType::CryptoNightHeavy) {
+			isHeavy=true;
 			}
 		}
 
@@ -101,8 +105,9 @@ QMap<Enums::DeviceType, QString> XmrStak::PrepareConfigFiles(QString url, QStrin
 	WriteJsonFile(config, configName, DefConfigName);
 
 	XmrStakConfigPool* pools=new XmrStakConfigPool;
-	pools->SetupPools(url, GetUsername(btcAddress, worker));
+	pools->SetupPools(url, GetUsername(btcAddress, worker), isHeavy);
 	WriteJsonFile(pools, GetPoolConfigName());
+	WriteJsonFile(pools, DefPoolName);
 
 	foreach (Enums::DeviceType type, types) {
 		if (type==Enums::DeviceType::CPU) {
@@ -263,13 +268,11 @@ T* XmrStak::ParseJsonFile(Enums::DeviceType type, QString filename, bool fallbac
 		file+='}';
 		json=T::fromJson(file);
 		}
+	catch (LException& e) {
+		Helpers::ConsolePrint(MinerTag(), QString("Config file %1 not found, attempting to generate").arg(filename));
+		}
 	catch (QException& e) {
-		if (QString(e.what())=="FileNotFound") {
-			Helpers::ConsolePrint(MinerTag(), QString("Config file %1 not found, attempting to generate").arg(filename));
-			}
-		else {
-			Helpers::ConsolePrint(MinerTag(), e.what());
-			}
+		Helpers::ConsolePrint(MinerTag(), e.what());
 		}
 
 	if (json==nullptr) {

@@ -10,7 +10,7 @@ QList<MinerEtherum*>* MinerEtherumOCL::MinerEtherumOclList=new QList<MinerEtheru
 MinerEtherumOCL::MinerEtherumOCL()
 	: MinerEtherum("MinerEtherumOCL", "AMD OpenCL")
 {
-	_gpuPlatformNumber=ComputeDeviceManager.Avaliable.AmdOpenCLPlatformNum;
+	_gpuPlatformNumber=ComputeDeviceManager.Available.AmdOpenCLPlatformNum;
 	MinerEtherumOclList->append(this);
 }
 

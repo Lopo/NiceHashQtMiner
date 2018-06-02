@@ -64,7 +64,7 @@ void ConfigManager::CreateBackup()
 	_generalConfigBackup=GeneralConfig::fromJson(generalConfig->asJson()); // MemoryHelper.DeepClone(generalConfig)
 //	if (_benchmarkConfigsBackup!=nullptr) {delete _benchmarkConfigsBackup;}
 	_benchmarkConfigsBackup=new QMap<QString, DeviceBenchmarkConfig*>;
-	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Available.Devices) {
 		(*_benchmarkConfigsBackup)[cDev->Uuid()]=cDev->GetAlgorithmDeviceConfig();
 		}
 }
@@ -75,14 +75,14 @@ void ConfigManager::RestoreBackup()
 //	if (generalConfig) {delete generalConfig;}
 	generalConfig=_generalConfigBackup;
 	if (generalConfig->LastDevicesSettup!=nullptr) {
-		foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+		foreach (ComputeDevice* cDev, *ComputeDeviceManager.Available.Devices) {
 			foreach (ComputeDeviceConfig* conf, *generalConfig->LastDevicesSettup) {
 				cDev->SetFromComputeDeviceConfig(conf);
 				}
 			}
 		}
 	// restore benchmarks
-	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Available.Devices) {
 		if (_benchmarkConfigsBackup!=nullptr && _benchmarkConfigsBackup->contains(cDev->Uuid())) {
 			cDev->SetAlgorithmDeviceConfig((*_benchmarkConfigsBackup)[cDev->Uuid()]);
 			}
@@ -109,7 +109,7 @@ bool ConfigManager::IsRestartNeeded()
 void ConfigManager::GeneralConfigFileCommit()
 {
 	generalConfig->LastDevicesSettup->clear();
-	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Available.Devices) {
 		generalConfig->LastDevicesSettup->append(cDev->GetComputeDeviceConfig());
 		}
 	generalConfigFile->Commit(generalConfig);
@@ -117,7 +117,7 @@ void ConfigManager::GeneralConfigFileCommit()
 
 void ConfigManager::CommitBenchmarks()
 {
-	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Available.Devices) {
 		QString devUuid=cDev->Uuid();
 		if (BenchmarkConfigFiles->contains(devUuid)) {
 			(*BenchmarkConfigFiles)[devUuid]->Commit(cDev->GetAlgorithmDeviceConfig());
@@ -133,7 +133,7 @@ void ConfigManager::AfterDeviceQueryInitialization()
 {
 	{ // extra check (probably will never happen but just in case)
 		QList<ComputeDevice*> invalidDevices;
-		foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+		foreach (ComputeDevice* cDev, *ComputeDeviceManager.Available.Devices) {
 			if (!cDev->IsAlgorithmSettingsInitialized()) {
 				Helpers::ConsolePrint(Tag, "CRITICAL ISSUE!!! Device has AlgorithmSettings == null. Will remove");
 				invalidDevices.append(cDev);
@@ -141,17 +141,17 @@ void ConfigManager::AfterDeviceQueryInitialization()
 			}
 		// remove invalids
 		foreach (ComputeDevice* invalid, invalidDevices) {
-			ComputeDeviceManager.Avaliable.AllAvailableDevices->removeOne(invalid);
+			ComputeDeviceManager.Available.Devices->removeOne(invalid);
 			}
 	}
 	// set enabled/disabled devs
-	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Available.Devices) {
 		foreach (ComputeDeviceConfig* devConf, *generalConfig->LastDevicesSettup) {
 			cDev->SetFromComputeDeviceConfig(devConf);
 			}
 		}
 	// create/init device benchmark configs files and configs
-	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Available.Devices) {
 		QString keyUuid=cDev->Uuid();
 		BenchmarkConfigFiles->insert(keyUuid, new DeviceBenchmarkConfigFile(keyUuid));
 		{ // init

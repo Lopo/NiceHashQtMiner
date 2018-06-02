@@ -1,5 +1,5 @@
 #include "Devices/ComputeDevice/CudaComputeDevice.h"
-#include "Devices/GroupAlgorithms.h"
+#include "Devices/Algorithms/GroupAlgorithms.h"
 #include "Devices/ComputeDeviceManager.h"
 #include "International.h"
 #include "Devices/CudaDevice.h"
@@ -78,7 +78,7 @@ CudaComputeDevice::CudaComputeDevice(CudaDevice* cudaDevice, Enums::DeviceGroupT
 	SMMinor=cudaDevice->SM_minor;
 	Uuid_=cudaDevice->UUID;
 	AlgorithmSettings=GroupAlgorithms::CreateForDeviceList(this);
-	Index_=ID+ComputeDeviceManager.Avaliable.AvailCpus();
+	Index_=ID+ComputeDeviceManager.Available.AvailCpus();
 
 	_nvHandle=nvHandle;
 	_nvmlDevice=nvmlHandle;

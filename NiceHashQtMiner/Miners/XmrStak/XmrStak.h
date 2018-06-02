@@ -25,6 +25,7 @@ protected:
 private:
 	const QString ConfigName="config_nh.txt";
 	const QString DefConfigName="config.txt";
+	const QString DefPoolName="pools.txt";
 
 	int _benchmarkCount;
 	double _benchmarkSum;

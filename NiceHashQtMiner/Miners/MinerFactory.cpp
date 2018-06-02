@@ -16,6 +16,7 @@
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Algorithms/Algorithm.h"
 #include "Miners/Xmrig.h"
+#include "Miners/CpuMiner.h"
 
 
 Miner* MinerFactory::CreateEthminer(Enums::DeviceType deviceType)
@@ -90,6 +91,8 @@ Miner* MinerFactory::CreateMiner(Enums::DeviceType deviceType, Algorithm* algori
 			return new Xmrig;
 		case Enums::MinerBaseType::dtsm:
 			return new Dtsm;
+		case Enums::MinerBaseType::cpuminer:
+			return new CpuMiner;
 		default:
 			return nullptr;
 		}

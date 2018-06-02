@@ -20,7 +20,7 @@
 Sgminer::Sgminer()
 	: Miner("sgminer_AMD", 90*1000)
 {
-	_gpuPlatformNumber=ComputeDeviceManager.Avaliable.AmdOpenCLPlatformNum;
+	_gpuPlatformNumber=ComputeDeviceManager.Available.AmdOpenCLPlatformNum;
 	IsKillAllUsedMinerProcs=true;
 }
 

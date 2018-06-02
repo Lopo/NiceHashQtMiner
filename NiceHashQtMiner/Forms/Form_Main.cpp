@@ -379,7 +379,7 @@ void Form_Main::InitMainConfigGuiData()
 	BalanceCallback(); // update currency changes
 
 	if (_isDeviceDetectionInitialized) {
-		devicesListViewEnableControl1->ResetComputeDevices(ComputeDeviceManager.Avaliable.AllAvailableDevices);
+		devicesListViewEnableControl1->ResetComputeDevices(ComputeDeviceManager.Available.Devices);
 		}
 }
 
@@ -457,7 +457,7 @@ void Form_Main::StartupTimer_Tick()
 	_loadingScreen->IncreaseLoadCounterAndMessage(International::GetText("Form_Main_loadtext_SaveConfig"));
 
 	// All devices settup should be initialized in AllDevices
-	devicesListViewEnableControl1->ResetComputeDevices(ComputeDeviceManager.Avaliable.AllAvailableDevices);
+	devicesListViewEnableControl1->ResetComputeDevices(ComputeDeviceManager.Available.Devices);
 	// set properties after
 	devicesListViewEnableControl1->SaveToGeneralConfig=true;
 
@@ -650,7 +650,7 @@ void Form_Main::InitFlowPanelStart()
 		delete i;
 		}
 	// add for every cdev a
-	foreach (ComputeDevice* cdev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* cdev, *ComputeDeviceManager.Available.Devices) {
 		if (cdev->Enabled) {
 			GroupProfitControl* newGroupProfitControl=new GroupProfitControl(flowLayoutPanelRates);
 //			newGroupProfitControl->setHidden(true);
@@ -1090,7 +1090,7 @@ Form_Main::StartMiningReturnType Form_Main::StartMining(bool showWarnings)
 
 	// Check if there are unbenchmarked algorithms
 	bool isBenchInit=true;
-	foreach (ComputeDevice* cdev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* cdev, *ComputeDeviceManager.Available.Devices) {
 		if (cdev->Enabled) {
 			foreach (Algorithm* algo, *cdev->GetAlgorithmSettings()) {
 				if (algo->Enabled==true) {
@@ -1118,7 +1118,7 @@ Form_Main::StartMiningReturnType Form_Main::StartMining(bool showWarnings)
 			}
 		else if (result==QMessageBox::No) {
 			// check devices without benchmarks
-			foreach (ComputeDevice* cdev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+			foreach (ComputeDevice* cdev, *ComputeDeviceManager.Available.Devices) {
 				if (cdev->Enabled) {
 					bool enabled=false;
 					foreach (Algorithm* algo, *cdev->GetAlgorithmSettings()) {

@@ -18,7 +18,7 @@
 #include "PInvoke/CPUID.h"
 #include "Globals.h"
 #include "Devices/CPUUtils.h"
-#include "Devices/ComputeDevice/CPUComputeDevice.h"
+#include "Devices/ComputeDevice/CpuComputeDevice.h"
 #if WITH_NVIDIA
 //#	include <nvml.h>
 //#	include "3rdParty/NVAPI.h" // @!!! neexistuje Linux verza
@@ -37,6 +37,7 @@
 #	include "3rdParty/ADL.h"
 #	include "Devices/AmdGpuDevice.h"
 #	include "Devices/ComputeDevice/AmdComputeDevice.h"
+#include "Querying/AmdQuery.h"
 #endif
 #include <QProcess>
 #include <QException>
@@ -98,8 +99,8 @@ ComputeDeviceManager::Query::NvidiaSmiDriver* ComputeDeviceManager::Query::Nvidi
 ComputeDeviceManager::Query::NvidiaSmiDriver* ComputeDeviceManager::Query::_currentNvidiaSmiDriver=new ComputeDeviceManager::Query::NvidiaSmiDriver(-1, -1);
 ComputeDeviceManager::Query::NvidiaSmiDriver* ComputeDeviceManager::Query::InvalidSmiDriver=new ComputeDeviceManager::Query::NvidiaSmiDriver(-1, -1);
 #endif
-int ComputeDeviceManager::Query::_cpuCount=0;
-int ComputeDeviceManager::Query::_gpuCount=0;
+int ComputeDeviceManager::Query::CpuCount=0;
+int ComputeDeviceManager::Query::GpuCount=0;
 #if WITH_NVIDIA
 ComputeDeviceManager::Query::NvidiaSmiDriver* ComputeDeviceManager::Query::GetNvidiaSmiDriver()
 {
@@ -189,7 +190,9 @@ void ComputeDeviceManager::Query::QueryDevices(IMessageNotifier* messageNotifier
 		ShowMessageAndStep(International::GetText("Compute_Device_Query_Manager_OpenCL_Query"));
 		OpenCL::QueryOpenCLDevices();
 		// #4 AMD query AMD from OpenCL devices, get serial and add devices
-		Amd::QueryAmd();
+		ShowMessageAndStep(International::GetText("Compute_Device_Query_Manager_AMD_Query"));
+		AmdQuery* amd=new AmdQuery(AvaliableVideoControllers);
+		AmdDevices=amd->QueryAmd(_isOpenCLQuerySuccess, _openCLJsonData);
 		}
 #else
 	Helpers::ConsolePrint(Tag, "Skipping AMD device detection, support not compiled in");
@@ -247,7 +250,7 @@ void ComputeDeviceManager::Query::QueryDevices(IMessageNotifier* messageNotifier
 #endif
 
 	// no devices found
-	if (Avaliable.AllAvailableDevices->count()<=0) {
+	if (Available.Devices->count()<=0) {
 		QMessageBox::StandardButton result=QMessageBox::warning(nullptr, International::GetText("Compute_Device_Query_Manager_No_Devices_Title"), International::GetText("Compute_Device_Query_Manager_No_Devices"), QMessageBox::Ok|QMessageBox::Cancel);
 		if (result==QMessageBox::Ok) {
 			QDesktopServices::openUrl(QUrl(Links::NHQTM_NoDevHelp));
@@ -257,7 +260,7 @@ void ComputeDeviceManager::Query::QueryDevices(IMessageNotifier* messageNotifier
 #if WITH_AMD
 	// create AMD bus ordering for Claymore
 	QList<ComputeDevice*>* amdDevices=new QList<ComputeDevice*>;
-	foreach (ComputeDevice* a, *Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* a, *Available.Devices) {
 		if (a->DeviceType==Enums::DeviceType::AMD) {
 			amdDevices->append(a);
 			}
@@ -270,7 +273,7 @@ void ComputeDeviceManager::Query::QueryDevices(IMessageNotifier* messageNotifier
 #if WITH_NVIDIA
 	// create NV bus ordering for Claymore
 	QList<ComputeDevice*>* nvDevices=new QList<ComputeDevice*>;
-	foreach (ComputeDevice* a, *Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* a, *Available.Devices) {
 		if (a->DeviceType==Enums::DeviceType::NVIDIA) {
 			nvDevices->append(a);
 			}
@@ -283,22 +286,22 @@ void ComputeDeviceManager::Query::QueryDevices(IMessageNotifier* messageNotifier
 
 	// get GPUs RAM sum
 	// bytes
-	Avaliable.NvidiaRamSum=0;
-	Avaliable.AmdRamSum=0;
-	foreach (ComputeDevice* dev, *Avaliable.AllAvailableDevices) {
+	Available.NvidiaRamSum=0;
+	Available.AmdRamSum=0;
+	foreach (ComputeDevice* dev, *Available.Devices) {
 		if (dev->DeviceType==Enums::DeviceType::NVIDIA) {
 #if WITH_NVIDIA
-			Avaliable.NvidiaRamSum+=dev->GpuRam;
+			Available.NvidiaRamSum+=dev->GpuRam;
 #endif
 			}
 		else if (dev->DeviceType==Enums::DeviceType::AMD) {
 #if WITH_AMD
-			Avaliable.AmdRamSum+=dev->GpuRam;
+			Available.AmdRamSum+=dev->GpuRam;
 #endif
 			}
 		}
 	// Make gpu ram needed not larger than 4GB per GPU
-	double totalGpuRam=std::min((Avaliable.NvidiaRamSum+Avaliable.AmdRamSum)*0.6/1024, (double)Avaliable.AvailGpUs()*4*1024*1024);
+	double totalGpuRam=std::min((Available.NvidiaRamSum+Available.AmdRamSum)*0.6/1024, (double)Available.AvailGpUs()*4*1024*1024);
 	double totalSysRam=SystemSpecs.FreePhysicalMemory+SystemSpecs.FreeVirtualMemory;
 	// check
 	if (ConfigManager.generalConfig->ShowDriverVersionWarning && totalSysRam<totalGpuRam) {
@@ -313,7 +316,7 @@ void ComputeDeviceManager::Query::QueryDevices(IMessageNotifier* messageNotifier
 	MessageNotifier_=nullptr;
 }
 
-QList<ComputeDeviceManager::Query::VideoControllerData*>* ComputeDeviceManager::Query::AvaliableVideoControllers=new QList<VideoControllerData*>;
+QList<VideoControllerData*>* ComputeDeviceManager::Query::AvaliableVideoControllers=new QList<VideoControllerData*>;
 /*
 QString ComputeDeviceManager::Query::WindowsDisplayAdapters::SafeGetProperty(QString key)
 {
@@ -325,7 +328,7 @@ void ComputeDeviceManager::Query::WindowsDisplayAdapters::QueryVideoControllers(
 	QueryVideoControllers(AvaliableVideoControllers, true);
 }
 
-void ComputeDeviceManager::Query::WindowsDisplayAdapters::QueryVideoControllers(QList<ComputeDeviceManager::Query::VideoControllerData*>* avaliableVideoControllers, bool warningsEnabled)
+void ComputeDeviceManager::Query::WindowsDisplayAdapters::QueryVideoControllers(QList<VideoControllerData*>* avaliableVideoControllers, bool warningsEnabled)
 {
 	QStringList stringBuilder({""});
 	stringBuilder << "QueryVideoControllers: ";
@@ -342,7 +345,7 @@ void ComputeDeviceManager::Query::WindowsDisplayAdapters::QueryVideoControllers(
 		VideoControllerData* vidController=new VideoControllerData;
 
 		vidController->Name=QString(hd->model);
-		vidController->PNPDeviceID=QString(hd->unique_id);
+		vidController->PnpDeviceID=QString(hd->unique_id);
 		vidController->Status= hd->status.invalid? "invalid" : "ok";
 		vidController->SysFS=QString(hd->sysfs_id);
 //		vidController->UDev=QString(hd->unix_dev_name);
@@ -352,7 +355,7 @@ void ComputeDeviceManager::Query::WindowsDisplayAdapters::QueryVideoControllers(
 		stringBuilder << "\thwinfo hd_list(hw_display) detected:";
 		stringBuilder << QString("\t\tName %1").arg(vidController->Name);
 		stringBuilder << QString("\t\tDescription %1").arg(vidController->Description);
-		stringBuilder << QString("\t\tPNPDeviceID %1").arg(vidController->PNPDeviceID);
+		stringBuilder << QString("\t\tPNPDeviceID %1").arg(vidController->PnpDeviceID);
 		stringBuilder << QString("\t\tStatus %1").arg(vidController->Status);
 		stringBuilder << QString("\t\tInfSection %1").arg(vidController->InfSection);
 		stringBuilder << QString("\t\tAdapterRAM %1").arg(vidController->AdapterRAM);
@@ -508,7 +511,7 @@ if (avaliableVideoControllers->first()->SysFS!=QString(udev_device_get_devpath(d
 			QString msg=International::GetText("QueryVideoControllers_NOT_ALL_OK_Msg");
 			foreach (VideoControllerData* vc, *avaliableVideoControllers) {
 				if (vc->Status.toLower()!="ok") {
-					msg+="\n"+International::GetText("QueryVideoControllers_NOT_ALL_OK_Msg_Append").arg(vc->Name).arg(vc->Status).arg(vc->PNPDeviceID);
+					msg+="\n"+International::GetText("QueryVideoControllers_NOT_ALL_OK_Msg_Append").arg(vc->Name).arg(vc->Status).arg(vc->PnpDeviceID);
 					}
 				}
 			QMessageBox::warning(nullptr, International::GetText("QueryVideoControllers_NOT_ALL_OK_Title"), msg, QMessageBox::Ok);
@@ -531,26 +534,26 @@ void ComputeDeviceManager::Query::Cpu::QueryCpus()
 {
 	Helpers::ConsolePrint(Tag, "QueryCpus START");
 	// get all CPUs
-	Avaliable.CpusCount=CPUID::GetPhysicalProcessorCount();
-	Avaliable.IsHyperThreadingEnabled=CPUID::IsHyperThreadingEnabled();
+	Available.CpusCount=CPUID::GetPhysicalProcessorCount();
+	Available.IsHyperThreadingEnabled=CPUID::IsHyperThreadingEnabled();
 
-	Helpers::ConsolePrint(Tag, Avaliable.IsHyperThreadingEnabled? "HyperThreadingEnabled = TRUE" : "HyperThreadingEnabled = FALSE");
+	Helpers::ConsolePrint(Tag, Available.IsHyperThreadingEnabled? "HyperThreadingEnabled = TRUE" : "HyperThreadingEnabled = FALSE");
 
 	// get all cores (including virtual - HT can benefit mining)
-	int threadsPerCpu=CPUID::GetVirtualCoresCount()/Avaliable.CpusCount;
+	int threadsPerCpu=CPUID::GetVirtualCoresCount()/Available.CpusCount;
 
 	if (!Helpers::Is64BitOperatingSystem()) {
 		if (ConfigManager.generalConfig->ShowDriverVersionWarning) {
 			QMessageBox::warning(nullptr, International::GetText("Warning_with_Exclamation"), International::GetText("Form_Main_msgbox_CPUMining64bitMsg"), QMessageBox::Ok);
 			}
-		Avaliable.CpusCount=0;
+		Available.CpusCount=0;
 		}
 
-	if (threadsPerCpu*Avaliable.CpusCount>64) {
+	if (threadsPerCpu*Available.CpusCount>64) {
 		if (ConfigManager.generalConfig->ShowDriverVersionWarning) {
 			QMessageBox::warning(nullptr, International::GetText("Warning_with_Exclamation"), International::GetText("Form_Main_msgbox_CPUMining64CoresMsg"), QMessageBox::Ok);
 			}
-		Avaliable.CpusCount=0;
+		Available.CpusCount=0;
 		}
 
 	// TODO important move this to settings
@@ -558,12 +561,12 @@ void ComputeDeviceManager::Query::Cpu::QueryCpus()
 	Globals::ThreadsPerCpu=threadsPerCpu;
 
 	if (CPUUtils::IsCpuMiningCapable()) {
-		if (Avaliable.CpusCount==1) {
-			Avaliable.AllAvailableDevices->append(new CpuComputeDevice(0, "CPU0", CPUID::GetCPUName().trimmed(), threadsPerCpu, 0, ++_cpuCount));
+		if (Available.CpusCount==1) {
+			Available.Devices->append(new CpuComputeDevice(0, "CPU0", CPUID::GetCPUName().trimmed(), threadsPerCpu, 0, ++CpuCount));
 			}
-		else if (Avaliable.CpusCount>1) {
-			for (int i=0; i<Avaliable.CpusCount; i++) {
-				Avaliable.AllAvailableDevices->append(new CpuComputeDevice(i, "CPU"+QString::number(i), CPUID::GetCPUName().trimmed(), threadsPerCpu, CPUID::CreateAffinityMask(i, threadsPerCpuMask), ++_cpuCount));
+		else if (Available.CpusCount>1) {
+			for (int i=0; i<Available.CpusCount; i++) {
+				Available.Devices->append(new CpuComputeDevice(i, "CPU"+QString::number(i), CPUID::GetCPUName().trimmed(), threadsPerCpu, CPUID::CreateAffinityMask(i, threadsPerCpuMask), ++CpuCount));
 				}
 			}
 		}
@@ -590,7 +593,7 @@ void ComputeDeviceManager::Query::Nvidia::QueryCudaDevices()
 	QueryCudaDevices(_cudaDevices);
 
 	if (_cudaDevices!=nullptr && _cudaDevices->count()) {
-		Avaliable.HasNvidia=true;
+		Available.HasNvidia=true;
 		QStringList stringBuilder({""});
 		stringBuilder << "CudaDevicesDetection:";
 
@@ -686,7 +689,7 @@ void ComputeDeviceManager::Query::Nvidia::QueryCudaDevices()
 
 //				NvPhysicalGpuHandle handle=idHandles.value(cudaDev->pciBusID);
 				nvmlDevice_t* handle=idHandles.value(cudaDev->pciBusID);
-				Avaliable.AllAvailableDevices->append(new CudaComputeDevice(cudaDev, group, ++_gpuCount, handle, nvmlHandle));
+				Available.Devices->append(new CudaComputeDevice(cudaDev, group, ++GpuCount, handle, nvmlHandle));
 				}
 			}
 		Helpers::ConsolePrint(Tag, stringBuilder.join('\n'));
@@ -759,7 +762,7 @@ void ComputeDeviceManager::Query::Nvidia::QueryCudaDevices(QList<CudaDevice*>* c
 //		}
 }
 #endif
-QList<ComputeDeviceManager::Query::OpenCLJsonData_t>* ComputeDeviceManager::Query::_openCLJsonData=new QList<ComputeDeviceManager::Query::OpenCLJsonData_t>;
+QList<OpenCLJsonData>* ComputeDeviceManager::Query::_openCLJsonData=new QList<OpenCLJsonData>;
 bool ComputeDeviceManager::Query::_isOpenCLQuerySuccess=false;
 
 QString ComputeDeviceManager::Query::OpenCL::_queryOpenCLDevicesString="";
@@ -791,7 +794,7 @@ void ComputeDeviceManager::Query::OpenCL::QueryOpenCLDevices()
 			QJsonArray arr=QJsonDocument::fromJson(_queryOpenCLDevicesString.toLatin1()).array();
 			foreach (QJsonValue v, arr) {
 				QJsonObject od=v.toObject();
-				OpenCLJsonData_t d;
+				OpenCLJsonData d;
 				d.PlatformName=od.value("PlatformName").toString();
 				d.PlatformNum=od.value("PlatformNum").toInt();
 				QList<OpenCLDevice*>* devs=new QList<OpenCLDevice*>;
@@ -827,7 +830,7 @@ void ComputeDeviceManager::Query::OpenCL::QueryOpenCLDevices()
 		_isOpenCLQuerySuccess=true;
 		QStringList stringBuilder({""});
 		stringBuilder << "AMDOpenCLDeviceDetection found devices success:";
-		foreach (OpenCLJsonData_t oclElem, *_openCLJsonData) {
+		foreach (OpenCLJsonData oclElem, *_openCLJsonData) {
 			stringBuilder << "\tFound devices for platform: "+oclElem.PlatformName;
 			foreach (OpenCLDevice* oclDev, *oclElem.Devices) {
 				stringBuilder << "\t\tDevice:";
@@ -842,321 +845,7 @@ void ComputeDeviceManager::Query::OpenCL::QueryOpenCLDevices()
 }
 
 QList<OpenCLDevice*>* ComputeDeviceManager::Query::AmdDevices=new QList<OpenCLDevice*>;
-#if WITH_AMD
-void ComputeDeviceManager::Query::Amd::QueryAmd()
-{
-	const int amdVendorID=1002;
-	Helpers::ConsolePrint(Tag, "QueryAMD START");
 
-	QMap<QString, bool>* deviceDriverOld=new QMap<QString, bool>;
-	QMap<QString, bool>* deviceDriverNoNeoscryptLyra2RE=new QMap<QString, bool>;
-	bool showWarningDialog=false;
-
-	foreach (VideoControllerData* vidContrllr, *AvaliableVideoControllers) {
-		Helpers::ConsolePrint(Tag, "Checking AMD device (driver): "+vidContrllr->Name+" ("+vidContrllr->DriverVersion+")");
-
-		deviceDriverOld->insert(vidContrllr->Name, false);
-		deviceDriverNoNeoscryptLyra2RE->insert(vidContrllr->Name, false);
-		QVersionNumber sgminerNoNeoscryptLyra2RE=QVersionNumber::fromString("21.19.164.1");
-		if ((vidContrllr->Name.contains("AMD") || vidContrllr->Name.contains("Radeon")) && showWarningDialog==false) {
-			QVersionNumber amdDriverVersion=QVersionNumber::fromString(vidContrllr->DriverVersion);
-
-			if (!ConfigManager.generalConfig->ForceSkipAMDNeoscryptLyraCheck) {
-				bool greaterOrEqual=QVersionNumber::compare(amdDriverVersion, sgminerNoNeoscryptLyra2RE)>=0;
-				if (greaterOrEqual) {
-					deviceDriverNoNeoscryptLyra2RE->insert(vidContrllr->Name, true);
-					Helpers::ConsolePrint(Tag, "Driver version seems to be "+sgminerNoNeoscryptLyra2RE.toString()+" or higher. NeoScrypt and Lyra2REv2 will be removed from list");
-					}
-				}
-
-			if (amdDriverVersion.majorVersion()<15) {
-				showWarningDialog=true;
-				deviceDriverOld->insert(vidContrllr->Name, true);
-				Helpers::ConsolePrint(Tag, "WARNING!!! Old AMD GPU driver detected! All optimized versions disabled, mining speed will not be optimal. Consider upgrading AMD GPU driver. Recommended AMD GPU driver version is 15.7.1.");
-				}
-			}
-		}
-	if (ConfigManager.generalConfig->ShowDriverVersionWarning && showWarningDialog) {
-		QDialog* warningDialog=new DriverVersionConfirmationDialog;
-		warningDialog->exec();
-		delete warningDialog;
-		}
-
-	// get platform version
-	ShowMessageAndStep(International::GetText("Compute_Device_Query_Manager_AMD_Query"));
-	QList<OpenCLDevice*>* amdOclDevices=new QList<OpenCLDevice*>;
-	if (_isOpenCLQuerySuccess) {
-		bool amdPlatformNumFound=false;
-		foreach (OpenCLJsonData_t oclEl, *_openCLJsonData) {
-			if (!oclEl.PlatformName.contains("AMD") && !oclEl.PlatformName.contains("amd")) {
-				continue;
-				}
-			amdPlatformNumFound=true;
-			QString amdOpenCLPlatformStringKey=oclEl.PlatformName;
-			Avaliable.AmdOpenCLPlatformNum=oclEl.PlatformNum;
-			amdOclDevices=oclEl.Devices;
-			Helpers::ConsolePrint(Tag, "AMD platform found: Key: "+amdOpenCLPlatformStringKey+", Num: "+QString::number(Avaliable.AmdOpenCLPlatformNum));
-			break;
-			}
-		if (amdPlatformNumFound) {
-			{ // get only AMD gpus
-				foreach (OpenCLDevice* oclDev, *amdOclDevices) {
-					if (oclDev->_CL_DEVICE_TYPE.contains("GPU")) {
-						AmdDevices->append(oclDev);
-						}
-					}
-			}
-
-			if (!AmdDevices->count()) {
-				Helpers::ConsolePrint(Tag, "AMD GPUs count is 0");
-				}
-			else {
-				Helpers::ConsolePrint(Tag, QString("AMD GPUs count: %1").arg(AmdDevices->count()));
-#if ADL_FOUND
-				Helpers::ConsolePrint(Tag, "AMD Getting device name and serial from ADL");
-				// ADL
-				bool isAdlInit=true;
-				// ADL does not get devices in order map devices by bus number
-				// bus id, <name, uuid>
-				QMap<int, std::tuple<QString, QString, QString, int, int>*>* busIDsInfo=new QMap<int, std::tuple<QString, QString, QString, int, int>*>;
-				QStringList* amdDeviceName=new QStringList;
-				QStringList* amdDeviceUuid=new QStringList;
-				try {
-					if (!ADL::Init()) {
-						throw LException("ADL::Init error");
-						}
-					int adlRet=-1;
-					int numberOfAdapters=0;
-					ADL_CONTEXT_HANDLE adl2Control=nullptr;
-
-					adlRet=ADL::ADL_Main_Control_Create(ADL_Main_Memory_Alloc, 1);
-					if (adlRet==ADL::ADL_SUCCESS) {
-						ADL::ADL_Adapter_NumberOfAdapters_Get(&numberOfAdapters);
-						Helpers::ConsolePrint(Tag, "Number Of Adapters: "+QString::number(numberOfAdapters));
-
-						if (numberOfAdapters>0) {
-							// Get OS adpater info from ADL
-//							ADLAdapterInfoArray* osAdapterInfoData=new ADLAdapterInfoArray;
-
-							int size=sizeof (AdapterInfo)*numberOfAdapters;
-							LPAdapterInfo adapterBuffer=(LPAdapterInfo)malloc(size);
-							memset(adapterBuffer, '\0', size);
-
-							adlRet=ADL::ADL_Adapter_AdapterInfo_Get(adapterBuffer, size);
-
-							int adl2Ret=-1;
-							adl2Ret=ADL::ADL2_Main_Control_Create(ADL_Main_Memory_Alloc, 0, &adl2Control);
-							AdapterInfo adl2Info[ADL_MAX_ADAPTERS];
-							if (adl2Ret==ADL::ADL_SUCCESS) {
-								adl2Ret=ADL::ADL2_Adapter_AdapterInfo_Get(adl2Control, adl2Info, sizeof(adl2Info));
-								}
-							else {
-								adl2Ret=-1;
-								}
-
-							if (adlRet==ADL::ADL_SUCCESS) {
-								int isActive=0;
-
-								for (int i=0; i<numberOfAdapters; i++) {
-									// Check if the adapter is active
-									AdapterInfo adapterInfo=adapterBuffer[i];
-									adlRet=ADL::ADL_Adapter_Active_Get(adapterInfo.iAdapterIndex, &isActive);
-
-									if (adlRet==ADL::ADL_SUCCESS) {
-										int vendorID=adapterInfo.iVendorID;
-										QString devName=adapterInfo.strAdapterName;
-										if (vendorID==amdVendorID
-											||devName.toLower().contains("amd")
-											||devName.toLower().contains("radeon")
-											||devName.toLower().contains("firepro")
-											) {
-											QString pnpStr=""; // adapterInfo.strPNPString;
-											QString infSection="";
-											foreach (VideoControllerData* vCtrl, *AvaliableVideoControllers) {
-												if (vCtrl->PNPDeviceID==pnpStr) {
-													infSection=vCtrl->InfSection;
-													}
-												}
-											int backSlashLast=pnpStr.lastIndexOf('\\');
-											QString serial=pnpStr.mid(backSlashLast, pnpStr.length()-backSlashLast);
-											int end0=serial.indexOf('&');
-											int end1=serial.indexOf('&', end0+1);
-											// get serial
-											serial=serial.mid(end0+1, (end1-end0)-1);
-
-											QString udid=adapterInfo.strUDID;
-											int pciVenIDStrSize=21; // PCI_VEN_XXXX&DEV_XXXX
-											QString uuid=udid.left(pciVenIDStrSize)+"_"+serial;
-											int budId=adapterInfo.iBusNumber;
-											int index=adapterInfo.iAdapterIndex;
-											if (!amdDeviceUuid->contains(uuid)) {
-//												try {
-													Helpers::ConsolePrint(Tag, "ADL device added BusNumber:"+QString::number(budId)+"  NAME:"+devName+"  UUID"+uuid);
-//													}
-//												catch (...) {
-//													}
-												amdDeviceUuid->append(uuid);
-												amdDeviceName->append(devName);
-												if (!busIDsInfo->contains(budId)) {
-													int adl2Index=-1;
-													if (adl2Ret==ADL::ADL_SUCCESS) {
-														for (int i=0; i<ADL_MAX_ADAPTERS; i++) {
-															if (adl2Info[i].strUDID==adapterBuffer[i].strUDID) {
-																adl2Index=adl2Info[i].iAdapterIndex;
-																break;
-																}
-															}
-														}
-													busIDsInfo->insert(budId, new std::tuple<QString, QString, QString, int, int>(devName, uuid, infSection, index, adl2Index));
-													}
-												}
-											}
-										}
-									}
-								}
-							else {
-								Helpers::ConsolePrint(Tag, "ADL_AdapterInfo_Get() returned error code "+QString::number(adlRet));
-								isAdlInit=false;
-								}
-							// Release the memory for the AdapterInfo structure
-							if (adapterBuffer!=nullptr) {
-								free(adapterBuffer);
-								}
-							}
-						if (numberOfAdapters<=0) {
-							ADL::ADL_Main_Control_Destroy(); // Close ADL if it found no AMD devices
-/*							if (adl2Control!=nullptr) {
-								ADL::ADL2_Main_Control_Destroy(adl2Control);
-								}*/
-							}
-						}
-					else {
-						// TODO
-						Helpers::ConsolePrint(Tag, "ADL_Main_Control_Create() returned error code "+QString::number(adlRet));
-						Helpers::ConsolePrint(Tag, "Check if ADL is properly installed!");
-						isAdlInit=false;
-						}
-					}
-				catch (LException& ex) {
-					Helpers::ConsolePrint(Tag, QString("AMD ADL exception: ")+ex.what());
-					isAdlInit=false;
-					}
-
-				bool isBusIDOk=true;
-				{ // check if buss ids are unique and different from -1
-					QSet<int> busIDs;
-					// Override AMD bus IDs
-					QStringList overrides=ConfigManager.generalConfig->OverrideAMDBusIds.split(',');
-					for (int i=0; i<AmdDevices->count(); i++) {
-						OpenCLDevice* amdOclDev=AmdDevices->at(i);
-						bool ok;
-						if (overrides.count()>i) {
-							int overrideBus=overrides[i].toInt(&ok);
-							if (ok && overrideBus>=0) {
-								amdOclDev->AMD_BUS_ID=overrideBus;
-								}
-							}
-						if (amdOclDev->AMD_BUS_ID<0 || !busIDsInfo->contains(amdOclDev->AMD_BUS_ID)) {
-							isBusIDOk=false;
-							break;
-							}
-						busIDs.insert(amdOclDev->AMD_BUS_ID);
-						}
-					// check if unique
-					isBusIDOk= isBusIDOk && busIDs.count()==AmdDevices->count();
-				}
-				// print BUS id status
-				Helpers::ConsolePrint(Tag, isBusIDOk? "AMD Bus IDs are unique and valid. OK" : "AMD Bus IDs IS INVALID. Using fallback AMD detection mode");
-
-				// AMD device creation (in NHM context)
-				if (isAdlInit && isBusIDOk) {
-					Helpers::ConsolePrint(Tag, "Using AMD device creation DEFAULT Reliable mappings");
-					Helpers::ConsolePrint(Tag, AmdDevices->count()==amdDeviceUuid->count()? "AMD OpenCL and ADL AMD query COUNTS GOOD/SAME" : "AMD OpenCL and ADL AMD query COUNTS DIFFERENT/BAD");
-					QStringList stringBuilder({""});
-					stringBuilder << "QueryAMD [DEFAULT query] devices: ";
-					foreach (OpenCLDevice* dev, *AmdDevices) {
-						Avaliable.HasAmd=true;
-
-						int busID=dev->AMD_BUS_ID;
-						if (busID!=-1 && busIDsInfo->contains(busID)) {
-							QString deviceName=std::get<0>(*busIDsInfo->value(busID));
-							AmdGpuDevice* newAmdDev=new AmdGpuDevice(dev, deviceDriverOld->value(deviceName), std::get<2>(*busIDsInfo->value(busID)), deviceDriverNoNeoscryptLyra2RE->value(deviceName));
-							newAmdDev->DeviceName=deviceName;
-							newAmdDev->UUID=std::get<1>(*busIDsInfo->value(busID));
-							newAmdDev->AdapterIndex=std::get<3>(*busIDsInfo->value(busID));
-							bool isDisabledGroup=ConfigManager.generalConfig->DeviceDetection->DisableDetectionAMD;
-
-							Avaliable.AllAvailableDevices->append(new AmdComputeDevice(newAmdDev, ++_gpuCount, false, std::get<4>(*busIDsInfo->value(busID))));
-//							try {
-								stringBuilder << QString("\t%1 device%2:").arg(isDisabledGroup? "SKIPED" : "ADDED").arg(isDisabledGroup? " (AMD group disabled)" : "");
-								stringBuilder << "\t\tID: "+QString::number(newAmdDev->DeviceID());
-								stringBuilder << "\t\tNAME: "+newAmdDev->DeviceName;
-								stringBuilder << "\t\tCODE_NAME: "+newAmdDev->Codename();
-								stringBuilder << "\t\tUUID: "+newAmdDev->UUID;
-								stringBuilder << "\t\tMEMORY: "+QString::number(newAmdDev->DeviceGlobalMemory());
-								stringBuilder << QString("\t\tETHEREUM: ")+(newAmdDev->IsEtherumCapable()? "YES" : "NO");
-//								}
-//							catch (...) {}
-							}
-						else {
-							stringBuilder+="\tDevice not added, Bus No. "+QString::number(busID)+" not found:\n";
-							}
-						}
-					Helpers::ConsolePrint(Tag, stringBuilder.join('\n'));
-					}
-				else {
-#endif
-					Helpers::ConsolePrint(Tag, "Using AMD device creation FALLBACK UnReliable mappings");
-					QStringList stringBuilder({""});
-					stringBuilder << "QueryAMD [FALLBACK query] devices: ";
-
-					// get video AMD controllers and sort them by RAM
-					// (find a way to get PCI BUS Numbers from PNPDeviceID)
-					QList<VideoControllerData*>* amdVideoControllers=new QList<VideoControllerData*>;
-					foreach (VideoControllerData* vcd, *AvaliableVideoControllers) {
-						if (vcd->Name.toLower().contains("amd")
-							|| vcd->Name.toLower().contains("radeon")
-							|| vcd->Name.toLower().contains("firepro")
-							) {
-							amdVideoControllers->append(vcd);
-							}
-						}
-					// sort by ram not ideal
-					std::sort(amdVideoControllers->begin(), amdVideoControllers->end(), [](const VideoControllerData* a, const VideoControllerData* b) { return a->AdapterRAM<b->AdapterRAM; });
-					std::sort(AmdDevices->begin(), AmdDevices->end(), [](const OpenCLDevice* a, const OpenCLDevice* b) { return a->_CL_DEVICE_GLOBAL_MEM_SIZE<b->_CL_DEVICE_GLOBAL_MEM_SIZE; });
-					int minCount=std::min(amdVideoControllers->count(), AmdDevices->count());
-
-					for (int i=0; i<minCount; ++i) {
-						Avaliable.HasAmd=true;
-
-						QString deviceName=amdVideoControllers->at(i)->Name;
-						AmdGpuDevice* newAmdDev=new AmdGpuDevice(AmdDevices->at(i), deviceDriverOld->value(deviceName), amdVideoControllers->at(i)->InfSection, deviceDriverNoNeoscryptLyra2RE->value(deviceName));
-						newAmdDev->DeviceName=deviceName;
-						newAmdDev->UUID="UNUSED";
-						bool isDisabledGroup=ConfigManager.generalConfig->DeviceDetection->DisableDetectionAMD;
-
-						Avaliable.AllAvailableDevices->append(new AmdComputeDevice(newAmdDev, ++_gpuCount, true, -1));
-//						try {
-							stringBuilder << QString("\t%1 device%2:").arg(isDisabledGroup? "SKIPED" : "ADDED").arg(isDisabledGroup? " (AMD group disabled)" : "");
-							stringBuilder << "\t\tID: "+QString::number(newAmdDev->DeviceID());
-							stringBuilder << "\t\tNAME: "+newAmdDev->DeviceName;
-							stringBuilder << "\t\tCODE_NAME: "+newAmdDev->Codename();
-							stringBuilder << "\t\tUUID: "+newAmdDev->UUID;
-							stringBuilder << "\t\tMEMORY: "+QString::number(newAmdDev->DeviceGlobalMemory());
-							stringBuilder << QString("\t\tETHEREUM: ")+(newAmdDev->IsEtherumCapable()? "YES" : "NO");
-//							}
-//						catch (...) {}
-						}
-					Helpers::ConsolePrint(Tag, stringBuilder.join('\n'));
-#if ADL_FOUND
-					}
-#endif
-				}
-			}
-		}
-	Helpers::ConsolePrint(Tag, "QueryAMD END");
-}
-#endif
 uint64_t ComputeDeviceManager::SystemSpecs::FreePhysicalMemory=0;
 uint64_t ComputeDeviceManager::SystemSpecs::FreeSpaceInPagingFiles=0;
 uint64_t ComputeDeviceManager::SystemSpecs::FreeVirtualMemory=0;
@@ -1228,7 +917,7 @@ int ComputeDeviceManager::Available::CpusCount=0;
 int ComputeDeviceManager::Available::AvailCpus()
 {
 	int cnt=0;
-	foreach (ComputeDevice* d, *AllAvailableDevices) {
+	foreach (ComputeDevice* d, *Devices) {
 		if (d->DeviceType==Enums::DeviceType::CPU) {
 			cnt++;
 			}
@@ -1239,7 +928,7 @@ int ComputeDeviceManager::Available::AvailCpus()
 int ComputeDeviceManager::Available::AvailNVGpus()
 {
 	int cnt=0;
-	foreach (ComputeDevice* d, *AllAvailableDevices) {
+	foreach (ComputeDevice* d, *Devices) {
 		if (d->DeviceType==Enums::DeviceType::NVIDIA) {
 			cnt++;
 			}
@@ -1250,7 +939,7 @@ int ComputeDeviceManager::Available::AvailNVGpus()
 int ComputeDeviceManager::Available::AvailAmdGpus()
 {
 	int cnt=0;
-	foreach (ComputeDevice* d, *AllAvailableDevices) {
+	foreach (ComputeDevice* d, *Devices) {
 		if (d->DeviceType==Enums::DeviceType::AMD) {
 			cnt++;
 			}
@@ -1265,11 +954,11 @@ bool ComputeDeviceManager::Available::IsHyperThreadingEnabled=false;
 ulong ComputeDeviceManager::Available::NvidiaRamSum=0;
 ulong ComputeDeviceManager::Available::AmdRamSum=0;
 
-QList<ComputeDevice*>* ComputeDeviceManager::Available::AllAvailableDevices=new QList<ComputeDevice*>;
+QList<ComputeDevice*>* ComputeDeviceManager::Available::Devices=new QList<ComputeDevice*>;
 
 ComputeDevice* ComputeDeviceManager::Available::GetDeviceWithUuid(QString uuid)
 {
-	foreach (ComputeDevice* dev, *ComputeDeviceManager::Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* dev, *ComputeDeviceManager::Available.Devices) {
 		if (uuid==dev->Uuid()) {
 			return dev;
 			}
@@ -1281,7 +970,7 @@ QList<ComputeDevice*>* ComputeDeviceManager::Available::GetSameDevicesTypeAsDevi
 {
 	QList<ComputeDevice*>* sameTypes=new QList<ComputeDevice*>;
 	ComputeDevice* compareDev=GetDeviceWithUuid(uuid);
-	foreach (ComputeDevice* dev, *AllAvailableDevices) {
+	foreach (ComputeDevice* dev, *Devices) {
 		if (uuid!=dev->Uuid() && compareDev->DeviceType==dev->DeviceType) {
 			sameTypes->append(GetDeviceWithUuid(dev->Uuid()));
 			}
@@ -1291,13 +980,13 @@ QList<ComputeDevice*>* ComputeDeviceManager::Available::GetSameDevicesTypeAsDevi
 
 ComputeDevice* ComputeDeviceManager::Available::GetCurrentlySelectedComputeDevice(int index, bool unique)
 {
-	return AllAvailableDevices->value(index);
+	return Devices->value(index);
 }
 
 int ComputeDeviceManager::Available::GetCountForType(Enums::DeviceType type)
 {
 	int count=0;
-	foreach (ComputeDevice* device, *AllAvailableDevices) {
+	foreach (ComputeDevice* device, *Devices) {
 		if (device->DeviceType==type) {
 			++count;
 			}
@@ -1308,7 +997,7 @@ int ComputeDeviceManager::Available::GetCountForType(Enums::DeviceType type)
 
 void ComputeDeviceManager::Group::DisableCpuGroup()
 {
-	foreach (ComputeDevice* device, *Available::AllAvailableDevices) {
+	foreach (ComputeDevice* device, *Available::Devices) {
 		if (device->DeviceType==Enums::DeviceType::CPU) {
 			device->Enabled=false;
 			}
@@ -1317,7 +1006,7 @@ void ComputeDeviceManager::Group::DisableCpuGroup()
 
 bool ComputeDeviceManager::Group::ContainsAmdGpus()
 {
-	foreach (ComputeDevice* device, *Available::AllAvailableDevices) {
+	foreach (ComputeDevice* device, *Available::Devices) {
 		if (device->DeviceType==Enums::DeviceType::AMD) {
 			return true;
 			}
@@ -1327,7 +1016,7 @@ bool ComputeDeviceManager::Group::ContainsAmdGpus()
 
 bool ComputeDeviceManager::Group::ContainsGpus()
 {
-	foreach (ComputeDevice* device, *Available::AllAvailableDevices) {
+	foreach (ComputeDevice* device, *Available::Devices) {
 		if (device->DeviceType==Enums::DeviceType::NVIDIA || device->DeviceType==Enums::DeviceType::AMD) {
 			return true;
 			}

@@ -33,7 +33,7 @@ Form_Benchmark::Form_Benchmark(QWidget *parent, Enums::BenchmarkPerformanceType 
 	StartMining_=false;
 
 	// clear prev pending statuses
-	foreach (ComputeDevice* dev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* dev, *ComputeDeviceManager.Available.Devices) {
 		foreach (Algorithm* algo, *dev->GetAlgorithmSettings()) {
 			algo->ClearBenchmarkPendingFirst();
 			}
@@ -43,7 +43,7 @@ Form_Benchmark::Form_Benchmark(QWidget *parent, Enums::BenchmarkPerformanceType 
 
 	// benchmark only unique devices
 	devicesListViewEnableControl1->SetIListItemCheckColorSetter(this);
-	devicesListViewEnableControl1->SetComputeDevices(ComputeDeviceManager.Avaliable.AllAvailableDevices);
+	devicesListViewEnableControl1->SetComputeDevices(ComputeDeviceManager.Available.Devices);
 
 	InitLocale();
 
@@ -68,8 +68,8 @@ Form_Benchmark::Form_Benchmark(QWidget *parent, Enums::BenchmarkPerformanceType 
 	algorithmsListView1->BenchmarkCalculation=this;
 
 	// set first device selected
-	if (ComputeDeviceManager.Avaliable.AllAvailableDevices->count()>0) {
-		ComputeDevice* firstComputeDevice=ComputeDeviceManager.Avaliable.AllAvailableDevices->first();
+	if (ComputeDeviceManager.Available.Devices->count()>0) {
+		ComputeDevice* firstComputeDevice=ComputeDeviceManager.Available.Devices->first();
 		algorithmsListView1->SetAlgorithms(firstComputeDevice, firstComputeDevice->Enabled);
 		}
 
@@ -165,7 +165,7 @@ void Form_Benchmark::CalcBenchmarkDevicesAlgorithmQueue()
 	_benchmarkAlgorithmsCount=0;
 	_benchmarkDevicesAlgorithmStatus=new QMap<QString, BenchmarkSettingsStatus>;
 	_benchmarkDevicesAlgorithmQueue=new QList<QPair<ComputeDevice*, QQueue<Algorithm*>*>*>;
-	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Available.Devices) {
 		QQueue<Algorithm*>* algorithmQueue=new QQueue<Algorithm*>;
 		foreach (Algorithm* algo, *cDev->GetAlgorithmSettings()) {
 			if (ShoulBenchmark(algo)) {
@@ -263,10 +263,10 @@ void Form_Benchmark::LviSetColor(QAbstractTableModel* model, int row)
 void Form_Benchmark::CopyBenchmarks()
 {
 	Helpers::ConsolePrint("CopyBenchmarks", "Checking for benchmarks to copy");
-	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Available.Devices) {
 		// check if copy
 		if (!cDev->Enabled && !cDev->BenchmarkCopyUuid.isEmpty()) {
-			ComputeDevice* copyCdevSettings=ComputeDeviceManager.Avaliable.GetDeviceWithUuid(cDev->BenchmarkCopyUuid);
+			ComputeDevice* copyCdevSettings=ComputeDeviceManager.Available.GetDeviceWithUuid(cDev->BenchmarkCopyUuid);
 			if (copyCdevSettings!=nullptr) {
 				Helpers::ConsolePrint("CopyBenchmarks", QString("Copy from %1 to %2").arg(cDev->Uuid()).arg(cDev->BenchmarkCopyUuid));
 				cDev->CopyBenchmarkSettingsFrom(copyCdevSettings);
@@ -372,7 +372,7 @@ bool Form_Benchmark::StartButonClick()
 	// device selection check scope
 	{
 		bool noneSelected=true;
-		foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+		foreach (ComputeDevice* cDev, *ComputeDeviceManager.Available.Devices) {
 			if (cDev->Enabled) {
 				noneSelected=false;
 				break;
@@ -509,7 +509,7 @@ void Form_Benchmark::FormBenchmark_New_FormClosing(QCloseEvent* e)
 		}
 
 	// disable all pending benchmark
-	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* cDev, *ComputeDeviceManager.Available.Devices) {
 		foreach (Algorithm* algorithm, *cDev->GetAlgorithmSettings()) {
 			algorithm->ClearBenchmarkPending();
 			}
@@ -518,7 +518,7 @@ void Form_Benchmark::FormBenchmark_New_FormClosing(QCloseEvent* e)
 	// save already benchmarked algorithms
 	ConfigManager.CommitBenchmarks();
 	// check devices without benchmarks
-	foreach (ComputeDevice* cdev, *ComputeDeviceManager.Avaliable.AllAvailableDevices) {
+	foreach (ComputeDevice* cdev, *ComputeDeviceManager.Available.Devices) {
 		if (cdev->Enabled) {
 			bool Enabled=false;
 			foreach (Algorithm* algo, *cdev->GetAlgorithmSettings()) {
@@ -536,8 +536,8 @@ void Form_Benchmark::DevicesListView1_ItemSelectionChanged(int row)
 {
 	// show algorithms
 	ComputeDevice* _selectedComputeDevice= row!=-1
-		? ComputeDeviceManager.Avaliable.GetCurrentlySelectedComputeDevice(row, true)
-		: ComputeDeviceManager.Avaliable.AllAvailableDevices->first()
+		? ComputeDeviceManager.Available.GetCurrentlySelectedComputeDevice(row, true)
+		: ComputeDeviceManager.Available.Devices->first()
 		;
 	algorithmsListView1->SetAlgorithms(_selectedComputeDevice, _selectedComputeDevice->Enabled);
 }

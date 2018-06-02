@@ -45,12 +45,16 @@ list(APPEND NHQTM_benchmarking_SRCS
 	)
 list(APPEND NHQTM_devices_SRCS
 	Devices/ComputeDeviceManager.cpp
-	Devices/GroupAlgorithms.cpp
 	Devices/GroupNames.cpp
 	Devices/CPUUtils.cpp
 
+	Devices/Algorithms/DefaultAlgorithms.cpp
+	Devices/Algorithms/GroupAlgorithms.cpp
+
 	Devices/ComputeDevice/ComputeDevice.cpp #done
-	Devices/ComputeDevice/CPUComputeDevice.cpp
+	Devices/ComputeDevice/CpuComputeDevice.cpp
+
+	Devices/Querying/AmdQuery.cpp
 	)
 list(APPEND NHQTM_3rdParty_SRCS
 	)
@@ -86,6 +90,7 @@ list(APPEND NHQTM_miners_SRCS
 	Miners/ClaymoreBaseMiner.cpp
 	Miners/ClaymoreDual.cpp
 	Miners/ClaymoreCryptoNightMiner.cpp
+	Miners/CpuMiner.cpp
 	Miners/Sgminer.cpp
 	Miners/Ewbf.cpp
 	Miners/Excavator.cpp
@@ -283,7 +288,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set_target_properties(BSEd PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
 endif ()
 
-qt5_use_modules(${PROJECT_NAME} Widgets)
+#qt5_use_modules(${PROJECT_NAME} Widgets)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/langs
 	DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}

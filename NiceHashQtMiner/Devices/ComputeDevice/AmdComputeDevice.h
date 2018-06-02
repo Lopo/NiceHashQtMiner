@@ -20,6 +20,7 @@ private:
 	int _adapterIndex; // For ADL
 	int _adapterIndex2; // For ADL2
 	ADL_CONTEXT_HANDLE _adlContext=nullptr;
+	bool _powerHasFailed=false;
 };
 
 #endif

@@ -8,12 +8,20 @@ class IMessageNotifier;
 class OpenCLDevice;
 class ComputeDevice;
 class CudaDevice;
+class VideoControllerData;
+class OpenCLJsonData;
 
 
 class ComputeDeviceManager
 {
 public:
 	static class Query {
+	public:
+		static int CpuCount;
+		static int GpuCount;
+		static IMessageNotifier* MessageNotifier() { return MessageNotifier_;};
+		static bool CheckVideoControllersCountMismath();
+		static void QueryDevices(IMessageNotifier* messageNotifier);
 	private:
 		const static QString Tag;
 		class NvidiaSmiDriver { //done
@@ -34,34 +42,11 @@ public:
 		static NvidiaSmiDriver* _currentNvidiaSmiDriver;
 		static NvidiaSmiDriver* InvalidSmiDriver;
 
-		static int _cpuCount;
-		static int _gpuCount;
-
 		static NvidiaSmiDriver* GetNvidiaSmiDriver();
 
 		static void ShowMessageAndStep(QString infoMsg); //done
 		static IMessageNotifier* MessageNotifier_;
-
-	public:
-		static IMessageNotifier* MessageNotifier() { return MessageNotifier_;};
-		static bool CheckVideoControllersCountMismath();
-		static void QueryDevices(IMessageNotifier* messageNotifier);
-
 	private:
-		class VideoControllerData {
-		public:
-			QString Name;
-			QString Description;
-			QString PNPDeviceID;
-			QString DriverVersion;
-			QString Status;
-			QString InfSection; // get arhitecture
-			ulong AdapterRAM=0;
-			QString SysFS;
-			QString UDev;
-			QString SysFS_BusID;
-			QString modalias;
-			}; //done
 		static QList<VideoControllerData*>* AvaliableVideoControllers;
 
 		static class WindowsDisplayAdapters {
@@ -71,7 +56,7 @@ public:
 		public:
 			static void QueryVideoControllers();
 		private:
-			static void QueryVideoControllers(QList<ComputeDeviceManager::Query::VideoControllerData*>* avaliableVideoControllers, bool warningsEnabled);
+			static void QueryVideoControllers(QList<VideoControllerData*>* avaliableVideoControllers, bool warningsEnabled);
 		public:
 			static bool HasNvidiaVideoController();
 			} WindowsDisplayAdapters;
@@ -94,13 +79,7 @@ public:
 			static void QueryCudaDevices(QList<CudaDevice*>* cudaDevices);
 			} Nvidia; //done
 #endif
-		class OpenCLJsonData_t {
-		public:
-			QString PlatformName="NONE";
-			int PlatformNum=0;
-			QList<OpenCLDevice*>* Devices=new QList<OpenCLDevice*>;
-			}; //done
-		static QList<OpenCLJsonData_t>* _openCLJsonData;
+		static QList<OpenCLJsonData>* _openCLJsonData;
 		static bool _isOpenCLQuerySuccess;
 
 		static class OpenCL {
@@ -114,14 +93,6 @@ public:
 
 	public:
 		static QList<OpenCLDevice*>* AmdDevices;
-
-	private:
-#if WITH_AMD
-		static class Amd {
-		public:
-			static void QueryAmd();
-			} Amd;
-#endif
 		} Query;
 
 	static class SystemSpecs {
@@ -168,13 +139,13 @@ public:
 		static ulong NvidiaRamSum;
 		static ulong AmdRamSum;
 		
-		static QList<ComputeDevice*>* AllAvailableDevices;
+		static QList<ComputeDevice*>* Devices;
 
 		static ComputeDevice* GetDeviceWithUuid(QString uuid);
 		static QList<ComputeDevice*>* GetSameDevicesTypeAsDeviceWithUuid(QString uuid);
 		static ComputeDevice* GetCurrentlySelectedComputeDevice(int index, bool unique);
 		static int GetCountForType(Enums::DeviceType type);
-		} Avaliable; //done
+		} Available; //done
 
 	static class Group { //done
 	public:

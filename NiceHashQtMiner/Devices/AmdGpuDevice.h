@@ -16,7 +16,7 @@ class AmdGpuDevice
 public:
 	AmdGpuDevice(OpenCLDevice* openClSubset, bool isOldDriver, QString infSection, bool driverDisableAlgo);
 
-	static const QStringList DefaultParam;
+	static QStringList DefaultParam();
 	static const QStringList TemperatureParam;
 
 	inline int DeviceID() const { return _openClSubset->DeviceID;};

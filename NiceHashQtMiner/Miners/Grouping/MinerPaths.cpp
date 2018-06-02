@@ -3,7 +3,7 @@
 #include "Algorithms/Algorithm.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Utils/Helpers.h"
-#include "Devices/GroupAlgorithms.h"
+#include "Devices/Algorithms/GroupAlgorithms.h"
 #include <QMetaEnum>
 #include <QFile>
 #include <QJsonObject>
@@ -94,6 +94,9 @@ const QString MinerPaths::Data::XmrStackCpuMiner=Bin+"/xmr-stack-cpu/xmr-stak";
 const QString MinerPaths::Data::XmrStakAmd=Bin+"/xmr-stak-amd/xmr-stak-amd";
 const QString MinerPaths::Data::XmrStak=Bin+"/xmr-stak/xmr-stak";
 const QString MinerPaths::Data::Xmrig=Bin+"/xmrig/xmrig";
+const QString MinerPaths::Data::XmrStakHeavy=Bin+"/xmr-stak_heavy/xmr-stak";
+
+const QString MinerPaths::Data::CpuMiner=Bin+"/cpuminer_opt/cpuminer";
 
 const QString MinerPaths::Data::None="";
 
@@ -140,6 +143,11 @@ QString MinerPaths::GetPathFor(Enums::MinerBaseType minerBaseType, Enums::Algori
 				}
 			}
 		}
+	// Temp workaround
+	if (minerBaseType==Enums::MinerBaseType::XmrStak && algoType==Enums::AlgorithmType::CryptoNightHeavy) {
+		return Data.XmrStakHeavy;
+		}
+
 	switch (minerBaseType) {
 		case Enums::MinerBaseType::ccminer:
 			return NvidiaGroups.Ccminer_path(algoType, devGroupType);
@@ -169,6 +177,8 @@ QString MinerPaths::GetPathFor(Enums::MinerBaseType minerBaseType, Enums::Algori
 			return Data.Xmrig;
 		case Enums::MinerBaseType::dtsm:
 			return Data.Dtsm;
+		case Enums::MinerBaseType::cpuminer:
+			return Data.CpuMiner;
 		default:
 			return Data.None;
 		}
@@ -234,6 +244,7 @@ QString MinerPaths::NvidiaGroups::CcminerSM5XOrSM6X(Enums::AlgorithmType algorit
 		case Enums::AlgorithmType::Blake2s:
 		case Enums::AlgorithmType::Skunk:
 		case Enums::AlgorithmType::Keccak:
+		case Enums::AlgorithmType::Lyra2z:
 			return Data.CcminerTPruvot;
 		case Enums::AlgorithmType::Sia:
 		case Enums::AlgorithmType::Nist5:

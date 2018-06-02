@@ -126,7 +126,7 @@ QString Prospector::DeviceIDString(int id, Enums::DeviceType type)
 	else {
 		// fallback
 		Helpers::ConsolePrint(MinerTag(), "Failed to get platform, falling back");
-		if (ComputeDeviceManager.Avaliable.HasNvidia && type!=Enums::DeviceType::NVIDIA) {
+		if (ComputeDeviceManager.Available.HasNvidia && type!=Enums::DeviceType::NVIDIA) {
 			platform=1;
 			}
 		}

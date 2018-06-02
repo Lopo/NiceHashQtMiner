@@ -26,8 +26,8 @@ public:
 			QJsonObject asJsonObject();
 		};
 
-	void SetupPools(QString poolAddr, QString wallet);
-	void SetupPools(QStringList poolAddrs, QString wallet);
+	void SetupPools(QString poolAddr, QString wallet, bool isHeavy);
+	void SetupPools(QStringList poolAddrs, QString wallet, bool isHeavy);
 
 	QList<XmrStakPoolItem> pool_list;
 	QString currency="monero7";

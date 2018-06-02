@@ -1,6 +1,6 @@
 #define __MinersSettingsManager_cpp__
 #include "Miners/MinersSettingsManager.h"
-#include "Devices/GroupAlgorithms.h"
+#include "Devices/Algorithms/GroupAlgorithms.h"
 #include "Miners/Grouping/MinerPaths.h"
 #include "Miners/Parsing/ExtraLaunchParameters.h"
 #include "Configs/ConfigJsonFile/MinerSystemVariablesConfigFile.h"

@@ -1,7 +1,7 @@
-#include "Devices/ComputeDevice/CPUComputeDevice.h"
+#include "Devices/ComputeDevice/CpuComputeDevice.h"
 #include "International.h"
 #include "Devices/GroupNames.h"
-#include "Devices/GroupAlgorithms.h"
+#include "Devices/Algorithms/GroupAlgorithms.h"
 #include "Utils/Helpers.h"
 #include <QException>
 
