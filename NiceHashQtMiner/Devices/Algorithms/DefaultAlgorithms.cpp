@@ -4,41 +4,49 @@
 
 QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::All()
 {
-	QMap<Enums::MinerBaseType, QList<Algorithm*>*>* ret=new QMap<Enums::MinerBaseType, QList<Algorithm*>*>;
-	ret->insert(Enums::MinerBaseType::XmrStak, new QList<Algorithm*>({
-		new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightV7, ""),
-		new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightHeavy, "")
-		}));
-	return ret;
+	return new QMap<Enums::MinerBaseType, QList<Algorithm*>*>({
+		{Enums::MinerBaseType::XmrStak, new QList<Algorithm*>({
+			new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightV7, ""),
+			new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightHeavy, "")
+			})}
+		});
 }
 
 QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Gpu()
 {
-	QMap<Enums::MinerBaseType, QList<Algorithm*>*>* ret=new QMap<Enums::MinerBaseType, QList<Algorithm*>*>;
-	ret->insert(Enums::MinerBaseType::Claymore, new QList<Algorithm*>({
-		new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, ""),
-		new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Decred),
-		new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Lbry),
-		new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Pascal),
-		new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Sia),
-		new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Blake2s),
-		new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Keccak)
-		}));
-	return ret;
+	return new QMap<Enums::MinerBaseType, QList<Algorithm*>*>({
+		{Enums::MinerBaseType::Claymore, new QList<Algorithm*>({
+			new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, ""),
+			new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Decred),
+			new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Lbry),
+			new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Pascal),
+			new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Sia),
+			new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Blake2s),
+			new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Keccak)
+			})}
+		});
 }
 
 QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Cpu()
 {
-	QMap<Enums::MinerBaseType, QList<Algorithm*>*>* ret=new QMap<Enums::MinerBaseType, QList<Algorithm*>*>;
-	ret->insert(Enums::MinerBaseType::Xmrig, new QList<Algorithm*>({
-		new Algorithm(Enums::MinerBaseType::Xmrig, Enums::AlgorithmType::CryptoNightV7, "")
-		}));
-	ret->insert(Enums::MinerBaseType::cpuminer, new QList<Algorithm*>({
-		new Algorithm(Enums::MinerBaseType::cpuminer, Enums::AlgorithmType::Lyra2z, "lyra2z")
-		}));
-	auto a=All();
-	foreach (Enums::MinerBaseType mbt, a->keys()) {
-		ret->insert(mbt, a->value(mbt));
+	QMap<Enums::MinerBaseType, QList<Algorithm*>*>* ret=new QMap<Enums::MinerBaseType, QList<Algorithm*>*>({
+		{Enums::MinerBaseType::Xmrig, new QList<Algorithm*>({
+			new Algorithm(Enums::MinerBaseType::Xmrig, Enums::AlgorithmType::CryptoNightV7, "")
+			})},
+		{Enums::MinerBaseType::cpuminer, new QList<Algorithm*>({
+			new Algorithm(Enums::MinerBaseType::cpuminer, Enums::AlgorithmType::Lyra2z, "lyra2z")
+			})}
+		});
+	auto all=All();
+	foreach (Enums::MinerBaseType mbt, all->keys()) {
+		if (!ret->count(mbt)) {
+			ret->insert(mbt, all->value(mbt));
+			}
+		else {
+			foreach (Algorithm* a, *all->value(mbt)) {
+				ret->value(mbt)->append(a);
+				}
+			}
 		}
 	return ret;
 }
@@ -87,11 +95,25 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Amd()
 		}));
 	auto all=All();
 	foreach (Enums::MinerBaseType mbt, all->keys()) {
-		ret->insert(mbt, all->value(mbt));
+		if (!ret->count(mbt)) {
+			ret->insert(mbt, all->value(mbt));
+			}
+		else {
+			foreach (Algorithm* a, *all->value(mbt)) {
+				ret->value(mbt)->append(a);
+				}
+			}
 		}
 	auto gpu=Gpu();
 	foreach (Enums::MinerBaseType mbt, gpu->keys()) {
-		ret->insert(mbt, gpu->value(mbt));
+		if (!ret->count(mbt)) {
+			ret->insert(mbt, gpu->value(mbt));
+			}
+		else {
+			foreach (Algorithm* a, *gpu->value(mbt)) {
+				ret->value(mbt)->append(a);
+				}
+			}
 		}
 	return ret;
 }
@@ -149,11 +171,25 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Nvidia()
 
 	auto all=All();
 	foreach (Enums::MinerBaseType mbt, all->keys()) {
-		ret->insert(mbt, all->value(mbt));
+		if (!ret->count(mbt)) {
+			ret->insert(mbt, all->value(mbt));
+			}
+		else {
+			foreach (Algorithm* a, *all->value(mbt)) {
+				ret->value(mbt)->append(a);
+				}
+			}
 		}
 	auto gpu=Gpu();
 	foreach (Enums::MinerBaseType mbt, gpu->keys()) {
-		ret->insert(mbt, gpu->value(mbt));
+		if (!ret->count(mbt)) {
+			ret->insert(mbt, gpu->value(mbt));
+			}
+		else {
+			foreach (Algorithm* a, *gpu->value(mbt)) {
+				ret->value(mbt)->append(a);
+				}
+			}
 		}
 	return ret;
 }
