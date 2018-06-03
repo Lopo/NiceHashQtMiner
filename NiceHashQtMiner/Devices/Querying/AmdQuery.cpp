@@ -104,11 +104,11 @@ QList<OpenCLDevice*>* AmdQuery::ProcessDevices(QList<OpenCLJsonData>* openCLData
 	}
 	
 	if (!amdDevices->count()) {
-		Helpers::ConsolePrint(Tag, QString("AMD GPUs count is 0"));
+		Helpers::ConsolePrint(Tag, "AMD GPUs count is 0");
 		return amdDevices;
 		}
 
-	Helpers::ConsolePrint(Tag, QString("AMD GPUs count : ").arg(amdDevices->count()));
+	Helpers::ConsolePrint(Tag, QString("AMD GPUs count : %1").arg(amdDevices->count()));
 	Helpers::ConsolePrint(Tag, "AMD Getting device name and serial from ADL");
 	// ADL
 	bool isAdlInit=true;
@@ -232,7 +232,7 @@ QList<OpenCLDevice*>* AmdQuery::AmdDeviceCreationFallback(QList<OpenCLDevice*>* 
 			stringBuilder << QString("\t\tCODE_NAME: %1").arg(newAmdDev->Codename());
 			stringBuilder << QString("\t\tUUID: %1").arg(newAmdDev->UUID);
 			stringBuilder << QString("\t\tMEMORY: %1").arg(newAmdDev->DeviceGlobalMemory());
-			stringBuilder << QString("\n\nETHEREUM: %1").arg(newAmdDev->IsEtherumCapable()? "YES" : "NO");
+			stringBuilder << QString("\t\tETHEREUM: %1").arg(newAmdDev->IsEtherumCapable()? "YES" : "NO");
 			}
 		catch (...) {}
 		}
