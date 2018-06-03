@@ -111,6 +111,7 @@ QList<OpenCLDevice*>* AmdQuery::ProcessDevices(QList<OpenCLJsonData>* openCLData
 	Helpers::ConsolePrint(Tag, QString("AMD GPUs count : %1").arg(amdDevices->count()));
 	Helpers::ConsolePrint(Tag, "AMD Getting device name and serial from ADL");
 	// ADL
+#if ADL_LIBWORKS
 	bool isAdlInit=true;
 	try {
 		isAdlInit=QueryAdl();
@@ -119,6 +120,9 @@ QList<OpenCLDevice*>* AmdQuery::ProcessDevices(QList<OpenCLJsonData>* openCLData
 		Helpers::ConsolePrint(Tag, QString("AMD ADL exception: ")+ex.what());
 		isAdlInit=false;
 		}
+#else
+	bool isAdlInit=false;
+#endif
 
 	bool isBusIDOk=true;
 	// check if buss ids are unique and different from -1
@@ -241,7 +245,7 @@ QList<OpenCLDevice*>* AmdQuery::AmdDeviceCreationFallback(QList<OpenCLDevice*>* 
 
 	return amdDevices;
 }
-
+#if ADL_LIBWORKS
 bool AmdQuery::QueryAdl()
 {
 	// ADL does not get devices in order map devices by bus number
@@ -374,3 +378,4 @@ bool AmdQuery::QueryAdl()
 
 	return isAdlInit;
 }
+#endif

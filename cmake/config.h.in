@@ -13,6 +13,7 @@
 
 #cmakedefine01 WITH_AMD
 #cmakedefine01 ADL_FOUND
+#cmakedefine01 ADL_LIBWORKS
 #cmakedefine01 WITH_NVIDIA
 
 //#cmakedefine HAVE_EVP_CIPHER_CTX_CTRL 1

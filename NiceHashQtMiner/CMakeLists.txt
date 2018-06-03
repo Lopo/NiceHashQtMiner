@@ -154,7 +154,7 @@ if (WITH_AMD)
 		ClaymoreCryptoNightMiner
 		Sgminer
 		)
-	if (ADL_FOUND)
+	if (ADL_LIBWORKS)
 		list(APPEND fl_3rdParty
 			ADL
 			)
@@ -200,7 +200,7 @@ include_directories(
 	${QtSingleApplication_SRC}
 	${managedCuda_SRC}
 	)
-if (WITH_AMD AND ADL_FOUND)
+if (WITH_AMD AND ADL_FOUND AND ADL_LIBWORKS)
 	include_directories(
 		BEFORE
 		${ADL_INCLUDE_DIR}
@@ -258,7 +258,7 @@ target_link_libraries(${PROJECT_NAME}
 	${LOG4_LIBRARY}
 	${OPENCL_LIBRARIES}
 	)
-if (WITH_AMD AND ADL_FOUND)
+if (WITH_AMD AND ADL_FOUND AND ADL_LIBWORKS)
 	target_link_libraries(${PROJECT_NAME}
 		${ADL_LIBRARY}
 		)

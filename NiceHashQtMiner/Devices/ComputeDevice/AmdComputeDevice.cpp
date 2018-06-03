@@ -7,14 +7,14 @@
 #include "Devices/ComputeDeviceManager.h"
 
 
-#if ADL_FOUND
+#if ADL_LIBWORKS
 using namespace  ATI::ADL;
 #endif
 
 
 int AmdComputeDevice::FanSpeed()
 {
-#if ADL_FOUND
+#if ADL_LIBWORKS
 	if (!ADL::Init()) {
 		return -1;
 		}
@@ -33,7 +33,7 @@ int AmdComputeDevice::FanSpeed()
 
 float AmdComputeDevice::Temp()
 {
-#if ADL_FOUND
+#if ADL_LIBWORKS
 	if (!ADL::Init()) {
 		return -1;
 		}
@@ -51,7 +51,7 @@ float AmdComputeDevice::Temp()
 
 float AmdComputeDevice::Load()
 {
-#if ADL_FOUND
+#if ADL_LIBWORKS
 	if (!ADL::Init()) {
 		return -1;
 		}
@@ -69,7 +69,7 @@ float AmdComputeDevice::Load()
 
 double AmdComputeDevice::PowerUsage()
 {
-#if ADL_FOUND
+#if ADL_LIBWORKS
 	if (!ADL::Init()) {
 		return -1;
 		}
@@ -103,7 +103,7 @@ AmdComputeDevice::AmdComputeDevice(AmdGpuDevice* amdDevice, int gpuCount, bool i
 	Index_=ID+ComputeDeviceManager.Available.AvailCpus()+ComputeDeviceManager.Available.AvailNVGpus();
 	_adapterIndex=amdDevice->AdapterIndex;
 
-#if ADL_FOUND
+#if ADL_LIBWORKS
 	ADL::ADL2_Main_Control_Create(ADL_Main_Memory_Alloc, 0, &(_adlContext));
 #endif
 	_adapterIndex2=adl2Index;
