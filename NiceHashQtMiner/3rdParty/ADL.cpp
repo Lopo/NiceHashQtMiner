@@ -8,18 +8,18 @@ using namespace ATI::ADL;
 
 void* ADL::adlLib=nullptr;
 
-ADL_MAIN_CONTROL_CREATE ADL::_ADL_Main_Control_Create;
-ADL2_MAIN_CONTROL_CREATE ADL::_ADL2_Main_Control_Create;
-ADL_MAIN_CONTROL_DESTROY ADL::_ADL_Main_Control_Destroy;
-ADL2_MAIN_CONTROL_DESTROY ADL::_ADL2_Main_Control_Destroy;
-ADL_ADAPTER_NUMBEROFADAPTERS_GET ADL::_ADL_Adapter_NumberOfAdapters_Get;
-ADL_ADAPTER_ADAPTERINFO_GET ADL::_ADL_Adapter_AdapterInfo_Get;
-ADL2_ADAPTER_ADAPTERINFO_GET ADL::_ADL2_Adapter_AdapterInfo_Get;
-ADL_ADAPTER_ACTIVE_GET ADL::_ADL_Adapter_Active_Get;
-ADL_OVERDRIVE5_CURRENTACTIVITY_GET ADL::_ADL_Overdrive5_CurrentActivity_Get;
-ADL_OVERDRIVE5_TEMPERATURE_GET ADL::_ADL_Overdrive5_Temperature_Get;
-ADL_OVERDRIVE5_FANSPEED_GET ADL::_ADL_Overdrive5_FanSpeed_Get;
-ADL2_OVERDRIVE6_CURRENTPOWER_GET ADL::_ADL2_Overdrive6_CurrentPower_Get;
+ADL_MAIN_CONTROL_CREATE ADL::_ADL_Main_Control_Create=nullptr;
+ADL2_MAIN_CONTROL_CREATE ADL::_ADL2_Main_Control_Create=nullptr;
+ADL_MAIN_CONTROL_DESTROY ADL::_ADL_Main_Control_Destroy=nullptr;
+ADL2_MAIN_CONTROL_DESTROY ADL::_ADL2_Main_Control_Destroy=nullptr;
+ADL_ADAPTER_NUMBEROFADAPTERS_GET ADL::_ADL_Adapter_NumberOfAdapters_Get=nullptr;
+ADL_ADAPTER_ADAPTERINFO_GET ADL::_ADL_Adapter_AdapterInfo_Get=nullptr;
+ADL2_ADAPTER_ADAPTERINFO_GET ADL::_ADL2_Adapter_AdapterInfo_Get=nullptr;
+ADL_ADAPTER_ACTIVE_GET ADL::_ADL_Adapter_Active_Get=nullptr;
+ADL_OVERDRIVE5_CURRENTACTIVITY_GET ADL::_ADL_Overdrive5_CurrentActivity_Get=nullptr;
+ADL_OVERDRIVE5_TEMPERATURE_GET ADL::_ADL_Overdrive5_Temperature_Get=nullptr;
+ADL_OVERDRIVE5_FANSPEED_GET ADL::_ADL_Overdrive5_FanSpeed_Get=nullptr;
+ADL2_OVERDRIVE6_CURRENTPOWER_GET ADL::_ADL2_Overdrive6_CurrentPower_Get=nullptr;
 
 
 void* __stdcall ADL_Main_Memory_Alloc(int iSize)
@@ -38,33 +38,81 @@ bool ADL::Init()
 		adlLib=dlopen("libatiadlxx.so", RTLD_LAZY|RTLD_GLOBAL);
 		}
 
-	_ADL_Main_Control_Create=(ADL_MAIN_CONTROL_CREATE)getProcAddress(adlLib, "ADL_Main_Control_Create");
-	if (_ADL_Main_Control_Create==0) {
+	if (_ADL_Main_Control_Create==nullptr) {
+		_ADL_Main_Control_Create=(ADL_MAIN_CONTROL_CREATE)getProcAddress(adlLib, "ADL_Main_Control_Create");
+		}
+	if (_ADL_Main_Control_Create==nullptr) {
 		return false;
 		}
-	_ADL2_Main_Control_Create=(ADL2_MAIN_CONTROL_CREATE)getProcAddress(adlLib, "ADL2_Main_Control_Create");
-	if (_ADL2_Main_Control_Create==0) {
+	if (_ADL2_Main_Control_Create==nullptr) {
+		_ADL2_Main_Control_Create=(ADL2_MAIN_CONTROL_CREATE)getProcAddress(adlLib, "ADL2_Main_Control_Create");
+		}
+	if (_ADL2_Main_Control_Create==nullptr) {
 		return false;
 		}
-	_ADL_Main_Control_Destroy=(ADL_MAIN_CONTROL_DESTROY)getProcAddress(adlLib, "ADL_Main_Control_Destroy");
-	if (_ADL_Main_Control_Destroy==0) {
+	if (_ADL_Main_Control_Destroy==nullptr) {
+		_ADL_Main_Control_Destroy=(ADL_MAIN_CONTROL_DESTROY)getProcAddress(adlLib, "ADL_Main_Control_Destroy");
+		}
+	if (_ADL_Main_Control_Destroy==nullptr) {
 		return false;
 		}
-	_ADL2_Main_Control_Destroy=(ADL2_MAIN_CONTROL_DESTROY)getProcAddress(adlLib, "ADL2_Main_Control_Destroy");
-	if (_ADL2_Main_Control_Destroy==0) {
+	if (_ADL2_Main_Control_Destroy==nullptr) {
+		_ADL2_Main_Control_Destroy=(ADL2_MAIN_CONTROL_DESTROY)getProcAddress(adlLib, "ADL2_Main_Control_Destroy");
+		}
+	if (_ADL2_Main_Control_Destroy==nullptr) {
 		return false;
 		}
 
-	_ADL_Adapter_NumberOfAdapters_Get=(ADL_ADAPTER_NUMBEROFADAPTERS_GET)getProcAddress(adlLib, "ADL_Adapter_NumberOfAdapters_Get");
-	_ADL_Adapter_AdapterInfo_Get=(ADL_ADAPTER_ADAPTERINFO_GET)getProcAddress(adlLib, "ADL_Adapter_AdapterInfo_Get");
-	_ADL2_Adapter_AdapterInfo_Get=(ADL2_ADAPTER_ADAPTERINFO_GET)getProcAddress(adlLib, "ADL_Adapter_AdapterInfo_Get");
-	_ADL_Adapter_Active_Get=(ADL_ADAPTER_ACTIVE_GET)getProcAddress(adlLib, "ADL_Adapter_Active_Get");
+	if (_ADL_Adapter_NumberOfAdapters_Get==nullptr) {
+		_ADL_Adapter_NumberOfAdapters_Get=(ADL_ADAPTER_NUMBEROFADAPTERS_GET)getProcAddress(adlLib, "ADL_Adapter_NumberOfAdapters_Get");
+		}
+	if (_ADL_Adapter_NumberOfAdapters_Get==nullptr) {
+		return false;
+		}
+	if (_ADL_Adapter_AdapterInfo_Get==nullptr) {
+		_ADL_Adapter_AdapterInfo_Get=(ADL_ADAPTER_ADAPTERINFO_GET)getProcAddress(adlLib, "ADL_Adapter_AdapterInfo_Get");
+		}
+	if (_ADL_Adapter_AdapterInfo_Get==nullptr) {
+		return false;
+		}
+	if (_ADL2_Adapter_AdapterInfo_Get==nullptr) {
+		_ADL2_Adapter_AdapterInfo_Get=(ADL2_ADAPTER_ADAPTERINFO_GET)getProcAddress(adlLib, "ADL_Adapter_AdapterInfo_Get");
+		}
+	if (_ADL2_Adapter_AdapterInfo_Get==nullptr) {
+		return false;
+		}
+	if (_ADL_Adapter_Active_Get==nullptr) {
+		_ADL_Adapter_Active_Get=(ADL_ADAPTER_ACTIVE_GET)getProcAddress(adlLib, "ADL_Adapter_Active_Get");
+		}
+	if (_ADL_Adapter_Active_Get==nullptr) {
+		return false;
+		}
 
-	_ADL_Overdrive5_CurrentActivity_Get=(ADL_OVERDRIVE5_CURRENTACTIVITY_GET)getProcAddress(adlLib, "ADL_Overdrive5_CurrentActivity_Get");
-	_ADL_Overdrive5_Temperature_Get=(ADL_OVERDRIVE5_TEMPERATURE_GET)getProcAddress(adlLib, "ADL_Overdrive5_Temperature_Get");
-	_ADL_Overdrive5_FanSpeed_Get=(ADL_OVERDRIVE5_FANSPEED_GET)getProcAddress(adlLib, "ADL_Overdrive5_FanSpeed_Get");
+	if (_ADL_Overdrive5_CurrentActivity_Get==nullptr) {
+		_ADL_Overdrive5_CurrentActivity_Get=(ADL_OVERDRIVE5_CURRENTACTIVITY_GET)getProcAddress(adlLib, "ADL_Overdrive5_CurrentActivity_Get");
+		}
+	if (_ADL_Overdrive5_CurrentActivity_Get==nullptr) {
+		return false;
+		}
+	if (_ADL_Overdrive5_Temperature_Get==nullptr) {
+		_ADL_Overdrive5_Temperature_Get=(ADL_OVERDRIVE5_TEMPERATURE_GET)getProcAddress(adlLib, "ADL_Overdrive5_Temperature_Get");
+		}
+	if (_ADL_Overdrive5_Temperature_Get==nullptr) {
+		return false;
+		}
+	if (_ADL_Overdrive5_FanSpeed_Get==nullptr) {
+		_ADL_Overdrive5_FanSpeed_Get=(ADL_OVERDRIVE5_FANSPEED_GET)getProcAddress(adlLib, "ADL_Overdrive5_FanSpeed_Get");
+		}
+	if (_ADL_Overdrive5_FanSpeed_Get==nullptr) {
+		return false;
+		}
 
-	_ADL2_Overdrive6_CurrentPower_Get=(ADL2_OVERDRIVE6_CURRENTPOWER_GET)getProcAddress(adlLib, "ADL2_Overdrive6_CurrentPower_Get");
+	if (_ADL2_Overdrive6_CurrentPower_Get==nullptr) {
+		_ADL2_Overdrive6_CurrentPower_Get=(ADL2_OVERDRIVE6_CURRENTPOWER_GET)getProcAddress(adlLib, "ADL2_Overdrive6_CurrentPower_Get");
+		}
+	if (_ADL2_Overdrive6_CurrentPower_Get==nullptr) {
+		return false;
+		}
 
 	return true;
 }
@@ -75,68 +123,87 @@ void* ADL::getProcAddress(void* lib, const char* name)
 	return adr;
 }
 
-bool ADL::GetAdlErr(int error)
+int ADL::ADL_Main_Control_Create(ADL_MAIN_MALLOC_CALLBACK callback, int enumConnectedAdapters)
 {
-	return false;
+	return Init()
+		? _ADL_Main_Control_Create(callback, enumConnectedAdapters)
+		: -1;
 }
 
-bool ADL::ADL_Main_Control_Create(ADL_MAIN_MALLOC_CALLBACK callback, int enumConnectedAdapters)
+int ADL::ADL2_Main_Control_Create(ADL_MAIN_MALLOC_CALLBACK callback, int enumConnectedAdapters, ADL_CONTEXT_HANDLE context)
 {
-	return GetAdlErr(_ADL_Main_Control_Create(callback, enumConnectedAdapters));
+	return Init()
+		? _ADL2_Main_Control_Create(callback, enumConnectedAdapters, context)
+		: -1;
 }
 
-bool ADL::ADL2_Main_Control_Create(ADL_MAIN_MALLOC_CALLBACK callback, int enumConnectedAdapters, ADL_CONTEXT_HANDLE context)
+int ADL::ADL_Main_Control_Destroy()
 {
-	return GetAdlErr(_ADL2_Main_Control_Create(callback, enumConnectedAdapters, context));
+	return Init()
+		? _ADL_Main_Control_Destroy()
+		: -1;
 }
 
-bool ADL::ADL_Main_Control_Destroy()
+int ADL::ADL2_Main_Control_Destroy(ADL_CONTEXT_HANDLE context)
 {
-	return GetAdlErr(_ADL_Main_Control_Destroy());
+	return Init()
+		? _ADL2_Main_Control_Destroy(context)
+		: -1;
 }
 
-bool ADL::ADL2_Main_Control_Destroy(ADL_CONTEXT_HANDLE context)
+int ADL::ADL_Adapter_Active_Get(int adapterIndex, int* status)
 {
-	return GetAdlErr(_ADL2_Main_Control_Destroy(context));
+	return Init()
+		? _ADL_Adapter_Active_Get(adapterIndex, status)
+		: -1;
 }
 
-bool ADL::ADL_Adapter_Active_Get(int adapterIndex, int* status)
+int ADL::ADL_Adapter_AdapterInfo_Get(LPAdapterInfo info, int inputSize)
 {
-	return GetAdlErr(_ADL_Adapter_Active_Get(adapterIndex, status));
+	return Init()
+		? _ADL_Adapter_AdapterInfo_Get(info, inputSize)
+		: -1;
 }
 
-bool ADL::ADL_Adapter_AdapterInfo_Get(LPAdapterInfo info, int inputSize)
+int ADL::ADL2_Adapter_AdapterInfo_Get(ADL_CONTEXT_HANDLE context, LPAdapterInfo lpInfo, int iInputSize)
 {
-	return GetAdlErr(_ADL_Adapter_AdapterInfo_Get(info, inputSize));
+	return Init()
+		? _ADL2_Adapter_AdapterInfo_Get(context, lpInfo, iInputSize)
+		: -1;
 }
 
-bool ADL::ADL2_Adapter_AdapterInfo_Get(ADL_CONTEXT_HANDLE context, LPAdapterInfo lpInfo, int iInputSize)
+int ADL::ADL_Adapter_NumberOfAdapters_Get(int* numAdapters)
 {
-	return GetAdlErr(_ADL2_Adapter_AdapterInfo_Get(context, lpInfo, iInputSize));
+	return Init()
+		? _ADL_Adapter_NumberOfAdapters_Get(numAdapters)
+		: -1;
 }
 
-bool ADL::ADL_Adapter_NumberOfAdapters_Get(int* numAdapters)
+int ADL::ADL_Overdrive5_CurrentActivity_Get(int iAdapterIndex, ADLPMActivity* activity)
 {
-	return GetAdlErr(_ADL_Adapter_NumberOfAdapters_Get(numAdapters));
+	return Init()
+		? _ADL_Overdrive5_CurrentActivity_Get(iAdapterIndex, activity)
+		: -1;
 }
 
-bool ADL::ADL_Overdrive5_CurrentActivity_Get(int iAdapterIndex, ADLPMActivity* activity)
+int ADL::ADL_Overdrive5_Temperature_Get(int adapterIndex, int thermalControllerIndex, ADLTemperature* temperature)
 {
-	return GetAdlErr(_ADL_Overdrive5_CurrentActivity_Get(iAdapterIndex, activity));
+	return Init()
+		? _ADL_Overdrive5_Temperature_Get(adapterIndex, thermalControllerIndex, temperature)
+		: -1;
 }
 
-bool ADL::ADL_Overdrive5_Temperature_Get(int adapterIndex, int thermalControllerIndex, ADLTemperature* temperature)
+int ADL::ADL_Overdrive5_FanSpeed_Get(int adapterIndex, int thermalControllerIndex, ADLFanSpeedValue* temperature)
 {
-	return GetAdlErr(_ADL_Overdrive5_Temperature_Get(adapterIndex, thermalControllerIndex, temperature));
-}
-
-bool ADL::ADL_Overdrive5_FanSpeed_Get(int adapterIndex, int thermalControllerIndex, ADLFanSpeedValue* temperature)
-{
-	return GetAdlErr(_ADL_Overdrive5_FanSpeed_Get(adapterIndex, thermalControllerIndex, temperature));
+	return Init()
+		? _ADL_Overdrive5_FanSpeed_Get(adapterIndex, thermalControllerIndex, temperature)
+		: -1;
 }
 
 
-bool ADL::ADL2_Overdrive6_CurrentPower_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, int iPowerType, int* lpCurrentValue)
+int ADL::ADL2_Overdrive6_CurrentPower_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, int iPowerType, int* lpCurrentValue)
 {
-	return GetAdlErr(_ADL2_Overdrive6_CurrentPower_Get(context, iAdapterIndex, iPowerType, lpCurrentValue));
+	return Init()
+		? _ADL2_Overdrive6_CurrentPower_Get(context, iAdapterIndex, iPowerType, lpCurrentValue)
+		: -1;
 }

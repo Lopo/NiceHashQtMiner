@@ -104,7 +104,7 @@ AmdComputeDevice::AmdComputeDevice(AmdGpuDevice* amdDevice, int gpuCount, bool i
 	_adapterIndex=amdDevice->AdapterIndex;
 
 #if ADL_FOUND
-	ADL::ADL2_Main_Control_Create(ADL_Main_Memory_Alloc, 0, _adlContext);
+	ADL::ADL2_Main_Control_Create(ADL_Main_Memory_Alloc, 0, &(_adlContext));
 #endif
 	_adapterIndex2=adl2Index;
 }

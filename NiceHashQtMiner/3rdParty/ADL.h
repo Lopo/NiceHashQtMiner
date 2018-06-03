@@ -27,25 +27,24 @@ public:
 
 	static bool Init();
 
-	static bool ADL_Main_Control_Create(ADL_MAIN_MALLOC_CALLBACK, int);
-	static bool ADL2_Main_Control_Create(ADL_MAIN_MALLOC_CALLBACK, int, ADL_CONTEXT_HANDLE);
-	static bool ADL_Main_Control_Destroy();
-	static bool ADL2_Main_Control_Destroy(ADL_CONTEXT_HANDLE);
-	static bool ADL_Adapter_NumberOfAdapters_Get(int* numAdapters);
-	static bool ADL_Adapter_AdapterInfo_Get(LPAdapterInfo info, int inputSize);
-	static bool ADL2_Adapter_AdapterInfo_Get(ADL_CONTEXT_HANDLE context, LPAdapterInfo lpInfo, int iInputSize);
-	static bool ADL_Adapter_Active_Get(int adapterIndex, int* status);
+	static int ADL_Main_Control_Create(ADL_MAIN_MALLOC_CALLBACK, int);
+	static int ADL2_Main_Control_Create(ADL_MAIN_MALLOC_CALLBACK, int, ADL_CONTEXT_HANDLE);
+	static int ADL_Main_Control_Destroy();
+	static int ADL2_Main_Control_Destroy(ADL_CONTEXT_HANDLE);
+	static int ADL_Adapter_NumberOfAdapters_Get(int* numAdapters);
+	static int ADL_Adapter_AdapterInfo_Get(LPAdapterInfo info, int inputSize);
+	static int ADL2_Adapter_AdapterInfo_Get(ADL_CONTEXT_HANDLE context, LPAdapterInfo lpInfo, int iInputSize);
+	static int ADL_Adapter_Active_Get(int adapterIndex, int* status);
 
-	static bool ADL_Overdrive5_CurrentActivity_Get(int iAdapterIndex, ADLPMActivity* activity);
-	static bool ADL_Overdrive5_Temperature_Get(int adapterIndex, int thermalControllerIndex, ADLTemperature* temperature);
-	static bool ADL_Overdrive5_FanSpeed_Get(int adapterIndex, int thermalControllerIndex, ADLFanSpeedValue* temperature);
+	static int ADL_Overdrive5_CurrentActivity_Get(int iAdapterIndex, ADLPMActivity* activity);
+	static int ADL_Overdrive5_Temperature_Get(int adapterIndex, int thermalControllerIndex, ADLTemperature* temperature);
+	static int ADL_Overdrive5_FanSpeed_Get(int adapterIndex, int thermalControllerIndex, ADLFanSpeedValue* temperature);
 
-	static bool ADL2_Overdrive6_CurrentPower_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, int iPowerType, int* lpCurrentValue);
+	static int ADL2_Overdrive6_CurrentPower_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, int iPowerType, int* lpCurrentValue);
 
 private:
 	static void* adlLib;
 	static void* getProcAddress(void* lib, const char* name);
-	static bool GetAdlErr(int error);
 
 	static ADL_MAIN_CONTROL_CREATE _ADL_Main_Control_Create;
 	static ADL2_MAIN_CONTROL_CREATE _ADL2_Main_Control_Create;
