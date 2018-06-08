@@ -23,7 +23,8 @@ protected:
 
 private:
 	int _benchmarkTimeWait=120;
-	const QString LookForStart="speed 2.5s/60s/15m";
+	const QString LookForStart25="speed 2.5s/60s/15m";
+	const QString LookForStart10="speed 10s/60s/15m";
 	const QString LookForEnd="h/s max";
 	QStringList GetStartCommand(QString url, QString btcAdress, QString worker);
 };

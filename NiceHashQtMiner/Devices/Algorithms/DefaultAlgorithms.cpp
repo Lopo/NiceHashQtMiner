@@ -8,6 +8,9 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::All()
 		{Enums::MinerBaseType::XmrStak, new QList<Algorithm*>({
 			new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightV7, ""),
 			new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightHeavy, "")
+			})},
+		{Enums::MinerBaseType::Xmrig, new QList<Algorithm*>({
+			new Algorithm(Enums::MinerBaseType::Xmrig, Enums::AlgorithmType::CryptoNightV7, "")
 			})}
 		});
 }
@@ -30,9 +33,6 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Gpu()
 QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Cpu()
 {
 	QMap<Enums::MinerBaseType, QList<Algorithm*>*>* ret=new QMap<Enums::MinerBaseType, QList<Algorithm*>*>({
-		{Enums::MinerBaseType::Xmrig, new QList<Algorithm*>({
-			new Algorithm(Enums::MinerBaseType::Xmrig, Enums::AlgorithmType::CryptoNightV7, "")
-			})},
 		{Enums::MinerBaseType::cpuminer, new QList<Algorithm*>({
 			new Algorithm(Enums::MinerBaseType::cpuminer, Enums::AlgorithmType::Hodl, "hodl"),
 			new Algorithm(Enums::MinerBaseType::cpuminer, Enums::AlgorithmType::Lyra2z, "lyra2z")

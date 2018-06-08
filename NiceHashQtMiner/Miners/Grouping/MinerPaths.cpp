@@ -94,6 +94,8 @@ const QString MinerPaths::Data::XmrStackCpuMiner=Bin+"/xmr-stack-cpu/xmr-stak";
 const QString MinerPaths::Data::XmrStakAmd=Bin+"/xmr-stak-amd/xmr-stak-amd";
 const QString MinerPaths::Data::XmrStak=Bin+"/xmr-stak/xmr-stak";
 const QString MinerPaths::Data::Xmrig=Bin+"/xmrig/xmrig";
+const QString MinerPaths::Data::XmrigAmd=Bin+"/xmrig/xmrig-amd";
+const QString MinerPaths::Data::XmrigNvidia=Bin+"/xmrig/xmrig-nvidia";
 const QString MinerPaths::Data::XmrStakHeavy=Bin+"/xmr-stak_heavy/xmr-stak";
 
 const QString MinerPaths::Data::CpuMiner=Bin+"/cpuminer_opt/cpuminer";
@@ -184,7 +186,7 @@ QString MinerPaths::GetPathFor(Enums::MinerBaseType minerBaseType, Enums::Algori
 		case Enums::MinerBaseType::Prospector:
 			return Data.Prospector;
 		case Enums::MinerBaseType::Xmrig:
-			return Data.Xmrig;
+			return Xmrig.GetPath(devGroupType);
 		case Enums::MinerBaseType::dtsm:
 			return Data.Dtsm;
 		case Enums::MinerBaseType::cpuminer:
@@ -332,6 +334,24 @@ QString MinerPaths::Experimental::GetPath(Enums::AlgorithmType algoType, Enums::
 		:
 #endif
 			Data.None;
+}
+
+QString MinerPaths::Xmrig::GetPath(Enums::DeviceGroupType devGroupType)
+{
+	switch (devGroupType) {
+		case Enums::DeviceGroupType::CPU:
+			return Data.Xmrig;
+		case Enums::DeviceGroupType::AMD_OpenCL:
+			return Data.XmrigAmd;
+		case Enums::DeviceGroupType::NVIDIA_2_1:
+		case Enums::DeviceGroupType::NVIDIA_3_x:
+		case Enums::DeviceGroupType::NVIDIA_5_x:
+		case Enums::DeviceGroupType::NVIDIA_6_x:
+			return Data.XmrigNvidia;
+		default:
+			return Data.None;
+		}
+	return Data.None;
 }
 
 void MinerPaths::InitializePackages() // @todo finish & verify

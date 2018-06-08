@@ -5,6 +5,7 @@
 #include "Configs/Data/GeneralConfig.h"
 #include "Algorithms/Algorithm.h"
 #include "Utils/Helpers.h"
+#include "Devices/ComputeDevice/ComputeDevice.h"
 #include <QtConcurrent/QtConcurrentRun>
 #include <QRegularExpression>
 
@@ -21,7 +22,9 @@ void Xmrig::Start(QString url, QString btcAdress, QString worker)
 
 QStringList Xmrig::GetStartCommand(QString url, QString btcAdress, QString worker)
 {
-	return QStringList() << "-o" << url << "-u" << QString("%1.%2:x").arg(btcAdress).arg(worker) << "--nicehash" << ExtraLaunchParametersParser::ParseForMiningSetup(MiningSetup_, Enums::DeviceType::CPU) << "--api-port" << QString::number(ApiPort());
+	return QStringList() << "-o" << url << "-u" << QString("%1.%2:x").arg(btcAdress).arg(worker) << "--nicehash" << ExtraLaunchParametersParser::ParseForMiningSetup(MiningSetup_, MiningSetup_->MiningPairs->first()->Device->DeviceType) << "--api-port" << QString::number(ApiPort())
+		<< "--no-color"
+		;
 }
 
 void Xmrig::_Stop(Enums::MinerStopType willswitch)
@@ -44,7 +47,9 @@ QStringList Xmrig::BenchmarkCreateCommandLine(Algorithm* algorithm, int time)
 	QString server=Globals::GetLocationURL(algorithm->NiceHashID, Globals::MiningLocation[ConfigManager.generalConfig->ServiceLocation], _ConectionType);
 	_benchmarkTimeWait=time;
 	return GetStartCommand(server, Globals::GetBitcoinUser(), ConfigManager.generalConfig->WorkerName.trimmed())
-		<< "-l" << GetLogFileName() << "--print-time=2";
+		<< "-l" << GetLogFileName() << "--print-time=2"
+		<< "--no-color"
+		;
 }
 
 void Xmrig::BenchmarkThreadRoutine(QStringList commandLine)
@@ -64,6 +69,9 @@ void Xmrig::ProcessBenchLinesAlternate(QStringList lines)
 	foreach (QString line, lines) {
 		BenchLines->append(line);
 		QString lineLowered=line.toLower();
+		QString LookForStart= MiningSetup_->MiningPairs->first()->Device->DeviceType==Enums::DeviceType::CPU
+			? LookForStart25
+			: LookForStart10;
 		if (!lineLowered.contains(LookForStart)) {
 			continue;
 			}

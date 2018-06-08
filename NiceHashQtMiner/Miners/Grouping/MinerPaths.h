@@ -94,6 +94,8 @@ public:
 		static const QString XmrStakAmd;
 		static const QString XmrStak;
 		static const QString Xmrig;
+		static const QString XmrigAmd;
+		static const QString XmrigNvidia;
 		static const QString XmrStakHeavy;
 
 		static const QString CpuMiner;
@@ -141,6 +143,10 @@ private:
 	public:
 		static QString GetPath(Enums::AlgorithmType algoType, Enums::DeviceGroupType devGroupType);
 		} Experimental;
+	static class Xmrig {
+	public:
+		static QString GetPath(Enums::DeviceGroupType devGroupType);
+		} Xmrig;
 
 	static QList<MinerPathPackage*>* MinerPathPackages;
 	static QList<Enums::MinerBaseType>* ConfigurableMiners;

@@ -32,6 +32,8 @@ dir | miner | notes
 ----------- | ----------- | -----------
 bin/xmr-stak | [XMR-Stak](https://github.com/nicehash/xmr-stak) | fDevDonationLevel set to 0
 bin/xmrig | [XMRig](https://github.com/xmrig/xmrig) | kDefaultDonateLevel & kMinimumDonateLevel set to 0
+bin/xmrig | [XMRigAmd](https://github.com/xmrig/xmrig-amd) | kDefaultDonateLevel & kMinimumDonateLevel set to 0
+bin/xmrig | [XMRigNvidia](https://github.com/xmrig/xmrig-nvidia) | kDefaultDonateLevel & kMinimumDonateLevel set to 0
 bin/ccminer_cryptonight | [ccminer](https://github.com/KlausT/ccminer-cryptonight) | untested
 bin/ccminer_decred | | unknown
 bin/excavator | [Excavator](https://github.com/nicehash/excavator/releases/tag/v1.5.4a) | 
