@@ -102,8 +102,6 @@ bool Excavator::BenchmarkParseLine(QString outdata)
 					}
 				return true;
 				}
-			else {
-				}
 			if (speed.trimmed().split(' ').count()>=2) {
 				double spd=GetNumber(speed);
 
@@ -143,12 +141,12 @@ ApiData* Excavator::GetSummaryAsync()
 
 	if (resp!=nullptr && resp->error==nullptr) {
 		ad->Speed=0;
-		foreach (Worker w, resp->algorithms.first().workers) {
-			ad->Speed+=w.speed.first();
-			}
-		if (IsDual()) {
-			foreach (Worker w, resp->algorithms.first().workers) {
-				ad->SecondarySpeed+=w.speed.at(1);
+		foreach (Algorithm algo, resp->algorithms) {
+			if (algo.algorithm_id==MiningSetup_->CurrentAlgorithmType) {
+				ad->Speed=algo.speed;
+				}
+			if (IsDual() && algo.algorithm_id==MiningSetup_->CurrentSecondaryAlgorithmType) {
+				ad->SecondarySpeed=algo.speed;
 				}
 			}
 		CurrentMinerReadStatus=Enums::MinerApiReadStatus::GOT_READ;
@@ -161,6 +159,17 @@ ApiData* Excavator::GetSummaryAsync()
 
 void Excavator::_Stop(Enums::MinerStopType willswitch)
 {
+	try {
+		QTcpSocket client;
+		client.connectToHost("127.0.0.1", ApiPort());
+		client.waitForConnected(1000);
+		client.write("{\"id\":1,\"method\":\"quit\",\"params\":[]}\n");
+		client.flush();
+		client.close();
+		}
+	catch (std::exception& ex) {
+		Helpers::ConsolePrint("ERROR", ex.what());
+		}
 	Stop_cpu_ccminer_sgminer_nheqminer(willswitch);
 }
 
@@ -180,15 +189,15 @@ Excavator::JsonApiResponse* Excavator::JsonApiResponse::fromJson(QString json)
 		QJsonObject ao=av.toObject();
 		Algorithm a;
 		a.algorithm_id=ao.value("algorithm_id").toInt();
-		foreach (QJsonValue wv, ao.value("workers").toArray()) {
-			QJsonObject wo=wv.toObject();
-			Worker w;
-			w.worker_id=wo.value("worker_id").toInt();
-			foreach (QJsonValue sv, wo.value("speed").toArray()) {
-				w.speed.append(sv.toDouble());
-				}
-			a.workers.append(w);
-			}
+		a.name=ao.value("name").toString();
+		a.speed=ao.value("speed").toDouble();
+		a.uptime=ao.value("uptime").toDouble();
+		a.benchmark=ao.value("benchmark").toBool();
+		a.accepted_shares=ao.value("accepted_shares").toInt();
+		a.rejected_shares=ao.value("rejected_shares").toInt();
+		a.got_job=ao.value("got_job").toBool();
+		a.received_jobs=ao.value("received_jobs").toInt();
+		a.current_job_difficulty=ao.value("current_job_difficulty").toDouble();
 		ret->algorithms.append(a);
 		}
 
@@ -205,22 +214,38 @@ QString Excavator::jsonConfig(QString url, QString btcAdress, QString worker)
 	ExcavatorAction* act;
 	QJsonArray cfg;
 
-	QString algo=MiningSetup_->MinerName;
-	if (IsDual()) {
-		algo+=QString("_%1").arg(QMetaEnum::fromType<Enums::AlgorithmType>().valueToKey((int)SecondaryAlgorithmType));
-		}
-	QString wallet=GetUsername(btcAdress, worker);
-	QStringList base({algo, url, wallet});
-	if (IsDual()) {
-		base << Globals::GetLocationURL(SecondaryAlgorithmType, Globals::MiningLocation[ConfigManager.generalConfig->ServiceLocation], _ConectionType) << wallet;
-		}
 	act=new ExcavatorAction();
-	act->commands.append(ExcavatorCommand("algorithm.add", base));
+	act->commands.append(ExcavatorCommand("subscribe", {QString("nhmp.%1.nicehash.com:3200").arg(Globals::MiningLocation[ConfigManager.generalConfig->ServiceLocation]), GetUsername(btcAdress, worker)}));
 	cfg.append(act->asJObject());
 
-	act=new ExcavatorAction(1);
+	act=new ExcavatorAction(2);
+	if (!IsDual()) {
+		act->commands.append(ExcavatorCommand("algorithm.add", {MiningSetup_->MinerName}));
+		}
+	else {
+		act->commands.append(ExcavatorCommand("algorithm.add", {"daggerhashimoto"}));
+		switch (SecondaryAlgorithmType) {
+			case Enums::AlgorithmType::Sia:
+				act->commands.append(ExcavatorCommand("algorithm.add", {"sia"}));
+				break;
+			case Enums::AlgorithmType::Pascal:
+				act->commands.append(ExcavatorCommand("algorithm.add", {"pascal"}));
+				break;
+			case Enums::AlgorithmType::Decred:
+				act->commands.append(ExcavatorCommand("algorithm.add", {"decred"}));
+				break;
+			default:
+				break;
+			}
+		}
+	cfg.append(act->asJObject());
+
+	act=new ExcavatorAction(2);
+	QString algo= IsDual()
+			? QString("daggerhashimoto_%1").arg(QMetaEnum::fromType<Enums::AlgorithmType>().valueToKey((int)SecondaryAlgorithmType)).toLower()
+			: MiningSetup_->MinerName;
 	foreach (MiningPair* nvidiaPair, *MiningSetup_->MiningPairs) {
-		act->commands.append(ExcavatorCommand("worker.add", {"0", QString::number(nvidiaPair->Device->ID)}));
+		act->commands.append(ExcavatorCommand("worker.add", {algo, QString::number(nvidiaPair->Device->ID)}));
 		}
 	cfg.append(act->asJObject());
 
@@ -228,7 +253,7 @@ QString Excavator::jsonConfig(QString url, QString btcAdress, QString worker)
 //	foreach (MiningPair* nvidiaPair, *_MiningSetup->MiningPairs) {
 //		act->commands.append(ExcavatorCommand("worker.print.speed", {QString::number(nvidiaPair->Device->ID)}));
 //		}
-	act->commands.append(ExcavatorCommand("algorithm.print.speeds", {"0"}));
+	act->commands.append(ExcavatorCommand("algorithm.print.speeds", {}));
 	cfg.append(act->asJObject());
 
 	return QJsonDocument(cfg).toJson(QJsonDocument::Indented);
@@ -239,32 +264,43 @@ QString Excavator::jsonBenchConfig(QString url, QString btcAdress, QString worke
 	ExcavatorAction* act;
 	QJsonArray cfg;
 
-	QString algo= !IsDual()
-		? MiningSetup_->MinerName
-		: QString("daggerhashimoto_%1").arg(QMetaEnum::fromType<Enums::AlgorithmType>().valueToKey((int)SecondaryAlgorithmType)).toLower();
-	QString wallet=GetUsername(btcAdress, worker);
-
-	QStringList base({algo, url, wallet});
-	if (IsDual()) {
-		base << Globals::GetLocationURL(SecondaryAlgorithmType, Globals::MiningLocation[ConfigManager.generalConfig->ServiceLocation], _ConectionType) << wallet;
-		}
 	act=new ExcavatorAction();
-	act->commands.append(ExcavatorCommand("algorithm.add", base));
+	act->commands.append(ExcavatorCommand("subscribe", {QString("nhmp.%1.nicehash.com:3200").arg(Globals::MiningLocation[ConfigManager.generalConfig->ServiceLocation]), GetUsername(btcAdress, worker)}));
+	cfg.append(act->asJObject());
+
+	act=new ExcavatorAction(2);
+	if (!IsDual()) {
+		act->commands.append(ExcavatorCommand("algorithm.add", {MiningSetup_->MinerName, "benchmark"}));
+		}
+	else {
+		act->commands.append(ExcavatorCommand("algorithm.add", {"daggerhashimoto", "benchmark"}));
+		switch (SecondaryAlgorithmType) {
+			case Enums::AlgorithmType::Sia:
+				act->commands.append(ExcavatorCommand("algorithm.add", {"sia", "benchmark"}));
+				break;
+			case Enums::AlgorithmType::Pascal:
+				act->commands.append(ExcavatorCommand("algorithm.add", {"pascal", "benchmark"}));
+				break;
+			case Enums::AlgorithmType::Decred:
+				act->commands.append(ExcavatorCommand("algorithm.add", {"decred", "benchmark"}));
+				break;
+			default:
+				break;
+			}
+		}
 	cfg.append(act->asJObject());
 
 	act=new ExcavatorAction(3);
-	foreach (MiningPair* nvidiaPair, *MiningSetup_->MiningPairs) {
-		if (IsDual()) {
-			act->commands.append(ExcavatorCommand("worker.add", {"0", QString::number(nvidiaPair->Device->ID)}));
-			}
-		else {
-			act->commands.append(ExcavatorCommand("worker.add", {"0", QString::number(nvidiaPair->Device->ID), "M=1"}));
-			}
+	if (!IsDual()) {
+		act->commands.append(ExcavatorCommand("worker.add", {MiningSetup_->MinerName, "0"}));
+		}
+	else {
+		act->commands.append(ExcavatorCommand("worker.add", {QString("daggerhashimoto_%1").arg(QMetaEnum::fromType<Enums::AlgorithmType>().valueToKey((int)SecondaryAlgorithmType)).toLower(), "0"}));
 		}
 	cfg.append(act->asJObject());
 
 	act=new ExcavatorAction(_benchmarkTimeWait+3+(MiningSetup_->CurrentAlgorithmType==Enums::AlgorithmType::DaggerHashimoto? 5 : 0));
-	act->commands.append(ExcavatorCommand("algorithm.print.speeds", {"0"}));
+	act->commands.append(ExcavatorCommand("worker.print.speed", {"0"}));
 	act->commands.append(ExcavatorCommand("quit", {}));
 	cfg.append(act->asJObject());
 

@@ -48,18 +48,19 @@ protected:
 	Enums::AlgorithmType SecondaryAlgorithmType=Enums::AlgorithmType::NONE;
 
 private:
-	class Worker
-	{
-	public:
-		int worker_id;
-		QList<double> speed;
-	};
-
 	class Algorithm
 	{
 	public:
 		int algorithm_id;
-		QList<Worker> workers;
+		QString name;
+		double speed;
+		double uptime;
+		bool benchmark;
+		int accepted_shares;
+		int rejected_shares;
+		bool got_job;
+		int received_jobs;
+		double current_job_difficulty;
 	};
 
 	class JsonApiResponse
@@ -72,7 +73,7 @@ private:
 		static JsonApiResponse* fromJson(QString json);
 	};
 
-	const QString totSpeed="total speed:";
+	const QString totSpeed=" speed: ";
 
 	int _benchmarkTimeWait=0;
 	QString jsonConfig(QString url, QString btcAdress, QString worker);
