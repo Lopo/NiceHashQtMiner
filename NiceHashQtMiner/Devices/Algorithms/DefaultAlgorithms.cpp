@@ -34,6 +34,7 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Cpu()
 			new Algorithm(Enums::MinerBaseType::Xmrig, Enums::AlgorithmType::CryptoNightV7, "")
 			})},
 		{Enums::MinerBaseType::cpuminer, new QList<Algorithm*>({
+			new Algorithm(Enums::MinerBaseType::cpuminer, Enums::AlgorithmType::Hodl, "hodl"),
 			new Algorithm(Enums::MinerBaseType::cpuminer, Enums::AlgorithmType::Lyra2z, "lyra2z")
 			})}
 		});
