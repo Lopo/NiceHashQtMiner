@@ -22,12 +22,15 @@ void DevicesListViewEnableControl::InitializeComponent()
 	listViewDevices->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
 	listViewDevices->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
 	listViewDevices->setEditTriggers(QAbstractItemView::EditTrigger::NoEditTriggers);
+	QVBoxLayout* l=new QVBoxLayout(this);
+	l->addWidget(listViewDevices);
+	setLayout(l);
 //	connect(/*listViewDevices*/this, SIGNAL(MouseClick()), this, SLOT(listViewDevices_MouseClick()));
 //	connect(listViewDevices, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(listViewDevices_MouseClick(QTreeWidgetItem*, int)));
 
-	this->setObjectName("DevicesListViewEnableControl");
-	this->resize(374, 226);
-	this->setFont(f6);
+	setObjectName("DevicesListViewEnableControl");
+	resize(374, 226);
+	setFont(f6);
 //	connect(this, SIGNAL(Resize()), this, SLOT(DevicesListViewEnableControl_Resize()));
 }
 

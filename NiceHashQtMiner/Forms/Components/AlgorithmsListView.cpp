@@ -46,6 +46,9 @@ void AlgorithmsListView::InitializeComponent()
 	listViewAlgorithms->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
 	listViewAlgorithms->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
 	listViewAlgorithms->setEditTriggers(QAbstractItemView::EditTrigger::NoEditTriggers);
+	QVBoxLayout* l=new QVBoxLayout(this);
+	l->addWidget(listViewAlgorithms);
+	setLayout(l);
 //	connect(listViewAlgorithms, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(listViewAlgorithms_MouseClick(const QPoint&)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(ListViewAlgorithms_MouseClick(const QPoint&)));
 
