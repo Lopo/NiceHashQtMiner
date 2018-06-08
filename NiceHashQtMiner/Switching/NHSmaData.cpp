@@ -184,13 +184,13 @@ void NHSmaData::UpdateStableAlgorithms(QList<Enums::AlgorithmType> algorithms)
 bool NHSmaData::TryGetSma(Enums::AlgorithmType algo, NiceHashSma& sma)
 {
 	CheckInit();
-	if (_currentSmaMtx.tryLock(1000)) {
+//	if (_currentSmaMtx.tryLock(1000)) {
 		if (_currentSma->contains(algo)) {
 			sma=*_currentSma->value(algo);
 			return true;
 			}
-		_currentSmaMtx.unlock();
-		}
+//		_currentSmaMtx.unlock();
+//		}
 
 //	sma=nullptr;
 	return false;

@@ -10,7 +10,7 @@
 #include "Configs/Data/GeneralConfig.h"
 #include <QThread>
 #include <QMetaEnum>
-#include <QMetaObject>
+#include <QtConcurrent/QtConcurrentRun>
 
 
 BenchmarkHandler::BenchmarkHandler(ComputeDevice* device, QQueue<Algorithm*> algorithms, IBenchmarkForm* form, Enums::BenchmarkPerformanceType performance)
@@ -27,7 +27,7 @@ BenchmarkHandler::BenchmarkHandler(ComputeDevice* device, QQueue<Algorithm*> alg
 void BenchmarkHandler::Start()
 {
 //	QFuture<void> f=QtConcurrent::run(this, &BenchmarkHandler::NextBenchmark);
-	QMetaObject::invokeMethod(this, "NextBenchmark");
+	QtConcurrent::run(this, &BenchmarkHandler::NextBenchmark);
 /*	QThread* thread=new QThread(NextBenchmark);
 	thread->setObjectName(QString("dev_%1-%2_benchmark").arg(QMetaEnum::fromType<Enums::DeviceType>().valueToKey((int)Device->DeviceType)).arg(Device->ID));
 	thread->start();*/
@@ -72,7 +72,7 @@ void BenchmarkHandler::OnBenchmarkComplete(bool success, QString status)
 
 	double power=_powerHelper->Stop();
 
-	DualAlgorithm* dualAlgo=(DualAlgorithm*)_currentAlgorithm;
+	DualAlgorithm* dualAlgo=qobject_cast<DualAlgorithm*>(_currentAlgorithm);
 	if (dualAlgo!=nullptr && dualAlgo->TuningEnabled) {
 		dualAlgo->SetPowerForCurrent(power);
 
@@ -128,6 +128,7 @@ void BenchmarkHandler::NextBenchmark()
 		}
 
 	if (Device!=nullptr && _currentAlgorithm!=nullptr) {
+		_currentMiner=MinerFactory::CreateMiner(Device, _currentAlgorithm);
 		if (_cpuBenchmarkStatus!=nullptr) {delete _cpuBenchmarkStatus;};
 		_cpuBenchmarkStatus=nullptr;
 

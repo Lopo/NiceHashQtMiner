@@ -35,7 +35,7 @@ public:
 	void RepaintStatus(bool isEnabled, const QString uuid);
 
 	void ResetListItemColors();
-	void SetSpeedStatus(ComputeDevice* computeDevice, Algorithm* algorithm, QString status); // benchmark settings
+	Q_INVOKABLE void SetSpeedStatus(ComputeDevice* computeDevice, Algorithm* algorithm, QString status); // benchmark settings
 
 	inline bool IsInBenchmark() const { return _isInBenchmark; };
 	void IsInBenchmark(const bool value);

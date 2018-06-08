@@ -19,6 +19,7 @@ class BenchmarkHandler
 	: public QObject,
 		public IBenchmarkComunicator
 {
+	Q_OBJECT
 public:
 	BenchmarkHandler(ComputeDevice* device, QQueue<Algorithm*> algorithms, IBenchmarkForm* form, Enums::BenchmarkPerformanceType performance);
 
@@ -39,14 +40,14 @@ private:
 	Enums::BenchmarkPerformanceType _performanceType;
 	ClaymoreZcashBenchHelper* _claymoreZcashStatus=nullptr;
 
-	CpuBenchHelper* _cpuBenchmarkStatus;
+	CpuBenchHelper* _cpuBenchmarkStatus=nullptr;
 
-	PowerHelper* _powerHelper;
+	PowerHelper* _powerHelper=nullptr;
 
 	// CPU sweet spots
 	QList<Enums::AlgorithmType> _cpuAlgos={Enums::AlgorithmType::CryptoNight};
 
-	void NextBenchmark();
+	Q_INVOKABLE void NextBenchmark();
 	void EndBenchmark();
 };
 

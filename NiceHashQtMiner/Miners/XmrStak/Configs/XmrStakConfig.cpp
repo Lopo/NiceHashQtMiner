@@ -1,6 +1,5 @@
-#include <qt/QtCore/qjsondocument.h>
-
 #include "Miners/XmrStak/Configs/XmrStakConfig.h"
+#include <QJsonDocument>
 
 
 void XmrStakConfig::SetBenchmarkOptions(QString logFile)

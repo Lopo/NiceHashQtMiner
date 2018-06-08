@@ -10,6 +10,7 @@ class ComputeDevice;
 class PowerHelper
 	: public QObject
 {
+	Q_OBJECT
 public:
 	PowerHelper(ComputeDevice* dev);
 	void Start();

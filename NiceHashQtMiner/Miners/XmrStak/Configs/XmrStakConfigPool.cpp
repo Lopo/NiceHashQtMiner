@@ -11,7 +11,7 @@ XmrStakConfigPool::XmrStakPoolItem::XmrStakPoolItem(QString pool, QString worker
 
 void XmrStakConfigPool::SetupPools(QString poolAddr, QString wallet, bool isHeavy)
 {
-	SetupPools({poolAddr}, wallet, isHeavy);
+	SetupPools(QStringList({poolAddr}), wallet, isHeavy);
 }
 
 void XmrStakConfigPool::SetupPools(QStringList poolAddrs, QString wallet, bool isHeavy)
