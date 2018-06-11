@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setApplicationVersion(NHQTM_VERSION_STRING);
 	QCoreApplication::addLibraryPath("./");
 
-	qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", commandLineArgs->Qassf.toLatin1());
+	qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
 //	QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
