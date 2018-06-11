@@ -10,8 +10,6 @@
 void FormDcriValues::InitializeComponent()
 {
 	Resources resources;
-	QFont f6;
-	f6.setPointSize(6);
 
 	listView_Intensities=new QTableView(this);
 	listView_Intensities->setObjectName("listView_Intensities");
@@ -19,13 +17,11 @@ void FormDcriValues::InitializeComponent()
 	listView_Intensities->setModel(model);
 	listView_Intensities->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	listView_Intensities->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-	listView_Intensities->horizontalHeader()->setFont(f6);
 	listView_Intensities->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	listView_Intensities->verticalHeader()->hide();
 	listView_Intensities->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
 	listView_Intensities->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
 	listView_Intensities->setEditTriggers(QAbstractItemView::EditTrigger::NoEditTriggers);
-	listView_Intensities->setFont(f6);
 
 	connect(listView_Intensities->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(ListView_Intensities_ItemSelectionChanged(const QItemSelection&, const QItemSelection&)));
 	listView_Intensities->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -100,7 +96,6 @@ void FormDcriValues::InitializeComponent()
 	setMinimumSize(609, 380);
 	setWindowTitle("Dcri Values");
 	setWindowFlag(Qt::WindowType::Dialog);
-	setFont(f6);
 }
 
 FormDcriValues::FormDcriValues(DualAlgorithm* algorithm, QWidget* parent)

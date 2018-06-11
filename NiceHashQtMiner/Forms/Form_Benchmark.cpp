@@ -81,9 +81,6 @@ Form_Benchmark::Form_Benchmark(QWidget *parent, Enums::BenchmarkPerformanceType 
 
 void Form_Benchmark::InitializeComponent()
 {
-	QFont f;
-	f.setPointSize(6);
-
 	StartStopBtn=new QPushButton(this);
 	StartStopBtn->setObjectName("StartStopBtn");
 	StartStopBtn->setGeometry(436, 366, 75, 23);
@@ -101,13 +98,11 @@ void Form_Benchmark::InitializeComponent()
 	groupBoxBenchmarkProgress->setGeometry(12, 342, 418, 47);
 	groupBoxBenchmarkProgress->setTitle("Benchmark progress status:");
 	groupBoxBenchmarkProgress->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.3em;} QGroupBox::title { top: -0.4em; left: 10px;}");
-	groupBoxBenchmarkProgress->setFont(f);
 
 	labelBenchmarkSteps=new QLabel(groupBoxBenchmarkProgress);
 	labelBenchmarkSteps->setObjectName("labelBenchmarkSteps");
 	labelBenchmarkSteps->setGeometry(6, 24, 116, 13);
 	labelBenchmarkSteps->setText("Benchmark step (0/10)");
-	labelBenchmarkSteps->setFont(f);
 
 	progressBarBenchmarkSteps=new QProgressBar(groupBoxBenchmarkProgress);
 	progressBarBenchmarkSteps->setObjectName("progressBarBenchmarkSteps");
@@ -165,7 +160,6 @@ void Form_Benchmark::InitializeComponent()
 	setFixedSize(604, 401);
 	setObjectName("Form_Benchmark");
 	setWindowTitle("Benchmark");
-	setFont(f);
 	connect(this, SIGNAL(closing(QCloseEvent*)), this, SLOT(FormBenchmark_New_FormClosing(QCloseEvent*)));
 }
 

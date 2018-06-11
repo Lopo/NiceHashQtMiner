@@ -67,7 +67,7 @@ private:
 	QLineEdit* textBoxWorkerName=nullptr;
 	ClickableLabel* linkLabelChooseBTCWallet=nullptr;
 	QLabel* labelDemoMode=nullptr;
-	QListWidget* flowLayoutPanelRates=nullptr;
+	QVBoxLayout* flowLayoutPanelRates=nullptr;
 	QGroupBox* groupBox1=nullptr;
 	QLabel* label_NotProfitable=nullptr;
 	DevicesListViewEnableControl* devicesListViewEnableControl1=nullptr;

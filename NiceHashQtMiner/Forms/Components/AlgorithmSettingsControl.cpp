@@ -22,44 +22,36 @@ AlgorithmSettingsControl::AlgorithmSettingsControl(QWidget* parent)
 void AlgorithmSettingsControl::InitializeComponent()
 {
 	Resources resources;
-	QFont fnt;
-	fnt.setPointSizeF(6);
 
 	groupBoxSelectedAlgorithmSettings=new QGroupBox(this);
 	groupBoxSelectedAlgorithmSettings->setObjectName("groupBoxSelectedAlgorithmSettings");
 	groupBoxSelectedAlgorithmSettings->setGeometry(3, 3, 229, 285);
 	groupBoxSelectedAlgorithmSettings->setTitle("Selected Algorithm Settings:");
-	groupBoxSelectedAlgorithmSettings->setFont(fnt);
 	groupBoxSelectedAlgorithmSettings->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.3em;} QGroupBox::title { top: -0.4em; left: 10px;}");
 
 	flowLayoutPanel1=new QWidget(groupBoxSelectedAlgorithmSettings);
 	flowLayoutPanel1->setObjectName("flowLayoutPanel1");
 	flowLayoutPanel1->setGeometry(3, 16, 223, 266);
-	flowLayoutPanel1->setFont(fnt);
 
 	field_PowerUsage=new Field<double>(flowLayoutPanel1);
 	field_PowerUsage->setObjectName("field_PowerUsage");
 	field_PowerUsage->setGeometry(3, 3, 220, 47);
 	field_PowerUsage->LabelText("Power Usage (W):");
-	field_PowerUsage->setFont(fnt);
 
 	fieldBoxBenchmarkSpeed=new Field<double>(flowLayoutPanel1);
 	fieldBoxBenchmarkSpeed->setObjectName("fieldBoxBenchmarkSpeed");
 	fieldBoxBenchmarkSpeed->setGeometry(3, 56, 220, 47);
 	fieldBoxBenchmarkSpeed->LabelText("Benchmark Speed (H/s):");
-	fieldBoxBenchmarkSpeed->setFont(fnt);
 
 	secondaryFieldBoxBenchmarkSpeed=new Field<double>(flowLayoutPanel1);
 	secondaryFieldBoxBenchmarkSpeed->setObjectName("secondaryFieldBoxBenchmarkSpeed");
 	secondaryFieldBoxBenchmarkSpeed->setGeometry(3, 109, 220, 47);
 	secondaryFieldBoxBenchmarkSpeed->LabelText("Secondary Benchmark Speed (H/s):");
-	secondaryFieldBoxBenchmarkSpeed->setFont(fnt);
 
 	groupBoxExtraLaunchParameters=new QGroupBox(flowLayoutPanel1);
 	groupBoxExtraLaunchParameters->setObjectName("groupBoxExtraLaunchParameters");
 	groupBoxExtraLaunchParameters->setGeometry(3, 162, 217, 95);
 	groupBoxExtraLaunchParameters->setTitle("Extra Launch Parameters:");
-	groupBoxExtraLaunchParameters->setFont(fnt);
 	groupBoxExtraLaunchParameters->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.3em;} QGroupBox::title { top: -0.4em; left: 10px;}");
 
 	pictureBox1=new QLabel(groupBoxExtraLaunchParameters);
@@ -71,11 +63,9 @@ void AlgorithmSettingsControl::InitializeComponent()
 	richTextBoxExtraLaunchParameters->setObjectName("richTextBoxExtraLaunchParameters");
 	richTextBoxExtraLaunchParameters->setGeometry(3, 16, 211, 82);
 	richTextBoxExtraLaunchParameters->setPlainText("");
-	richTextBoxExtraLaunchParameters->setFont(fnt);
 
 	setObjectName("AlgorithmSettingsControl");
 	resize(235, 291);
-	setFont(fnt);
 }
 
 void AlgorithmSettingsControl::Deselect()

@@ -7,9 +7,6 @@
 
 void DevicesListViewEnableControl::InitializeComponent()
 {
-	QFont f6;
-	f6.setPointSize(6);
-
 	listViewDevices=new QTreeView(this);
 	listViewDevices->setObjectName("listViewDevices");
 	listViewDevices->setGeometry(0, 0, 374, 226);
@@ -30,7 +27,6 @@ void DevicesListViewEnableControl::InitializeComponent()
 
 	setObjectName("DevicesListViewEnableControl");
 	resize(374, 226);
-	setFont(f6);
 //	connect(this, SIGNAL(Resize()), this, SLOT(DevicesListViewEnableControl_Resize()));
 }
 

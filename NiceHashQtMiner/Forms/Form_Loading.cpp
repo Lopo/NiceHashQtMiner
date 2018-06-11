@@ -5,10 +5,6 @@
 
 void Form_Loading::InitializeComponent()
 {
-	QFont f;
-	f.setPointSize(7);
-	setFont(f);
-
 	progressBar1=new QProgressBar(this);
 	progressBar1->setObjectName("progressBar1");
 	progressBar1->setGeometry(12, 25, 286, 23);
@@ -24,7 +20,6 @@ void Form_Loading::InitializeComponent()
 	label_LoadingText->setGeometry(84, 9, 136, 13);
 	QFont fl;
 	fl.setBold(true);
-	fl.setPointSize(6);
 	label_LoadingText->setFont(fl);
 	label_LoadingText->setText("Loading, please wait...");
 
@@ -34,8 +29,7 @@ void Form_Loading::InitializeComponent()
 	setModal(true);
 	setObjectName("Form_Loading");
 	setWindowTitle("Form_Loading");
-	setWindowFlags(windowFlags() | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint); // borderless
-//	setMask(geometry()); // borderless
+	setWindowFlag(Qt::SplashScreen); // borderless
 //	connect(this, SIGNAL(), this, SLOT(Form_Loading_Shown()));
 }
 

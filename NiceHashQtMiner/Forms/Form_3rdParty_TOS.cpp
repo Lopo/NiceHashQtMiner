@@ -52,9 +52,6 @@ void Form_3rdParty_TOS::InitializeComponent()
 	setObjectName("Form_ClaymoreTOS");
 	resize(384, 295);
 	setWindowTitle("Disclaimer on usage of 3rd party software");
-	QFont f6;
-	f6.setPointSize(6);
-	setFont(f6);
 	setWindowIcon(QIcon());
 	setGeometry( // CenterScreen
 		QStyle::alignedRect(

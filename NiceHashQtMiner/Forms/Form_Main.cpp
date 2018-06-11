@@ -81,9 +81,6 @@ Form_Main::Form_Main(QWidget *parent)
 void Form_Main::InitializeComponent()
 {
 	Resources resources;
-	QFont f;
-	f.setPointSize(5);
-	setFont(f);
 
 	buttonStartMining=new QPushButton(this);
 	buttonStartMining->setObjectName("buttonStartMining");
@@ -114,7 +111,8 @@ void Form_Main::InitializeComponent()
 
 	statusStrip1=new QStatusBar(this);
 	statusStrip1->setObjectName("statusStrip1");
-	statusStrip1->setGeometry(0, 306, 565, 25);
+	statusStrip1->setFixedHeight(25);
+	setStatusBar(statusStrip1);
 
 	toolStripStatusLabelGlobalRateText=new QLabel(statusStrip1);
 	toolStripStatusLabelGlobalRateText->setObjectName("toolStripStatusLabelGlobalRateText");
@@ -122,12 +120,13 @@ void Form_Main::InitializeComponent()
 	toolStripStatusLabelGlobalRateText->setFixedSize(67, 20);
 	statusStrip1->addPermanentWidget(toolStripStatusLabelGlobalRateText);
 
+	QFont fb;
+	fb.setBold(true);
 	toolStripStatusLabelGlobalRateValue=new QLabel(statusStrip1);
 	toolStripStatusLabelGlobalRateValue->setObjectName("toolStripStatusLabelGlobalRateValue");
 	toolStripStatusLabelGlobalRateValue->setText("0.00000000");
 	toolStripStatusLabelGlobalRateValue->setFixedSize(73, 20);
-//	toolStripStatusLabelGlobalRateValue->setStyleSheet("QLabel { font: 9pt \"Segoe UI\"; font-weight: bold; }");
-	toolStripStatusLabelGlobalRateValue->setStyleSheet("QLabel { font: \"Segoe UI\"; font-weight: bold; }");
+	toolStripStatusLabelGlobalRateValue->setFont(fb);
 	statusStrip1->addPermanentWidget(toolStripStatusLabelGlobalRateValue);
 
 	toolStripStatusLabelBTCDayText=new QLabel(statusStrip1);
@@ -140,8 +139,7 @@ void Form_Main::InitializeComponent()
 	toolStripStatusLabelBTCDayValue->setObjectName("toolStripStatusLabelBTCDayValue");
 	toolStripStatusLabelBTCDayValue->setText("0.00");
 	toolStripStatusLabelBTCDayValue->setFixedSize(31, 20);
-//	toolStripStatusLabelBTCDayValue->setStyleSheet("QLabel { font: 9pt \"Segoe UI\"; font-weight: bold; }");
-	toolStripStatusLabelBTCDayValue->setStyleSheet("QLabel { font: \"Segoe UI\"; font-weight: bold; }");
+	toolStripStatusLabelBTCDayValue->setFont(fb);
 	statusStrip1->addPermanentWidget(toolStripStatusLabelBTCDayValue);
 
 	toolStripStatusLabelBalanceText=new QLabel(statusStrip1);
@@ -154,8 +152,7 @@ void Form_Main::InitializeComponent()
 	toolStripStatusLabelBalanceBTCValue->setObjectName("toolStripStatusLabelBalanceBTCValue");
 	toolStripStatusLabelBalanceBTCValue->setText("0.00000000");
 	toolStripStatusLabelBalanceBTCValue->setFixedSize(73, 20);
-//	toolStripStatusLabelBalanceBTCValue->setStyleSheet("QLabel { font: 9pt \"Segoe UI\"; font-weight: bold; }");
-	toolStripStatusLabelBalanceBTCValue->setStyleSheet("QLabel { font: \"Segoe UI\"; font-weight: bold; }");
+	toolStripStatusLabelBalanceBTCValue->setFont(fb);
 	statusStrip1->addPermanentWidget(toolStripStatusLabelBalanceBTCValue);
 
 	toolStripStatusLabelBalanceBTCCode=new QLabel(statusStrip1);
@@ -168,8 +165,7 @@ void Form_Main::InitializeComponent()
 	toolStripStatusLabelBalanceDollarText->setObjectName("toolStripStatusLabelBalanceDollarText");
 	toolStripStatusLabelBalanceDollarText->setText("0.00");
 	toolStripStatusLabelBalanceDollarText->setFixedSize(31, 20);
-//	toolStripStatusLabelBalanceDollarText->setStyleSheet("QLabel { font: 9pt \"Segoe UI\"; font-weight: bold; }");
-	toolStripStatusLabelBalanceDollarText->setStyleSheet("QLabel { font: \"Segoe UI\"; font-weight: bold; }");
+	toolStripStatusLabelBalanceDollarText->setFont(fb);
 	statusStrip1->addPermanentWidget(toolStripStatusLabelBalanceDollarText);
 
 	toolStripStatusLabelBalanceDollarValue=new QLabel(statusStrip1);
@@ -246,17 +242,17 @@ void Form_Main::InitializeComponent()
 	labelDemoMode->setStyleSheet("QLabel { color: red; font: 15.25pt \"Sans Serif\"; }");
 	labelDemoMode->setVisible(false);
 
-	flowLayoutPanelRates=new QListWidget;
-	flowLayoutPanelRates->setObjectName("flowLayoutPanelRates");
-	flowLayoutPanelRates->setGeometry(3, 16, 545, 40);
-	flowLayoutPanelRates->setLayout(new QVBoxLayout);
-
 	groupBox1=new QGroupBox(this);
 	groupBox1->setObjectName("groupBox1");
-	groupBox1->setGeometry(9, 246, 551, 59);
+	groupBox1->move(9, 246);
+	groupBox1->setFixedWidth(551);
 	groupBox1->setTitle("Group/Device Rates:");
-	groupBox1->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.4em; } QGroupBox::title { top: -8px; left: 10px; }");
-	flowLayoutPanelRates->setParent(groupBox1);
+	groupBox1->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.25em; padding: 0;} QGroupBox::title { top: -0.5em; left: 0.5em; }");
+
+	flowLayoutPanelRates=new QVBoxLayout(groupBox1);
+	flowLayoutPanelRates->setObjectName("flowLayoutPanelRates");
+	flowLayoutPanelRates->setAlignment(Qt::AlignCenter);
+	groupBox1->setLayout(flowLayoutPanelRates);
 
 	label_NotProfitable=new QLabel(groupBox1);
 	label_NotProfitable->setObjectName("label_NotProfitable");
@@ -300,7 +296,7 @@ void Form_Main::InitializeComponent()
 	setTabOrder(devicesListViewEnableControl1, linkLabelNewVersion);
 
 	setEnabled(false);
-	setMinimumSize(576, 316);
+	setFixedSize(576, 316);
 	setObjectName("Form_Main");
 	setWindowTitle("NiceHash QtMiner");
 	// closeEvent(QCloseEvent* ev)
@@ -661,19 +657,25 @@ void Form_Main::ComputeDevicesCheckTimer_Tick()
 
 void Form_Main::InitFlowPanelStart()
 {
-	QListWidgetItem* i=nullptr;
-	while (i=flowLayoutPanelRates->takeItem(0)) {
+	QLayoutItem* i=nullptr;
+	GroupProfitControl* gpc=nullptr;
+	while ((i=flowLayoutPanelRates->takeAt(0))!=nullptr) {
+		gpc=(GroupProfitControl*)i->widget();
+		if (gpc!=nullptr) {
+			delete gpc;
+			}
 		delete i;
 		}
 	// add for every cdev a
+	QSizePolicy sp1(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+	sp1.setHorizontalStretch(0);
+	sp1.setVerticalStretch(0);
 	foreach (ComputeDevice* cdev, *ComputeDeviceManager.Available.Devices) {
 		if (cdev->Enabled) {
-			GroupProfitControl* newGroupProfitControl=new GroupProfitControl(flowLayoutPanelRates);
-//			newGroupProfitControl->setHidden(true);
-			QListWidgetItem* item=new QListWidgetItem(flowLayoutPanelRates);
-			flowLayoutPanelRates->addItem(item);
-			flowLayoutPanelRates->setItemWidget(item, newGroupProfitControl);
-			flowLayoutPanelRates->setItemHidden(item, true);
+			GroupProfitControl* newGroupProfitControl=new GroupProfitControl(groupBox1);
+			newGroupProfitControl->setSizePolicy(sp1);
+			newGroupProfitControl->setVisible(false);
+			flowLayoutPanelRates->addWidget(newGroupProfitControl);
 			}
 		}
 }
@@ -693,7 +695,7 @@ void Form_Main::ClearRates(int groupCount)
 		// hide some Controls
 		int hideIndex=0;
 		for (int i=0; i<flowLayoutPanelRates->count(); i++) {
-			flowLayoutPanelRates->setItemHidden(flowLayoutPanelRates->item(i), !(hideIndex<groupCount));
+			flowLayoutPanelRates->itemAt(i)->widget()->setVisible(hideIndex<groupCount);
 			++hideIndex;
 			}
 		}
@@ -704,17 +706,11 @@ void Form_Main::ClearRates(int groupCount)
 		}
 	int groupBox1Height=_emtpyGroupPanelHeight;
 	if (flowLayoutPanelRates->count()) {
-		QWidget* control=flowLayoutPanelRates->itemWidget(flowLayoutPanelRates->item(0));
-		float panelHeight=control->height()*1.2f;
-		groupBox1Height=(int)(visibleGroupCount*panelHeight);
+		groupBox1Height=(int)(visibleGroupCount*flowLayoutPanelRates->itemAt(0)->widget()->height());
 		}
 	groupBox1->resize(groupBox1->width(), groupBox1Height);
-	flowLayoutPanelRates->resize(flowLayoutPanelRates->width(), groupBox1Height-6);
-	statusStrip1->move(statusStrip1->x(), groupBox1->y()+groupBox1->height()+1);
 	// set new height
-	QSize s=size();
-	s.setHeight(_mainFormHeight+groupBox1Height);
-	resize(s);
+	setFixedHeight(_mainFormHeight+groupBox1Height);
 }
 
 void Form_Main::AddRateInfo(QString groupName, QString deviceStringInfo, ApiData* iAPIData, double paying, bool isApiGetException)
@@ -728,7 +724,7 @@ void Form_Main::AddRateInfo(QString groupName, QString deviceStringInfo, ApiData
 	QString rateCurrencyString=QString::number(ExchangeRateApi::ConvertToActiveCurrency(paying*ExchangeRateApi::GetUsdExchangeRate()*_factorTimeUnit), 'f', 2)+QString(" %1/").arg(ExchangeRateApi::ActiveDisplayCurrency)+International::GetText(QMetaEnum::fromType<Enums::TimeUnitType>().valueToKey((int)ConfigManager.generalConfig->TimeUnit));
 
 	try {
-		((GroupProfitControl*)flowLayoutPanelRates->itemWidget(flowLayoutPanelRates->item(_flowLayoutPanelRatesIndex++)))->UpdateProfitStats(groupName, deviceStringInfo, speedString, rateBTCString, rateCurrencyString);
+		((GroupProfitControl*)flowLayoutPanelRates->itemAt(_flowLayoutPanelRatesIndex++)->widget())->UpdateProfitStats(groupName, deviceStringInfo, speedString, rateBTCString, rateCurrencyString);
 		}
 	catch (...) {}
 

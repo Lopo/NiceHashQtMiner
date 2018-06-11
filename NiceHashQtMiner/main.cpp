@@ -15,6 +15,7 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include <boost/filesystem.hpp>
 #include <QtSingleApplication>
+#include <QFontDatabase>
 
 
 QNetworkAccessManager* qnam;
@@ -29,10 +30,25 @@ int main(int argc, char *argv[])
 	QCoreApplication::setApplicationVersion(NHQTM_VERSION_STRING);
 	QCoreApplication::addLibraryPath("./");
 
+	qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", commandLineArgs->Qassf.toLatin1());
+//	QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
 	// #1 first initialize config
 	ConfigManager.InitializeConfig();
 
 	QtSingleApplication a(argc, argv);
+	a.setAttribute(Qt::AA_NativeWindows);
+	QFontDatabase fntDb;
+	QString curFam(QApplication::font().family());
+	bool isCurScaleable=fntDb.isScalable(curFam);
+	QString subFam(QFont::substitute(curFam));
+	bool isSubScaleable=fntDb.isScalable(subFam);
+	if (isCurScaleable && !isSubScaleable) {
+		QFont::removeSubstitutions(curFam);
+		}
+//	float devicePixelRatio=1.0;
+//	devicePixelRatio=a.devicePixelRatio();
 	// #2 check if multiple instances are allowed
 	if (!ConfigManager.generalConfig->AllowMultipleInstances) {
 		try {

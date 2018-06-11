@@ -24,8 +24,6 @@
 void Form_Settings::InitializeComponent()
 {
 	Resources resources;
-	QFont f6;
-	f6.setPointSize(6);
 
 //	toolTip1=new QToolTip;
 
@@ -45,7 +43,6 @@ void Form_Settings::InitializeComponent()
 	groupBox_Misc->setContentsMargins(2, 3, 2, 3);
 	groupBox_Misc->setTitle("Misc:");
 	groupBox_Misc->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.4em;} QGroupBox::title { top: -8px; left: 10px;}");
-	groupBox_Misc->setFont(f6);
 #if WITH_NVIDIA
 	pictureBox_RunScriptOnCUDA_GPU_Lost=new QLabel(groupBox_Misc);
 	pictureBox_RunScriptOnCUDA_GPU_Lost->setObjectName("pictureBox_RunScriptOnCUDA_GPU_Lost");
@@ -56,7 +53,6 @@ void Form_Settings::InitializeComponent()
 	checkBox_RunScriptOnCUDA_GPU_Lost->setObjectName("checkBox_RunScriptOnCUDA_GPU_Lost");
 	checkBox_RunScriptOnCUDA_GPU_Lost->setGeometry(6, 383, 191, 17);
 	checkBox_RunScriptOnCUDA_GPU_Lost->setText("Run script when CUDA GPU is lost");
-	checkBox_RunScriptOnCUDA_GPU_Lost->setFont(f6);
 #endif
 	pictureBox_ShowInternetConnectionWarning=new QLabel(groupBox_Misc);
 	pictureBox_ShowInternetConnectionWarning->setObjectName("pictureBox_ShowInternetConnectionWarning");
@@ -67,7 +63,6 @@ void Form_Settings::InitializeComponent()
 	checkBox_ShowInternetConnectionWarning->setObjectName("checkBox_ShowInternetConnectionWarning");
 	checkBox_ShowInternetConnectionWarning->setGeometry(6, 361, 192, 17);
 	checkBox_ShowInternetConnectionWarning->setText("Show Internet Connection Warning");
-	checkBox_ShowInternetConnectionWarning->setFont(f6);
 
 //	checkBox_MinimizeMiningWindows
 //	pictureBox_MinimizeMiningWindows
@@ -81,28 +76,24 @@ void Form_Settings::InitializeComponent()
 	checkBox_RunAtStartup->setObjectName("checkBox_RunAtStartup");
 	checkBox_RunAtStartup->setGeometry(6, 339, 120, 17);
 	checkBox_RunAtStartup->setText("Start on logon");
-	checkBox_RunAtStartup->setFont(f6);
 	connect(checkBox_RunAtStartup, SIGNAL(stateChanged(int)), this, SLOT(CheckBox_RunAtStartup_CheckedChanged()));
 
 	checkBox_AllowMultipleInstances=new QCheckBox(groupBox_Misc);
 	checkBox_AllowMultipleInstances->setObjectName("checkBox_AllowMultipleInstances");
 	checkBox_AllowMultipleInstances->setGeometry(6, 317, 139, 17);
 	checkBox_AllowMultipleInstances->setText("Allow Multiple Instances");
-	checkBox_AllowMultipleInstances->setFont(f6);
 	connect(checkBox_AllowMultipleInstances, SIGNAL(stateChanged(int)), this, SLOT(CheckBox_DisableDefaultOptimizations_CheckedChanged()));
 
 	checkBox_DisableDefaultOptimizations=new QCheckBox(groupBox_Misc);
 	checkBox_DisableDefaultOptimizations->setObjectName("checkBox_DisableDefaultOptimizations");
 	checkBox_DisableDefaultOptimizations->setGeometry(6, 296, 163, 17);
 	checkBox_DisableDefaultOptimizations->setText("Disable Default Optimizations");
-	checkBox_DisableDefaultOptimizations->setFont(f6);
 	connect(checkBox_DisableDefaultOptimizations, SIGNAL(stateChanged(int)), this, SLOT(CheckBox_DisableDefaultOptimizations_CheckedChanged()));
 #if WITH_AMD
 	checkBox_AMD_DisableAMDTempControl=new QCheckBox(groupBox_Misc);
 	checkBox_AMD_DisableAMDTempControl->setObjectName("checkBox_AMD_DisableAMDTempControl");
 	checkBox_AMD_DisableAMDTempControl->setGeometry(6, 275, 145, 17);
 	checkBox_AMD_DisableAMDTempControl->setText("DisableAMDTempControl");
-	checkBox_AMD_DisableAMDTempControl->setFont(f6);
 	connect(checkBox_AMD_DisableAMDTempControl, SIGNAL(stateChanged(int)), this, SLOT(CheckBox_AMD_DisableAMDTempControl_CheckedChanged()));
 #endif
 	checkBox_AutoStartMining=new QCheckBox(groupBox_Misc);
@@ -110,7 +101,6 @@ void Form_Settings::InitializeComponent()
 	checkBox_AutoStartMining->setGeometry(6, 19, 102, 17);
 	checkBox_AutoStartMining->setContentsMargins(2, 3, 2, 3);
 	checkBox_AutoStartMining->setText("Autostart Mining");
-	checkBox_AutoStartMining->setFont(f6);
 
 //	checkBox_HideMiningWindows
 
@@ -123,7 +113,6 @@ void Form_Settings::InitializeComponent()
 	checkBox_MinimizeToTray->setObjectName("checkBox_MinimizeToTray");
 	checkBox_MinimizeToTray->setGeometry(6, 83, 100, 17);
 	checkBox_MinimizeToTray->setText("MinimizeToTray");
-	checkBox_MinimizeToTray->setFont(f6);
 
 	pictureBox_DisableDefaultOptimizations=new QLabel(groupBox_Misc);
 	pictureBox_DisableDefaultOptimizations->setObjectName("pictureBox_DisableDefaultOptimizations");
@@ -189,34 +178,29 @@ void Form_Settings::InitializeComponent()
 	checkBox_Use3rdPartyMiners->setObjectName("checkBox_Use3rdPartyMiners");
 	checkBox_Use3rdPartyMiners->setGeometry(6, 104, 129, 17);
 	checkBox_Use3rdPartyMiners->setText("Enable3rdPartyMiners");
-	checkBox_Use3rdPartyMiners->setFont(f6);
 	connect(checkBox_Use3rdPartyMiners, SIGNAL(stateChanged(int)), this, SLOT(CheckBox_Use3rdPartyMiners_CheckedChanged()));
 #if WITH_NVIDIA
 	checkBox_DisableDetectionNVIDIA=new QCheckBox(groupBox_Misc);
 	checkBox_DisableDetectionNVIDIA->setObjectName("checkBox_DisableDetectionNVIDIA");
 	checkBox_DisableDetectionNVIDIA->setGeometry(6, 125, 143, 17);
 	checkBox_DisableDetectionNVIDIA->setText("DisableDetectionNVIDIA");
-	checkBox_DisableDetectionNVIDIA->setFont(f6);
 #endif
 #if WITH_AMD
 	checkBox_DisableDetectionAMD=new QCheckBox(groupBox_Misc);
 	checkBox_DisableDetectionAMD->setObjectName("checkBox_DisableDetectionAMD");
 	checkBox_DisableDetectionAMD->setGeometry(6, 147, 131, 17);
 	checkBox_DisableDetectionAMD->setText("DisableDetectionAMD");
-	checkBox_DisableDetectionAMD->setFont(f6);
 #endif
 #if WITH_NVIDIA
 	checkBox_NVIDIAP0State=new QCheckBox(groupBox_Misc);
 	checkBox_NVIDIAP0State->setObjectName("checkBox_NVIDIAP0State");
 	checkBox_NVIDIAP0State->setGeometry(6, 253, 100, 17);
 	checkBox_NVIDIAP0State->setText("NVIDIAP0State");
-	checkBox_NVIDIAP0State->setFont(f6);
 #endif
 	checkBox_AutoScaleBTCValues=new QCheckBox(groupBox_Misc);
 	checkBox_AutoScaleBTCValues->setObjectName("checkBox_AutoScaleBTCValues");
 	checkBox_AutoScaleBTCValues->setGeometry(6, 168, 128, 17);
 	checkBox_AutoScaleBTCValues->setText("AutoScaleBTCValues");
-	checkBox_AutoScaleBTCValues->setFont(f6);
 
 //	checkBox_DisableWindowsErrorReporting
 
@@ -224,38 +208,32 @@ void Form_Settings::InitializeComponent()
 	checkBox_StartMiningWhenIdle->setObjectName("checkBox_StartMiningWhenIdle");
 	checkBox_StartMiningWhenIdle->setGeometry(6, 189, 125, 17);
 	checkBox_StartMiningWhenIdle->setText("StartMiningWhenIdle");
-	checkBox_StartMiningWhenIdle->setFont(f6);
 
 	checkBox_ShowDriverVersionWarning=new QCheckBox(groupBox_Misc);
 	checkBox_ShowDriverVersionWarning->setObjectName("checkBox_ShowDriverVersionWarning");
 	checkBox_ShowDriverVersionWarning->setGeometry(6, 211, 156, 17);
 	checkBox_ShowDriverVersionWarning->setText("ShowDriverVersionWarning");
-	checkBox_ShowDriverVersionWarning->setFont(f6);
 
 	groupBox_Logging=new QGroupBox(tabPageGeneral);
 	groupBox_Logging->setObjectName("groupBox_Logging");
 	groupBox_Logging->setGeometry(4, 339, 346, 70);
 	groupBox_Logging->setTitle("Logging:");
 	groupBox_Logging->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.4em;} QGroupBox::title { top: -8px; left: 10px;}");
-	groupBox_Logging->setFont(f6);
 
 	label_LogMaxFileSize=new QLabel(groupBox_Logging);
 	label_LogMaxFileSize->setObjectName("label_LogMaxFileSize");
 	label_LogMaxFileSize->setGeometry(174, 19, 84, 13);
 	label_LogMaxFileSize->setText("LogMaxFileSize:");
-	label_LogMaxFileSize->setFont(f6);
 
 	textBox_LogMaxFileSize=new QSpinBox(groupBox_Logging);
 	textBox_LogMaxFileSize->setObjectName("textBox_LogMaxFileSize");
 	textBox_LogMaxFileSize->setGeometry(174, 41, 160, 20);
-	textBox_LogMaxFileSize->setFont(f6);
 	textBox_LogMaxFileSize->setRange(0, INT_MAX);
 
 	checkBox_LogToFile=new QCheckBox(groupBox_Logging);
 	checkBox_LogToFile->setObjectName("checkBox_LogToFile");
 	checkBox_LogToFile->setGeometry(6, 19, 72, 17);
 	checkBox_LogToFile->setText("Log to file");
-	checkBox_LogToFile->setFont(f6);
 
 //	pictureBox_DebugConsole
 
@@ -276,7 +254,6 @@ void Form_Settings::InitializeComponent()
 	groupBox_Main->setGeometry(6, 6, 346, 256);
 	groupBox_Main->setTitle("Main:");
 	groupBox_Main->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.4em;} QGroupBox::title { top: -8px; left: 10px;}");
-	groupBox_Main->setFont(f6);
 
 	pictureBox_ElectricityCost=new QLabel(groupBox_Main);
 	pictureBox_ElectricityCost->setObjectName("pictureBox_ElectricityCost");
@@ -288,13 +265,11 @@ void Form_Settings::InitializeComponent()
 	textBox_ElectricityCost->setGeometry(10, 231, 138, 20);
 	textBox_ElectricityCost->setRange(0, DBL_MAX);
 	textBox_ElectricityCost->setDecimals(4);
-	textBox_ElectricityCost->setFont(f6);
 
 	label_ElectricityCost=new QLabel(groupBox_Main);
 	label_ElectricityCost->setObjectName("label_ElectricityCost");
 	label_ElectricityCost->setGeometry(10, 211, 117, 13);
 	label_ElectricityCost->setText("Electricity Cost (/KWh):");
-	label_ElectricityCost->setFont(f6);
 
 	pictureBox_TimeUnit=new QLabel(groupBox_Main);
 	pictureBox_TimeUnit->setObjectName("pictureBox_TimeUnit");
@@ -305,18 +280,15 @@ void Form_Settings::InitializeComponent()
 	label_TimeUnit->setObjectName("label_TimeUnit");
 	label_TimeUnit->setGeometry(160, 102, 52, 13);
 	label_TimeUnit->setText("TimeUnit:");
-	label_TimeUnit->setFont(f6);
 
 	comboBox_TimeUnit=new QComboBox(groupBox_Main);
 	comboBox_TimeUnit->setObjectName("comboBox_TimeUnit");
 	comboBox_TimeUnit->setGeometry(160, 123, 160, 21);
-	comboBox_TimeUnit->setFont(f6);
 
 	label_IFTTTAPIKey=new QLabel(groupBox_Main);
 	label_IFTTTAPIKey->setObjectName("label_IFTTTAPIKey");
 	label_IFTTTAPIKey->setGeometry(113, 170, 81, 13);
 	label_IFTTTAPIKey->setText("IFTTT API Key:");
-	label_IFTTTAPIKey->setFont(f6);
 
 	textBox_IFTTTKey=new QLineEdit(groupBox_Main);
 	textBox_IFTTTKey->setObjectName("textBox_IFTTTKey");
@@ -331,13 +303,11 @@ void Form_Settings::InitializeComponent()
 	checkBox_UseIFTTT->setObjectName("checkBox_UseIFTTT");
 	checkBox_UseIFTTT->setGeometry(10, 168, 78, 17);
 	checkBox_UseIFTTT->setText("Use IFTTT");
-	checkBox_UseIFTTT->setFont(f6);
 
 	checkBox_IdleWhenNoInternetAccess=new QCheckBox(groupBox_Main);
 	checkBox_IdleWhenNoInternetAccess->setObjectName("checkBox_IdleWhenNoInternetAccess");
 	checkBox_IdleWhenNoInternetAccess->setGeometry(10, 149, 205, 17);
 	checkBox_IdleWhenNoInternetAccess->setText("Continue Mining If No Internet Access");
-	checkBox_IdleWhenNoInternetAccess->setFont(f6);
 	connect(checkBox_IdleWhenNoInternetAccess, SIGNAL(stateChanged(int)), this, SLOT(GeneralCheckBoxes_CheckedChanged()));
 
 	pictureBox_WorkerName=new QLabel(groupBox_Main);
@@ -363,7 +333,6 @@ void Form_Settings::InitializeComponent()
 	textBox_MinProfit=new QDoubleSpinBox(groupBox_Main);
 	textBox_MinProfit->setObjectName("textBox_MinProfit");
 	textBox_MinProfit->setGeometry(10, 123, 138, 20);
-	textBox_MinProfit->setFont(f6);
 	textBox_MinProfit->setRange(0, DBL_MAX);
 
 	pictureBox_IdleWhenNoInternetAccess=new QLabel(groupBox_Main);
@@ -375,54 +344,45 @@ void Form_Settings::InitializeComponent()
 	label_BitcoinAddress->setObjectName("label_BitcoinAddress");
 	label_BitcoinAddress->setGeometry(10, 16, 80, 13);
 	label_BitcoinAddress->setText("BitcoinAddress:");
-	label_BitcoinAddress->setFont(f6);
 
 	label_MinProfit=new QLabel(groupBox_Main);
 	label_MinProfit->setObjectName("label_MinProfit");
 	label_MinProfit->setGeometry(10, 103, 115, 13);
 	label_MinProfit->setText("Minimum Profit ($/day):");
-	label_MinProfit->setFont(f6);
 
 	label_WorkerName=new QLabel(groupBox_Main);
 	label_WorkerName->setObjectName("label_WorkerName");
 	label_WorkerName->setGeometry(10, 59, 73, 13);
 	label_WorkerName->setText("WorkerName:");
-	label_WorkerName->setFont(f6);
 
 	label_ServiceLocation=new QLabel(groupBox_Main);
 	label_ServiceLocation->setObjectName("label_ServiceLocation");
 	label_ServiceLocation->setGeometry(160, 59, 87, 13);
 	label_ServiceLocation->setText("ServiceLocation:");
-	label_ServiceLocation->setFont(f6);
 
 	comboBox_ServiceLocation=new QComboBox(groupBox_Main);
 	comboBox_ServiceLocation->setObjectName("comboBox_ServiceLocation");
 	comboBox_ServiceLocation->setGeometry(160, 80, 160, 21);
 	comboBox_ServiceLocation->insertItems(0, QStringList() << "Europe - Amsterdam" << "USA - San Jose" << "China - Hong Kong" << "Japan - Tokyo" << "India - Chennai" << "Brazil - Sao Paulo");
-	comboBox_ServiceLocation->setFont(f6);
 
 	textBox_BitcoinAddress=new QLineEdit(groupBox_Main);
 	textBox_BitcoinAddress->setObjectName("textBox_BitcoinAddress");
 	textBox_BitcoinAddress->setGeometry(10, 36, 316, 20);
-	textBox_BitcoinAddress->setFont(f6);
 
 	textBox_WorkerName=new QLineEdit(groupBox_Main);
 	textBox_WorkerName->setObjectName("textBox_WorkerName");
 	textBox_WorkerName->setGeometry(10, 80, 138, 20);
-	textBox_WorkerName->setFont(f6);
 
 	groupBox_Localization=new QGroupBox(tabPageGeneral);
 	groupBox_Localization->setObjectName("groupBox_Localization");
 	groupBox_Localization->setGeometry(4, 268, 346, 70);
 	groupBox_Localization->setTitle("Localization:");
 	groupBox_Localization->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.4em;} QGroupBox::title { top: -8px; left: 10px;}");
-	groupBox_Localization->setFont(f6);
 
 	label_Language=new QLabel(groupBox_Localization);
 	label_Language->setObjectName("label_Language");
 	label_Language->setGeometry(6, 16, 58, 13);
 	label_Language->setText("Language:");
-	label_Language->setFont(f6);
 
 //	pictureBox5
 
@@ -439,32 +399,27 @@ void Form_Settings::InitializeComponent()
 	comboBox_Language=new QComboBox(groupBox_Localization);
 	comboBox_Language->setObjectName("comboBox_Language");
 	comboBox_Language->setGeometry(6, 36, 190, 21);
-	comboBox_Language->setFont(f6);
 
 	currencyConverterCombobox=new QComboBox(groupBox_Localization);
 	currencyConverterCombobox->setObjectName("currencyConverterCombobox");
 	currencyConverterCombobox->setGeometry(212, 36, 122, 21);
 	currencyConverterCombobox->insertItems(0, QStringList() << "AUD" << "BGN" << "BRL" << "CAD" << "CHF" << "CNY" << "CZK" << "DKK" << "EUR" << "GBP" << "HKD" << "HRK" << "HUF" << "IDR" << "ILS" << "INR" << "JPY" << "KRW" << "MXN" << "MYR" << "NOK" << "NZD" << "PHP" << "PLN" << "RON" << "RUB" << "SEK" << "SGD" << "THB" << "TRY" << "USD" << "ZAR");
-	currencyConverterCombobox->setFont(f6);
 	connect(currencyConverterCombobox, SIGNAL(currentIndexChanged(int)), SLOT(CurrencyConverterCombobox_SelectedIndexChanged(int)));
 
 	label_displayCurrency=new QLabel(groupBox_Localization);
 	label_displayCurrency->setObjectName("label_displayCurrency");
 	label_displayCurrency->setGeometry(212, 16, 89, 13);
 	label_displayCurrency->setText("Display Currency:");
-	label_displayCurrency->setFont(f6);
 
 	tabPageAdvanced=new QWidget(tabControlGeneral);
 	tabPageAdvanced->setObjectName("tabPageAdvanced");
 	tabPageAdvanced->setGeometry(4, 22, 604, 414);
-	tabPageAdvanced->setFont(f6);
 
 	groupBox_Miners=new QGroupBox(tabPageAdvanced);
 	groupBox_Miners->setObjectName("groupBox_Miners");
 	groupBox_Miners->setGeometry(6, 6, 592, 192);
 	groupBox_Miners->setTitle("Miners:");
 	groupBox_Miners->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.4em;} QGroupBox::title { top: -8px; left: 10px;}");
-	groupBox_Miners->setFont(f6);
 
 	pictureBox_MinerRestartDelayMS=new QLabel(groupBox_Miners);
 	pictureBox_MinerRestartDelayMS->setObjectName("pictureBox_MinerRestartDelayMS");
@@ -521,69 +476,58 @@ void Form_Settings::InitializeComponent()
 	comboBox_DagLoadMode->setObjectName("comboBox_DagLoadMode");
 	comboBox_DagLoadMode->setGeometry(210, 165, 172, 21);
 	comboBox_DagLoadMode->insertItems(0, QStringList() << "Automatic" << "SSE2" << "AVX" << "AVX2");
-	comboBox_DagLoadMode->setFont(f6);
 
 	label_DagGeneration=new QLabel(groupBox_Miners);
 	label_DagGeneration->setObjectName("label_DagGeneration");
 	label_DagGeneration->setGeometry(210, 149, 87, 13);
 	label_DagGeneration->setText("Dag Load Mode:");
-	label_DagGeneration->setFont(f6);
 
 	comboBox_CPU0_ForceCPUExtension=new QComboBox(groupBox_Miners);
 	comboBox_CPU0_ForceCPUExtension->setObjectName("comboBox_CPU0_ForceCPUExtension");
 	comboBox_CPU0_ForceCPUExtension->setGeometry(10, 165, 178, 21);
 	comboBox_CPU0_ForceCPUExtension->insertItems(0, QStringList() << "Automatic" << "AVX2_AES" << "AVX2" << "AVX_AES" << "AVX" << "AES");
 	comboBox_CPU0_ForceCPUExtension->setVisible(false);
-	comboBox_CPU0_ForceCPUExtension->setFont(f6);
 	connect(comboBox_CPU0_ForceCPUExtension, SIGNAL(currentIndexChanged(int)), this, SLOT(ComboBox_CPU0_ForceCPUExtension_SelectedIndexChanged(int)));
 
 	label_CPU0_ForceCPUExtension=new QLabel(groupBox_Miners);
 	label_CPU0_ForceCPUExtension->setObjectName("label_CPU0_ForceCPUExtension");
 	label_CPU0_ForceCPUExtension->setGeometry(10, 149, 105, 13);
 	label_CPU0_ForceCPUExtension->setText("ForceCPUExtension:");
-	label_CPU0_ForceCPUExtension->setFont(f6);
 	label_CPU0_ForceCPUExtension->setVisible(false);
 
 	label_MinIdleSeconds=new QLabel(groupBox_Miners);
 	label_MinIdleSeconds->setObjectName("label_MinIdleSeconds");
 	label_MinIdleSeconds->setGeometry(10, 15, 86, 13);
 	label_MinIdleSeconds->setText("MinIdleSeconds:");
-	label_MinIdleSeconds->setFont(f6);
 
 	label_SwitchMaxSeconds=new QLabel(groupBox_Miners);
 	label_SwitchMaxSeconds->setObjectName("label_SwitchMaxSeconds");
 	label_SwitchMaxSeconds->setGeometry(210, 59, 86, 13);
 	label_SwitchMaxSeconds->setText("SwitchMaxSecs:");
-	label_SwitchMaxSeconds->setFont(f6);
 
 	label_MinerAPIQueryInterval=new QLabel(groupBox_Miners);
 	label_MinerAPIQueryInterval->setObjectName("label_MinerAPIQueryInterval");
 	label_MinerAPIQueryInterval->setGeometry(10, 100, 116, 13);
 	label_MinerAPIQueryInterval->setText("MinerAPIQueryInterval:");
-	label_MinerAPIQueryInterval->setFont(f6);
 
 	label_MinerRestartDelayMS=new QLabel(groupBox_Miners);
 	label_MinerRestartDelayMS->setObjectName("label_MinerRestartDelayMS");
 	label_MinerRestartDelayMS->setGeometry(210, 15, 113, 13);
 	label_MinerRestartDelayMS->setText("MinerRestartDelayMS:");
-	label_MinerRestartDelayMS->setFont(f6);
 
 	textBox_SwitchMinSeconds=new QSpinBox(groupBox_Miners);
 	textBox_SwitchMinSeconds->setObjectName("textBox_SwitchMinSeconds");
 	textBox_SwitchMinSeconds->setGeometry(10, 78, 178, 20);
-	textBox_SwitchMinSeconds->setFont(f6);
 	textBox_SwitchMinSeconds->setRange(0, INT_MAX);
 
 	label_APIBindPortStart=new QLabel(groupBox_Miners);
 	label_APIBindPortStart->setObjectName("label_APIBindPortStart");
 	label_APIBindPortStart->setGeometry(403, 14, 118, 13);
 	label_APIBindPortStart->setText("API Bind port pool start:");
-	label_APIBindPortStart->setFont(f6);
 
 	textBox_SwitchProfitabilityThreshold=new QDoubleSpinBox(groupBox_Miners);
 	textBox_SwitchProfitabilityThreshold->setObjectName("textBox_SwitchProfitabilityThreshold");
 	textBox_SwitchProfitabilityThreshold->setGeometry(403, 78, 118, 20);
-	textBox_SwitchProfitabilityThreshold->setFont(f6);
 	textBox_SwitchProfitabilityThreshold->setRange(0, 1);
 	textBox_SwitchProfitabilityThreshold->setSingleStep(0.01);
 	textBox_SwitchProfitabilityThreshold->setDecimals(2);
@@ -592,55 +536,46 @@ void Form_Settings::InitializeComponent()
 	textBox_ethminerDefaultBlockHeight=new QSpinBox(groupBox_Miners);
 	textBox_ethminerDefaultBlockHeight->setObjectName("textBox_ethminerDefaultBlockHeight");
 	textBox_ethminerDefaultBlockHeight->setGeometry(210, 121, 172, 20);
-	textBox_ethminerDefaultBlockHeight->setFont(f6);
 	textBox_ethminerDefaultBlockHeight->setRange(0, INT_MAX);
 
 	label_SwitchProfitabilityThreshold=new QLabel(groupBox_Miners);
 	label_SwitchProfitabilityThreshold->setObjectName("label_SwitchProfitabilityThreshold");
 	label_SwitchProfitabilityThreshold->setGeometry(401, 58, 142, 13);
 	label_SwitchProfitabilityThreshold->setText("ethminerDefaultBlockHeight:");
-	label_SwitchProfitabilityThreshold->setFont(f6);
 
 	label_ethminerDefaultBlockHeight=new QLabel(groupBox_Miners);
 	label_ethminerDefaultBlockHeight->setObjectName("label_ethminerDefaultBlockHeight");
 	label_ethminerDefaultBlockHeight->setGeometry(210, 100, 142, 13);
 	label_ethminerDefaultBlockHeight->setText("ethminerDefaultBlockHeight:");
-	label_ethminerDefaultBlockHeight->setFont(f6);
 
 	textBox_APIBindPortStart=new QSpinBox(groupBox_Miners);
 	textBox_APIBindPortStart->setObjectName("textBox_APIBindPortStart");
 	textBox_APIBindPortStart->setGeometry(403, 32, 172, 20);
-	textBox_APIBindPortStart->setFont(f6);
 	textBox_APIBindPortStart->setRange(1025, 65535);
 
 	label_SwitchMinSeconds=new QLabel(groupBox_Miners);
 	label_SwitchMinSeconds->setObjectName("label_SwitchMinSeconds");
 	label_SwitchMinSeconds->setGeometry(10, 59, 83, 13);
 	label_SwitchMinSeconds->setText("SwitchMinSecs:");
-	label_SwitchMinSeconds->setFont(f6);
 
 	textBox_MinIdleSeconds=new QSpinBox(groupBox_Miners);
 	textBox_MinIdleSeconds->setObjectName("textBox_MinIdleSeconds");
 	textBox_MinIdleSeconds->setGeometry(10, 33, 178, 20);
-	textBox_MinIdleSeconds->setFont(f6);
 	textBox_MinIdleSeconds->setRange(0, INT_MAX);
 
 	textBox_SwitchMaxSeconds=new QSpinBox(groupBox_Miners);
 	textBox_SwitchMaxSeconds->setObjectName("textBox_SwitchMaxSeconds");
 	textBox_SwitchMaxSeconds->setGeometry(210, 78, 172, 20);
-	textBox_SwitchMaxSeconds->setFont(f6);
 	textBox_SwitchMaxSeconds->setRange(0, INT_MAX);
 
 	textBox_MinerRestartDelayMS=new QSpinBox(groupBox_Miners);
 	textBox_MinerRestartDelayMS->setObjectName("textBox_MinerRestartDelayMS");
 	textBox_MinerRestartDelayMS->setGeometry(210, 33, 172, 20);
-	textBox_MinerRestartDelayMS->setFont(f6);
 	textBox_MinerRestartDelayMS->setRange(0, INT_MAX);
 
 	textBox_MinerAPIQueryInterval=new QSpinBox(groupBox_Miners);
 	textBox_MinerAPIQueryInterval->setObjectName("textBox_MinerAPIQueryInterval");
 	textBox_MinerAPIQueryInterval->setGeometry(10, 121, 178, 20);
-	textBox_MinerAPIQueryInterval->setFont(f6);
 	textBox_MinerAPIQueryInterval->setRange(0, INT_MAX);
 
 	groupBoxBenchmarkTimeLimits=new QGroupBox(tabPageAdvanced);
@@ -648,30 +583,25 @@ void Form_Settings::InitializeComponent()
 	groupBoxBenchmarkTimeLimits->setGeometry(6, 204, 592, 145);
 	groupBoxBenchmarkTimeLimits->setTitle("Benchmark Time Limits:");
 	groupBoxBenchmarkTimeLimits->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.4em;} QGroupBox::title { top: -8px; left: 10px;}");
-	groupBoxBenchmarkTimeLimits->setFont(f6);
 #if WITH_NVIDIA
 	benchmarkLimitControlNVIDIA=new BenchmarkLimitControl(groupBoxBenchmarkTimeLimits);
 	benchmarkLimitControlNVIDIA->setObjectName("benchmarkLimitControlNVIDIA");
 	benchmarkLimitControlNVIDIA->setGeometry(10, 17, 178, 121);
 	benchmarkLimitControlNVIDIA->setTimeLimits(nullptr);
-	benchmarkLimitControlNVIDIA->setFont(f6);
 #endif
 	benchmarkLimitControlCPU=new BenchmarkLimitControl(groupBoxBenchmarkTimeLimits);
 	benchmarkLimitControlCPU->setObjectName("benchmarkLimitControlCPU");
 	benchmarkLimitControlCPU->setGeometry(210, 17, 178, 121);
 	benchmarkLimitControlCPU->setTimeLimits(nullptr);
-	benchmarkLimitControlCPU->setFont(f6);
 #if WITH_AMD
 	benchmarkLimitControlAMD=new BenchmarkLimitControl(groupBoxBenchmarkTimeLimits);
 	benchmarkLimitControlAMD->setObjectName("benchmarkLimitControlAMD");
 	benchmarkLimitControlAMD->setGeometry(410, 17, 178, 121);
 	benchmarkLimitControlAMD->setTimeLimits(nullptr);
-	benchmarkLimitControlAMD->setFont(f6);
 #endif
 	tabPageDevicesAlgos=new QWidget(tabControlGeneral);
 	tabPageDevicesAlgos->setObjectName("tabPageDevicesAlgos");
 	tabPageDevicesAlgos->setGeometry(4, 22, 604, 414);
-	tabPageDevicesAlgos->setFont(f6);
 
 	devicesListViewEnableControl1=new DevicesListViewEnableControl(tabPageDevicesAlgos);
 	devicesListViewEnableControl1->setObjectName("devicesListViewEnableControl1");
@@ -685,14 +615,12 @@ void Form_Settings::InitializeComponent()
 	algorithmSettingsControl1=new AlgorithmSettingsControl(tabPageDevicesAlgos);
 	algorithmSettingsControl1->setObjectName("algorithmSettingsControl1");
 	algorithmSettingsControl1->setGeometry(362, 63, 238, 278);
-	algorithmSettingsControl1->setFont(f6);
 
 	groupBoxAlgorithmSettings=new QGroupBox(tabPageDevicesAlgos);
 	groupBoxAlgorithmSettings->setObjectName("groupBoxAlgorithmSettings");
 	groupBoxAlgorithmSettings->setGeometry(6, 141, 350, 206);
 	groupBoxAlgorithmSettings->setTitle("Algorithm settings for selected device:");
 	groupBoxAlgorithmSettings->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.4em;} QGroupBox::title { top: -8px; left: 10px;}");
-	groupBoxAlgorithmSettings->setFont(f6);
 
 	algorithmsListView1=new AlgorithmsListView(groupBoxAlgorithmSettings);
 	algorithmsListView1->setObjectName("algorithmsListView1");
@@ -700,7 +628,6 @@ void Form_Settings::InitializeComponent()
 	algorithmsListView1->BenchmarkCalculation=nullptr;
 	algorithmsListView1->ComunicationInterface=nullptr;
 	algorithmsListView1->IsInBenchmark(false);
-	algorithmsListView1->setFont(f6);
 
 	buttonAllProfit=new QPushButton(tabPageDevicesAlgos);
 	buttonAllProfit->setObjectName("buttonAllProfit");
@@ -740,8 +667,6 @@ void Form_Settings::InitializeComponent()
 	resize(634, 494);
 	setWindowTitle("Settings");
 //	connect(this, SIGNAL(closing()), this, SLOT(FormSettings_FormClosing()));
-
-	setFont(f6);
 }
 
 Form_Settings::Form_Settings(QWidget *parent)

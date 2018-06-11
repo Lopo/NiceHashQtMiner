@@ -25,9 +25,6 @@ void AlgorithmsListView::InitializeComponent()
 {
 	setObjectName("AlgorithmsListView");
 
-	QFont f6;
-	f6.setPointSize(6);
-
 	listViewAlgorithms=new QTableView(this);
 	listViewAlgorithms->setObjectName("listViewAlgorithms");
 //	listViewAlgorithms->setGeometry(0, 0, 539, 380);
@@ -53,10 +50,8 @@ void AlgorithmsListView::InitializeComponent()
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(ListViewAlgorithms_MouseClick(const QPoint&)));
 
 	connect(listViewAlgorithms->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(forwardSelectionChanged(const QItemSelection&, const QItemSelection&)));
-	listViewAlgorithms->setFont(f6);
 
 	resize(539, 380);
-	setFont(f6);
 }
 
 void AlgorithmsListView::DefaultAlgorithmColorSeter::LviSetColor(QAbstractTableModel* model, int row)

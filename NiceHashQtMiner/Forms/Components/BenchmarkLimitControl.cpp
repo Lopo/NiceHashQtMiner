@@ -14,15 +14,9 @@ void BenchmarkLimitControl::InitializeComponent()
 {
 	setObjectName("BenchmarkLimitControl1");
 
-	QFont f7;
-	f7.setPointSize(6);
-	QFont f6;
-	f6.setPointSize(6);
-
 	groupBox1=new QGroupBox(this);
 	groupBox1->setObjectName("groupBox1");
 	groupBox1->setGeometry(0, 0, 173, 117);
-	groupBox1->setFont(f7);
 	groupBox1->setStyleSheet("QGroupBox { border: 1px solid; margin-top: 0.3em;} QGroupBox::title { top: -0.4em; left: 10px;}");
 	groupBox1->setTitle("groupName");
 
@@ -38,7 +32,6 @@ void BenchmarkLimitControl::InitializeComponent()
 	textBoxQuick=new QSpinBox(groupBox1);
 	textBoxQuick->setObjectName("textBoxQuick");
 	textBoxQuick->setGeometry(62, 22, 100, 20);
-	textBoxQuick->setFont(f7);
 //	textBoxQuick->setButtonSymbols(QAbstractSpinBox::NoButtons);
 	textBoxQuick->setRange(1, 999);
 	textBoxQuick->setCursor(QCursor(Qt::IBeamCursor));
@@ -47,7 +40,6 @@ void BenchmarkLimitControl::InitializeComponent()
 
 	labelQuick=new QLabel(groupBox1);
 	labelQuick->setObjectName("labelQuick");
-	labelQuick->setFont(f6);
 	labelQuick->setGeometry(3, 25, 55, 13);
 	labelQuick->setText("Quick");
 
@@ -58,7 +50,6 @@ void BenchmarkLimitControl::InitializeComponent()
 	textBoxStandard=new QSpinBox(groupBox1);
 	textBoxStandard->setObjectName("textBoxStandard");
 	textBoxStandard->setGeometry(62, 54, 100, 20);
-	textBoxStandard->setFont(f7);
 //	textBoxStandard->setButtonSymbols(QAbstractSpinBox::NoButtons);
 	textBoxStandard->setRange(1, 999);
 	textBoxStandard->setCursor(QCursor(Qt::IBeamCursor));
@@ -67,7 +58,6 @@ void BenchmarkLimitControl::InitializeComponent()
 
 	labelStandard=new QLabel(groupBox1);
 	labelStandard->setObjectName("labelStandard");
-	labelStandard->setFont(f6);
 	labelStandard->setGeometry(3, 57, 55, 13);
 	labelStandard->setText("Standard");
 
@@ -78,7 +68,6 @@ void BenchmarkLimitControl::InitializeComponent()
 	textBoxPrecise=new QSpinBox(groupBox1);
 	textBoxPrecise->setObjectName("textBoxPrecise");
 	textBoxPrecise->setGeometry(62, 86, 100, 20);
-	textBoxPrecise->setFont(f7);
 //	textBoxPrecise->setButtonSymbols(QAbstractSpinBox::NoButtons);
 	textBoxPrecise->setRange(1, 999);
 	textBoxPrecise->setCursor(QCursor(Qt::IBeamCursor));
@@ -87,7 +76,6 @@ void BenchmarkLimitControl::InitializeComponent()
 
 	labelPrecise=new QLabel(groupBox1);
 	labelPrecise->setObjectName("labelPrecise");
-	labelPrecise->setFont(f6);
 	labelPrecise->setGeometry(3, 89, 55, 13);
 	labelPrecise->setText("Precise");
 

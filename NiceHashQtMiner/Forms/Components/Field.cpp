@@ -15,14 +15,11 @@ template<typename T>
 void Field<T>::InitializeComponent()
 {
 	Resources resources;
-	QFont f6;
-	f6.setPointSize(6);
 
 	labelFieldIndicator=new QLabel(this);
 	labelFieldIndicator->setObjectName("labelFieldIndicator");
 	labelFieldIndicator->setGeometry(3, 6, 190, 13);
 	labelFieldIndicator->setText("Label field indicator");
-	labelFieldIndicator->setFont(f6);
 
 	if (std::is_same<T, int>::value) {
 		textBox=new QSpinBox(this);
@@ -47,7 +44,6 @@ void Field<T>::InitializeComponent()
 		}
 	textBox->setObjectName("textBox");
 	textBox->setGeometry(3, 24, 214, 20);
-	textBox->setFont(f6);
 
 	pictureBox1=new QLabel(this);
 	pictureBox1->setObjectName("pictureBox1");
@@ -56,7 +52,6 @@ void Field<T>::InitializeComponent()
 
 	setObjectName("Field");
 	resize(220, 48);
-	setFont(f6);
 }
 
 template<typename T>

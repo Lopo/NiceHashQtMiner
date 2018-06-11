@@ -48,10 +48,7 @@ void DriverVersionConfirmationDialog::InitializeComponent()
 	setTabOrder(linkToDriverDownloadPage, chkBoxDontShowAgain);
 
 	setObjectName("DriverVersionConfirmationDialog");
-	resize(497, 97);
-	QFont f;
-	f.setPointSize(6);
-	setFont(f);
+	setFixedSize(497, 97);
 	setWindowIcon(QIcon());
 	setWindowTitle("Update AMD Driver Recommended");
 }

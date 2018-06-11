@@ -63,9 +63,6 @@ void Form_ChooseLanguage::InitializeComponent()
 	setObjectName("Form_ChooseLanguage");
 	resize(455, 427);
 	setWindowTitle("NiceHash QtMiner EULA / Choose Language");
-	QFont f6;
-	f6.setPointSize(6);
-	setFont(f6);
 }
 
 void Form_ChooseLanguage::Button_OK_Click()

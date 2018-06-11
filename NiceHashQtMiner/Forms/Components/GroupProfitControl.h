@@ -9,7 +9,7 @@ class GroupProfitControl
 {
 	Q_OBJECT
 public:
-	GroupProfitControl(QListWidget* parent=Q_NULLPTR);
+	GroupProfitControl(QWidget* parent=Q_NULLPTR);
 	virtual ~GroupProfitControl() {};
 	void UpdateProfitStats(QString groupName, QString deviceStringInfo, QString speedString, QString btcRateString, QString currencyRateString);
 
