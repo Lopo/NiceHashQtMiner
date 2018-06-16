@@ -3,7 +3,7 @@
 
 NiceHash Qt Miner is a try for Linux port of [NiceHash Miner Legacy](https://github.com/nicehash/NiceHashMinerLegacy)
 
-<img src="http://temp.losys.sk/NHQtM001.png">
+<img src="http://temp.losys.sk/Screenshot_20180616_142252.png">
 
 :warning: This is development version !!! It's not stable enough for "production" usage and requires some knowledge to make it running/usable !!! :warning:
 
