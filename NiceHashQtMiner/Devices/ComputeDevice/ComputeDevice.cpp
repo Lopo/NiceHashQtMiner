@@ -265,7 +265,7 @@ QList<Algorithm*>* ComputeDevice::GetAlgorithmSettingsThirdParty(Enums::Use3rdPa
 		};
 	QList<Algorithm*>* ret=new QList<Algorithm*>;
 	foreach (Algorithm* a, *AlgorithmSettings) {
-		if (thirdPartyMiners.contains(a->MinerBaseType)) {
+		if (!thirdPartyMiners.contains(a->MinerBaseType)) {
 			ret->append(a);
 			}
 		}
