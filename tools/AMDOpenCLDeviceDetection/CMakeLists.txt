@@ -4,7 +4,10 @@ set(AMDOpenCLDeviceDetection_SRCS
 	)
 source_group(tools\\AMDOpenCLDeviceDetection FILES ${AMDOpenCLDeviceDetection_SRCS})
 
-include_directories(${OPENCL_INCLUDE_DIRS})
+include_directories(
+	${ROOT_DIR}/3rdparty
+	${OPENCL_INCLUDE_DIRS}
+	)
 
 add_executable(AMDOpenCLDeviceDetection main.cpp ${AMDOpenCLDeviceDetection_SRCS})
 
