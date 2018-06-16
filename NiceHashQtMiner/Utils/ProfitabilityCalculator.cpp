@@ -20,7 +20,7 @@ QMap<Enums::AlgorithmType, double> ProfitabilityCalculator::Div={
 	{Enums::AlgorithmType::Quark_UNUSED, MHs},
 	{Enums::AlgorithmType::Axiom_UNUSED, kHs},
 	{Enums::AlgorithmType::Lyra2REv2, MHs},
-	{Enums::AlgorithmType::ScryptJaneNf_UNUSED, MHs},
+	{Enums::AlgorithmType::ScryptJaneNf_UNUSED, kHs},
 	{Enums::AlgorithmType::Blake256r8_UNUSED, GHs},
 	{Enums::AlgorithmType::Blake256r14_UNUSED, GHs},
 	{Enums::AlgorithmType::Blake256r8vnl_UNUSED, GHs},
@@ -35,7 +35,9 @@ QMap<Enums::AlgorithmType, double> ProfitabilityCalculator::Div={
 	{Enums::AlgorithmType::Sia, GHs},
 	{Enums::AlgorithmType::Blake2s, GHs},
 	{Enums::AlgorithmType::Skunk, MHs},
-	{Enums::AlgorithmType::CryptoNightV7, kHs}
+	{Enums::AlgorithmType::CryptoNightV7, kHs},
+	{Enums::AlgorithmType::CryptoNightHeavy, kHs},
+	{Enums::AlgorithmType::Lyra2z, MHs}
 	};
 
 double ProfitabilityCalculator::GetFormatedSpeed(double speed, Enums::AlgorithmType type)

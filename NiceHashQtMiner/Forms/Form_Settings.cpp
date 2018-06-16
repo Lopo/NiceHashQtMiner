@@ -1378,18 +1378,19 @@ void Form_Settings::ButtonSelectedProfit_Click()
 		}
 
 	QString url=Links::NhmProfitCheck+_selectedComputeDevice->Name;
+	url+=";"+ConfigManager.generalConfig->DisplayCurrency+";"+QString::number(ConfigManager.generalConfig->KwhPrice, 'f')+";1;1;1"; // Set default power and cost to 1
 	foreach (Algorithm* algorithm, *_selectedComputeDevice->GetAlgorithmSettingsFastest()) {
 		int id=(int)algorithm->NiceHashID;
-		url+="&speed"+QString::number(id)+"="+QString::number(ProfitabilityCalculator::GetFormatedSpeed(algorithm->BenchmarkSpeed(), algorithm->NiceHashID), 'f', 2);
+		url+=";a"+QString::number(id)+"="+QString::number(ProfitabilityCalculator::GetFormatedSpeed(algorithm->BenchmarkSpeed(), algorithm->NiceHashID), 'f', 2);
 		}
-	url+="&nhqmver="+qApp->applicationVersion(); // Add version info
-	url+="&cost=1&power=1"; // Set default power and cost to 1
+//	url+="&nhqmver="+qApp->applicationVersion(); // Add version info
 	QDesktopServices::openUrl(url);
 }
 
 void Form_Settings::ButtonAllProfit_Click()
 {
 	QString url=Links::NhmProfitCheck+"CUSTOM";
+	url+=";"+ConfigManager.generalConfig->DisplayCurrency+";"+QString::number(ConfigManager.generalConfig->KwhPrice, 'f')+";1;1;1"; // Set default power and cost to 1
 	QMap<Enums::AlgorithmType, double> total;
 	foreach (ComputeDevice* curCDev, *ComputeDeviceManager.Available.Devices) {
 		foreach (Algorithm* algorithm, *curCDev->GetAlgorithmSettingsFastest()) {
@@ -1403,10 +1404,9 @@ void Form_Settings::ButtonAllProfit_Click()
 		}
 	foreach (Enums::AlgorithmType algorithm, total.keys()) {
 		int id=(int)algorithm;
-		url+="&speed"+QString::number(id)+"="+QString::number(ProfitabilityCalculator::GetFormatedSpeed(total.value(algorithm), algorithm), 'f', 2);
+		url+=";a"+QString::number(id)+"="+QString::number(ProfitabilityCalculator::GetFormatedSpeed(total.value(algorithm), algorithm), 'f', 2);
 		}
-	url+="&nhqmver="+qApp->applicationVersion(); // Add version info
-	url+="&cost=1&power=1"; // Set default power and cost to 1
+//	url+="&nhqmver="+qApp->applicationVersion(); // Add version info
 	QDesktopServices::openUrl(url);
 }
 /*

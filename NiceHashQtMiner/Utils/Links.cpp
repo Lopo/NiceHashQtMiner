@@ -17,6 +17,6 @@ const QString Links::NhmApiStats="https://api.nicehash.com/api?method=stats.prov
 const QString Links::NhmApiInfo="https://api.nicehash.com/api?method=simplemultialgo.info";
 const QString Links::NhmApiVersion="http://nhqtm.losys.eu/version/?method=version&Qt";
 
-const QString Links::NhmProfitCheck="https://api.nicehash.com/?p=calc&name=";
+const QString Links::NhmProfitCheck="https://www.nicehash.com/profitability-calculator#";
 
 const QString Links::NhmSocketAddress="wss://nhmws.nicehash.com/v2/nhm";

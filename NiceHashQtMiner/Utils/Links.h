@@ -26,7 +26,7 @@ public:
 	static const QString NhmApiInfo/*="https://api.nicehash.com/api?method=simplemultialgo.info"*/;
 	static const QString NhmApiVersion/*="http://nhqtm.losys.eu/version/?method=version&Qt"*/;
 
-	static const QString NhmProfitCheck/*="https://api.nicehash.com/?p=calc&name="*/; // device profits
+	static const QString NhmProfitCheck/*="https://www.nicehash.com/profitability-calculator#"*/; // device profits
 
 	static const QString NhmSocketAddress/*="wss://nhmws.nicehash.com/v2/nhm"*/; // SMA Socket
 };
