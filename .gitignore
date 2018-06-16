@@ -13,6 +13,8 @@ CMakeCache.txt
 CMakeFiles
 cmake_install.cmake
 
+Makefile
+
 #generated
 /include/config.h
 /include/version.h
