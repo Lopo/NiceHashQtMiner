@@ -1,16 +1,20 @@
 #include "Miners/MinerFactory.h"
 #include "Miners/ClaymoreDual.h"
-#include "Miners/ClaymoreCryptoNightMiner.h"
-#include "Miners/Ewbf.h"
-#include "Miners/Excavator.h"
-#include "Miners/Ccminer.h"
-#include "Miners/Sgminer.h"
+#if WITH_AMD
+#	include "Miners/ClaymoreCryptoNightMiner.h"
+#	include "Miners/Equihash/ClaymoreZcashMiner.h"
+#	include "Miners/Sgminer.h"
+#	include "Miners/ethminer/MinerEtherumOCL.h"
+#endif
+#if WITH_NVIDIA
+#	include "Miners/Ewbf.h"
+#	include "Miners/Excavator.h"
+#	include "Miners/Ccminer.h"
+#	include "Miners/Equihash/Dtsm.h"
+#	include "Miners/ethminer/MinerEtherumCUDA.h"
+#endif
 #include "Miners/Equihash/NhEqMiner.h"
 #include "Miners/Equihash/OptiminerZcashMiner.h"
-#include "Miners/Equihash/ClaymoreZcashMiner.h"
-#include "Miners/Equihash/Dtsm.h"
-#include "Miners/ethminer/MinerEtherumOCL.h"
-#include "Miners/ethminer/MinerEtherumCUDA.h"
 #include "Miners/XmrStak/XmrStak.h"
 #include "Miners/Prospector.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
@@ -52,15 +56,15 @@ Miner* MinerFactory::CreateClaymore(Algorithm* algorithm)
 	return nullptr;
 }
 
+#if WITH_NVIDIA
 Miner* MinerFactory::CreateExperimental(Enums::DeviceType deviceType, Enums::AlgorithmType algorithmType)
 {
-#if WITH_NVIDIA
 	if (algorithmType==Enums::AlgorithmType::NeoScrypt && deviceType==Enums::DeviceType::NVIDIA) {
 		return new Ccminer;
 		}
-#endif
 	return nullptr;
 }
+#endif
 
 Miner* MinerFactory::CreateMiner(Enums::DeviceType deviceType, Algorithm* algorithm)
 {
@@ -92,10 +96,8 @@ Miner* MinerFactory::CreateMiner(Enums::DeviceType deviceType, Algorithm* algori
 #if WITH_NVIDIA
 		case Enums::MinerBaseType::ccminer_alexis:
 			return new Ccminer;
-#endif
 		case Enums::MinerBaseType::experimental:
 			return CreateExperimental(deviceType, algorithm->NiceHashID);
-#if WITH_NVIDIA
 		case Enums::MinerBaseType::EWBF:
 			return new Ewbf;
 #endif

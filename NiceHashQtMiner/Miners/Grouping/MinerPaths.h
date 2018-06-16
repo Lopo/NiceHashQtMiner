@@ -68,6 +68,7 @@ public:
 		static const QString Bin; // root binary folder
 
 	public:
+#if WITH_NVIDIA
 		// ccminers
 		static const QString CcminerDecred;
 
@@ -78,24 +79,32 @@ public:
 		static const QString CcminerCryptonight;
 		static const QString CcminerX11Gost;
 		static const QString CcminerKlausT;
-
+#endif
 		// ethminers
 		static const QString Ethminer;
-
+#if WITH_AMD
 		// sgminers
 		static const QString Sgminer560General;
 
 		static const QString SgminerGm;
-
+#endif
 		static const QString NhEqMiner;
+#if WITH_NVIDIA
 		static const QString Excavator;
+#endif
 
 		static const QString XmrStackCpuMiner;
+#if WITH_AMD
 		static const QString XmrStakAmd;
+#endif
 		static const QString XmrStak;
 		static const QString Xmrig;
+#if WITH_AMD
 		static const QString XmrigAmd;
+#endif
+#if WITH_NVIDIA
 		static const QString XmrigNvidia;
+#endif
 		static const QString XmrStakHeavy;
 
 		static const QString CpuMiner;
@@ -103,15 +112,20 @@ public:
 		static const QString None;
 
 		static const QString Bin3rdParty; // root binary folder
-
+#if WITH_AMD
 		static const QString ClaymoreZcashMiner;
 		static const QString ClaymoreCryptoNightMiner;
+#endif
 
 		static const QString OptiminerZcashMiner;
 		static const QString ClaymoreDual;
+#if WITH_NVIDIA
 		static const QString Ewbf;
+#endif
 		static const QString Prospector;
+#if WITH_NVIDIA
 		static const QString Dtsm;
+#endif
 		} Data;
 
 	static QString GetPathFor(Enums::MinerBaseType minerBaseType, Enums::AlgorithmType algoType, Enums::DeviceGroupType devGroupType, bool def=false);
@@ -132,17 +146,19 @@ private:
 		static QString CcminerUnstablePath(Enums::AlgorithmType algorithmType, Enums::DeviceGroupType nvidiaGroup);
 		} NvidiaGroups;
 #endif
-#if WITH_AMD
 	static class AmdGroup {
 	public:
+#if WITH_AMD
 		static QString SgminerPath(Enums::AlgorithmType type);
+#endif
 		static QString ClaymorePath(Enums::AlgorithmType type);
 		} AmdGroup;
-#endif
+#if WITH_NVIDIA
 	static class Experimental { // unstable miners, NVIDIA for now
 	public:
 		static QString GetPath(Enums::AlgorithmType algoType, Enums::DeviceGroupType devGroupType);
 		} Experimental;
+#endif
 	static class Xmrig {
 	public:
 		static QString GetPath(Enums::DeviceGroupType devGroupType);

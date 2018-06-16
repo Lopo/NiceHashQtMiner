@@ -1,6 +1,7 @@
 #ifndef MINERS_PARSING_EXTRALAUNCHPARAMETERSPARSER_H_
 #define MINERS_PARSING_EXTRALAUNCHPARAMETERSPARSER_H_
 
+#include "config.h"
 #include "Enums.h"
 class MinerOption;
 class MiningPair;
@@ -30,7 +31,9 @@ private:
 	static int GetThreads(int threads, int lessThreads);
 
 public:
+#if WITH_NVIDIA
 	static int GetEqmCudaThreadCount(MiningPair* pair);
+#endif
 
 	static QStringList ParseForMiningSetup(MiningSetup* miningSetup, Enums::DeviceType deviceType, bool showLog=true);
 	static QStringList ParseForMiningPair(MiningPair* miningPair, Enums::AlgorithmType algorithmType, Enums::DeviceType deviceType, bool showLog=true);

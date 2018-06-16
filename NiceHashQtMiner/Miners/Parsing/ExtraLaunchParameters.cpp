@@ -12,6 +12,7 @@ MinerOptionPackageFile::MinerOptionPackageFile(QString name)
 
 
 QList<MinerOptionPackage*> ExtraLaunchParameters::Defaults={
+#if WITH_NVIDIA
 	new MinerOptionPackage(
 		Enums::MinerType::ccminer,
 		new QList<MinerOption*>({
@@ -29,6 +30,7 @@ QList<MinerOptionPackage*> ExtraLaunchParameters::Defaults={
 			}),
 		new QList<MinerOption*>()
 		),
+#endif
 	new MinerOptionPackage(
 		Enums::MinerType::ethminer_OCL,
 		new QList<MinerOption*>({
@@ -37,6 +39,7 @@ QList<MinerOptionPackage*> ExtraLaunchParameters::Defaults={
 			}),
 		new QList<MinerOption*>()
 		),
+#if WITH_NVIDIA
 	new MinerOptionPackage(
 		Enums::MinerType::ethminer_CUDA,
 		new QList<MinerOption*>({
@@ -45,6 +48,8 @@ QList<MinerOptionPackage*> ExtraLaunchParameters::Defaults={
 			}),
 		new QList<MinerOption*>()
 		),
+#endif
+#if WITH_AMD
 	new MinerOptionPackage(
 		Enums::MinerType::sgminer,
 		new QList<MinerOption*>({
@@ -72,6 +77,7 @@ QList<MinerOptionPackage*> ExtraLaunchParameters::Defaults={
 			new MinerOption("AutoGpu", "", "--auto-gpu", NULL, Enums::MinerOptionFlagType::Uni)
 			})
 		),
+#endif
 	new MinerOptionPackage(
 		Enums::MinerType::cpuminer_opt,
 		new QList<MinerOption*>({
@@ -88,6 +94,7 @@ QList<MinerOptionPackage*> ExtraLaunchParameters::Defaults={
 			}),
 		new QList<MinerOption*>()
 		),
+#if WITH_NVIDIA
 	new MinerOptionPackage(
 		Enums::MinerType::nheqminer_CUDA,
 		new QList<MinerOption*>({
@@ -104,6 +111,8 @@ QList<MinerOptionPackage*> ExtraLaunchParameters::Defaults={
 			}),
 		new QList<MinerOption*>()
 		),
+#endif
+#if WITH_AMD
 	new MinerOptionPackage(
 		Enums::MinerType::ClaymoreZcash,
 		new QList<MinerOption*>({
@@ -155,6 +164,7 @@ QList<MinerOptionPackage*> ExtraLaunchParameters::Defaults={
 			new MinerOption("ClaymoreCryptoNight_fanmin", "-fanmin", "-fanmin", "0", Enums::MinerOptionFlagType::MultiParam, ",")
 			})
 		),
+#endif
 	new MinerOptionPackage(
 		Enums::MinerType::OptiminerZcash,
 		new QList<MinerOption*>({
@@ -166,6 +176,7 @@ QList<MinerOptionPackage*> ExtraLaunchParameters::Defaults={
 			}),
 		new QList<MinerOption*>()
 		),
+#if WITH_NVIDIA
 	new MinerOptionPackage(
 		Enums::MinerType::excavator,
 		new QList<MinerOption*> ({
@@ -176,6 +187,7 @@ QList<MinerOptionPackage*> ExtraLaunchParameters::Defaults={
 			}),
 		new QList<MinerOption*>()
 		),
+#endif
 	new MinerOptionPackage(
 		Enums::MinerType::ClaymoreDual,
 		new QList<MinerOption*>({
@@ -228,6 +240,7 @@ QList<MinerOptionPackage*> ExtraLaunchParameters::Defaults={
 			new MinerOption("ClaymoreDual_fanmin", "-fanmin", "-fanmin", "0", Enums::MinerOptionFlagType::MultiParam, ",")
 			})
 		),
+#if WITH_NVIDIA
 	new MinerOptionPackage(
 		Enums::MinerType::EWBF,
 		new QList<MinerOption*>({ // parameters differ according to algorithm
@@ -241,6 +254,7 @@ QList<MinerOptionPackage*> ExtraLaunchParameters::Defaults={
 			}),
 		new QList<MinerOption*>()
 		),
+#endif
 	new MinerOptionPackage(
 		Enums::MinerType::Xmrig,
 		new QList<MinerOption*>({
@@ -255,7 +269,9 @@ QList<MinerOptionPackage*> ExtraLaunchParameters::Defaults={
 			new MinerOption("Xmrig_safe", "--safe", NULL, Enums::MinerOptionFlagType::Uni)
 			}),
 		new QList<MinerOption*>()
-		),
+		)
+#if WITH_NVIDIA
+			,
 	new MinerOptionPackage(
 		Enums::MinerType::dtsm,
 		new QList<MinerOption*>({
@@ -265,6 +281,7 @@ QList<MinerOptionPackage*> ExtraLaunchParameters::Defaults={
 			}),
 		new QList<MinerOption*>()
 		)
+#endif
 	};
 
 QList<MinerOptionPackage*>* ExtraLaunchParameters::MinerOptionPackages=new QList<MinerOptionPackage*>;

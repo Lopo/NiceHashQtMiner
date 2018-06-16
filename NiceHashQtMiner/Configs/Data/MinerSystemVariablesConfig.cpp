@@ -1,3 +1,4 @@
+#include "config.h"
 #include "Configs/Data/MinerSystemVariablesConfig.h"
 #include "Miners/Grouping/MinerPaths.h"
 #include <QJsonObject>
@@ -7,10 +8,12 @@ void MinerSystemVariablesConfig::Init()
 {
 	{ // general AMD defaults scope
 		QStringList minerPaths={
+#if WITH_AMD
 			MinerPaths::Data.Sgminer560General,
 			MinerPaths::Data.SgminerGm,
 			MinerPaths::Data.ClaymoreCryptoNightMiner,
 			MinerPaths::Data.ClaymoreZcashMiner,
+#endif
 			MinerPaths::Data.OptiminerZcashMiner
 			};
 		foreach (QString minerPath, minerPaths) {

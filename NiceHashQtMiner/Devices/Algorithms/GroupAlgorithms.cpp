@@ -142,6 +142,7 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateForDevice
 	if (!device->IsEtherumCapale) {
 		algoSettings=FilterMinerAlgos(algoSettings, {Enums::AlgorithmType::DaggerHashimoto});
 		}
+#if WITH_NVIDIA
 	if (algoSettings->contains(Enums::MinerBaseType::ccminer_alexis)) {
 		foreach (Algorithm* unstable_algo, *algoSettings->value(Enums::MinerBaseType::ccminer_alexis)) {
 			unstable_algo->Enabled=false;
@@ -152,7 +153,6 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateForDevice
 			unstable_algo->Enabled=false;
 			}
 		}
-#if WITH_NVIDIA
 	{ // NhEqMiner exceptions scope
 		const Enums::MinerBaseType minerBaseKey=Enums::MinerBaseType::nheqminer;
 		if (algoSettings->contains(minerBaseKey) && device->Name.contains("GTX")
@@ -214,7 +214,7 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 						});
 					toRemoveMinerTypes.append({
 						Enums::MinerBaseType::eqm,
-//						Enums::MinerBaseType::excavator,
+						Enums::MinerBaseType::excavator,
 						Enums::MinerBaseType::EWBF,
 						Enums::MinerBaseType::dtsm
 						});

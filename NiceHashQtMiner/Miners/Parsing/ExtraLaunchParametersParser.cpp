@@ -1,5 +1,4 @@
 #include "Miners/Parsing/ExtraLaunchParametersParser.h"
-#include "config.h"
 #include "Utils/Helpers.h"
 #include "Miners/Grouping/MiningPair.h"
 #include "Miners/Parsing/MinerOption.h"
@@ -30,7 +29,7 @@ void ExtraLaunchParametersParser::LogParser(QString msg)
 		Helpers::ConsolePrint(Tag, msg);
 		}
 }
-
+#if WITH_NVIDIA
 // exception ...
 int ExtraLaunchParametersParser::GetEqmCudaThreadCount(MiningPair* pair)
 {
@@ -46,6 +45,7 @@ int ExtraLaunchParametersParser::GetEqmCudaThreadCount(MiningPair* pair)
 		}
 	return 1; // default
 }
+#endif
 
 void ExtraLaunchParametersParser::IgnorePrintLogInit()
 {
@@ -241,10 +241,13 @@ QStringList ExtraLaunchParametersParser::ParseForMiningPair(MiningPair* miningPa
 Enums::MinerType ExtraLaunchParametersParser::GetMinerType(Enums::DeviceType deviceType, Enums::MinerBaseType minerBaseType, Enums::AlgorithmType algorithmType)
 {
 	switch (minerBaseType) {
+#if WITH_AMD
 		case Enums::MinerBaseType::OptiminerAMD:
 			return Enums::MinerType::OptiminerZcash;
 		case Enums::MinerBaseType::sgminer:
 			return Enums::MinerType::sgminer;
+#endif
+#if WITH_NVIDIA
 		case Enums::MinerBaseType::ccminer:
 		case Enums::MinerBaseType::ccminer_alexis:
 		case Enums::MinerBaseType::experimental:
@@ -252,13 +255,16 @@ Enums::MinerType ExtraLaunchParametersParser::GetMinerType(Enums::DeviceType dev
 				return Enums::MinerType::ccminer_CryptoNight;
 				}
 			return Enums::MinerType::ccminer;
+#endif
 		case Enums::MinerBaseType::Claymore:
 			switch (algorithmType) {
+#if WITH_AMD
 				case Enums::AlgorithmType::CryptoNight:
 				case Enums::AlgorithmType::CryptoNightV7:
 					return Enums::MinerType::ClaymoreCryptoNight;
 				case Enums::AlgorithmType::Equihash:
 					return Enums::MinerType::ClaymoreZcash;
+#endif
 				case Enums::AlgorithmType::DaggerHashimoto:
 					return Enums::MinerType::ClaymoreDual;
 				default:
@@ -308,14 +314,18 @@ Enums::MinerType ExtraLaunchParametersParser::GetMinerType(Enums::DeviceType dev
 				}
 #endif
 			break;
+#if WITH_NVIDIA
 		case Enums::MinerBaseType::excavator:
 			return Enums::MinerType::excavator;
 		case Enums::MinerBaseType::EWBF:
 			return Enums::MinerType::EWBF;
+#endif
 		case Enums::MinerBaseType::Xmrig:
 			return Enums::MinerType::Xmrig;
+#if WITH_NVIDIA
 		case Enums::MinerBaseType::dtsm:
 			return Enums::MinerType::dtsm;
+#endif
 		default:
 			return Enums::MinerType::NONE;
 		}

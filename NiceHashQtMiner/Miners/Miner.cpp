@@ -5,7 +5,9 @@
 #include "Configs/ConfigManager.h"
 #include "Miners/MinersSettingsManager.h"
 #include "Miners/MinersApiPortsManager.h"
-#include "Miners/Sgminer.h"
+#if WITH_AMD
+#	include "Miners/Sgminer.h"
+#endif
 #include "Utils/Logger.h"
 #include "Utils/Helpers.h"
 #include "Configs/Data/GeneralConfig.h"

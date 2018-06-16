@@ -72,6 +72,7 @@ MinerPathPackage::MinerPathPackage(Enums::DeviceGroupType type, QList<MinerTypeP
 
 const QString MinerPaths::Data::Bin="bin";
 
+#if WITH_NVIDIA
 const QString MinerPaths::Data::CcminerDecred=Bin+"/ccminer_decred/ccminer";
 
 const QString MinerPaths::Data::CcminerNanashi=Bin+"/ccminer_nanashi/ccminer";
@@ -81,21 +82,29 @@ const QString MinerPaths::Data::CcminerTPruvot=Bin+"/ccminer_tpruvot/ccminer";
 const QString MinerPaths::Data::CcminerCryptonight=Bin+"/ccminer_cryptonight/ccminer";
 const QString MinerPaths::Data::CcminerX11Gost=Bin+"/ccminer_x11gost/ccminer";
 const QString MinerPaths::Data::CcminerKlausT=Bin+"/ccminer_klaust/ccminer";
-
+#endif
 const QString MinerPaths::Data::Ethminer=Bin+"/ethminer/ethminer";
-
+#if WITH_AMD
 const QString MinerPaths::Data::Sgminer560General=Bin+"/sgminer-5-6-0-general/sgminer";
 const QString MinerPaths::Data::SgminerGm=Bin+"/sgminer-gm/sgminer";
-
+#endif
 const QString MinerPaths::Data::NhEqMiner=Bin+"/nheqminer_v0.4b/nheqminer";
+#if WITH_NVIDIA
 const QString MinerPaths::Data::Excavator=Bin+"/excavator/excavator";
+#endif
 
 const QString MinerPaths::Data::XmrStackCpuMiner=Bin+"/xmr-stack-cpu/xmr-stak";
+#if WITH_AMD
 const QString MinerPaths::Data::XmrStakAmd=Bin+"/xmr-stak-amd/xmr-stak-amd";
+#endif
 const QString MinerPaths::Data::XmrStak=Bin+"/xmr-stak/xmr-stak";
 const QString MinerPaths::Data::Xmrig=Bin+"/xmrig/xmrig";
+#if WITH_AMD
 const QString MinerPaths::Data::XmrigAmd=Bin+"/xmrig/xmrig-amd";
+#endif
+#if WITH_NVIDIA
 const QString MinerPaths::Data::XmrigNvidia=Bin+"/xmrig/xmrig-nvidia";
+#endif
 const QString MinerPaths::Data::XmrStakHeavy=Bin+"/xmr-stak_heavy/xmr-stak";
 
 const QString MinerPaths::Data::CpuMiner=Bin+"/cpuminer_opt/cpuminer";
@@ -103,14 +112,19 @@ const QString MinerPaths::Data::CpuMiner=Bin+"/cpuminer_opt/cpuminer";
 const QString MinerPaths::Data::None="";
 
 const QString MinerPaths::Data::Bin3rdParty="bin_3rdparty";
-
+#if WITH_AMD
 const QString MinerPaths::Data::ClaymoreZcashMiner=Bin3rdParty+"/claymore_zcash/zecminer64";
 const QString MinerPaths::Data::ClaymoreCryptoNightMiner=Bin3rdParty+"/claymore_cryptonight/nsgpucnminer";
+#endif
 const QString MinerPaths::Data::OptiminerZcashMiner=Bin3rdParty+"/optiminer_zcash/optiminer-zcash";
 const QString MinerPaths::Data::ClaymoreDual=Bin3rdParty+"/claymore_dual/ethdcrminer64";
+#if WITH_NVIDIA
 const QString MinerPaths::Data::Ewbf=Bin3rdParty+"/ewbf/miner";
+#endif
 const QString MinerPaths::Data::Prospector=Bin3rdParty+"/prospector/prospector";
+#if WITH_NVIDIA
 const QString MinerPaths::Data::Dtsm=Bin3rdParty+"/dtsm/zm";
+#endif
 
 QList<MinerPathPackage*>* MinerPaths::MinerPathPackages=new QList<MinerPathPackage*>;
 QList<Enums::MinerBaseType>* MinerPaths::ConfigurableMiners=new QList<Enums::MinerBaseType>({
@@ -163,23 +177,23 @@ QString MinerPaths::GetPathFor(Enums::MinerBaseType minerBaseType, Enums::Algori
 			return Data.NhEqMiner;
 		case Enums::MinerBaseType::ethminer:
 			return Data.Ethminer;
-#if WITH_AMD
 		case Enums::MinerBaseType::Claymore:
 			return AmdGroup.ClaymorePath(algoType);
+#if WITH_AMD
 		case Enums::MinerBaseType::OptiminerAMD:
 			return Data.OptiminerZcashMiner;
 #endif
+#if WITH_NVIDIA
 		case Enums::MinerBaseType::excavator:
 			return Data.Excavator;
+#endif
 		case Enums::MinerBaseType::XmrStak:
 			return Data.XmrStak;
 #if WITH_NVIDIA
 		case Enums::MinerBaseType::ccminer_alexis:
 			return NvidiaGroups.CcminerUnstablePath(algoType, devGroupType);
-#endif
 		case Enums::MinerBaseType::experimental:
 			return Experimental.GetPath(algoType, devGroupType);
-#if WITH_NVIDIA
 		case Enums::MinerBaseType::EWBF:
 			return Data.Ewbf;
 #endif
@@ -187,8 +201,10 @@ QString MinerPaths::GetPathFor(Enums::MinerBaseType minerBaseType, Enums::Algori
 			return Data.Prospector;
 		case Enums::MinerBaseType::Xmrig:
 			return Xmrig.GetPath(devGroupType);
+#if WITH_NVIDIA
 		case Enums::MinerBaseType::dtsm:
 			return Data.Dtsm;
+#endif
 		case Enums::MinerBaseType::cpuminer:
 			return Data.CpuMiner;
 		default:
@@ -308,15 +324,17 @@ QString MinerPaths::AmdGroup::SgminerPath(Enums::AlgorithmType type)
 		}
 	return Data.Sgminer560General;
 }
-
+#endif
 QString MinerPaths::AmdGroup::ClaymorePath(Enums::AlgorithmType type)
 {
 	switch (type) {
+#if WITH_AMD
 		case Enums::AlgorithmType::Equihash:
 			return Data.ClaymoreZcashMiner;
 		case Enums::AlgorithmType::CryptoNight:
 		case Enums::AlgorithmType::CryptoNightV7:
 			return Data.ClaymoreCryptoNightMiner;
+#endif
 		case Enums::AlgorithmType::DaggerHashimoto:
 			return Data.ClaymoreDual;
 		default:
@@ -324,30 +342,32 @@ QString MinerPaths::AmdGroup::ClaymorePath(Enums::AlgorithmType type)
 		}
 	return Data.None; // should not happen
 }
-#endif
+#if WITH_NVIDIA
 QString MinerPaths::Experimental::GetPath(Enums::AlgorithmType algoType, Enums::DeviceGroupType devGroupType)
 {
-	return
-#if WITH_NVIDIA
-	devGroupType==Enums::DeviceGroupType::NVIDIA_6_x
+	return devGroupType==Enums::DeviceGroupType::NVIDIA_6_x
 		? NvidiaGroups.Ccminer_path(algoType, devGroupType)
 		:
-#endif
 			Data.None;
 }
+#endif
 
 QString MinerPaths::Xmrig::GetPath(Enums::DeviceGroupType devGroupType)
 {
 	switch (devGroupType) {
 		case Enums::DeviceGroupType::CPU:
 			return Data.Xmrig;
+#if WITH_AMD
 		case Enums::DeviceGroupType::AMD_OpenCL:
 			return Data.XmrigAmd;
+#endif
+#if WITH_NVIDIA
 		case Enums::DeviceGroupType::NVIDIA_2_1:
 		case Enums::DeviceGroupType::NVIDIA_3_x:
 		case Enums::DeviceGroupType::NVIDIA_5_x:
 		case Enums::DeviceGroupType::NVIDIA_6_x:
 			return Data.XmrigNvidia;
+#endif
 		default:
 			return Data.None;
 		}
