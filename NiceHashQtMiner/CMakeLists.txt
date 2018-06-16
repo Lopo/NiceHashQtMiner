@@ -257,6 +257,7 @@ target_link_libraries(${PROJECT_NAME}
 	${DL_LIBRARY}
 	${LOG4_LIBRARY}
 	${OPENCL_LIBRARIES}
+	${CMAKE_THREAD_LIBS_INIT}
 	)
 if (WITH_AMD AND ADL_FOUND AND ADL_LIBWORKS)
 	target_link_libraries(${PROJECT_NAME}

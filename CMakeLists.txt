@@ -120,6 +120,7 @@ if (OPENSSL_FOUND)
 	check_function_exists(SHA256_Update HAVE_SHA256_UPDATE)
 endif ()
 endif(false)
+find_package(Threads REQUIRED)
 
 set(WITH_AMD FALSE)
 if (ENABLE_AMD)
