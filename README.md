@@ -10,6 +10,7 @@ NiceHash Qt Miner is a try for Linux port of [NiceHash Miner Legacy](https://git
 ## Dependencies
 - CMake
 - Qt5
+- Log4Qt
 - CUDA
 - OpenCL
 - ADL
