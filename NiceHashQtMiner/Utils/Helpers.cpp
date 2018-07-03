@@ -264,7 +264,7 @@ void Helpers::SetDefaultEnvironmentVariables()
 		{"GPU_USE_SYNC_OBJECTS", "1"},
 		{"GPU_SINGLE_ALLOC_PERCENT", "100"},
 		{"GPU_MAX_HEAP_SIZE", "100"},
-		{"GPU_FORCE_64BIT_PTR", "1"}
+//		{"GPU_FORCE_64BIT_PTR", "1"} // cuases problems with lots of miners
 		};
 	auto i=envNameValues.constBegin();
 	QProcessEnvironment env=QProcessEnvironment::systemEnvironment();

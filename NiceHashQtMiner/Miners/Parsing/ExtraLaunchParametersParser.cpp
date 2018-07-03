@@ -326,6 +326,8 @@ Enums::MinerType ExtraLaunchParametersParser::GetMinerType(Enums::DeviceType dev
 		case Enums::MinerBaseType::dtsm:
 			return Enums::MinerType::dtsm;
 #endif
+		case Enums::MinerBaseType::cpuminer:
+			return Enums::MinerType::cpuminer_opt;
 		default:
 			return Enums::MinerType::NONE;
 		}

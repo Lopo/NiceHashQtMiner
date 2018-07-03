@@ -13,7 +13,7 @@ public:
 
 	static QString DemoUser;
 
-	static int CurrentTosVer; // change this if TOS changes
+	static const int CurrentTosVer; // change this if TOS changes
 
 	// variables
 	static int ThreadsPerCpu;

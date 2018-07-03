@@ -229,6 +229,7 @@ add_executable(${PROJECT_NAME}
 
 	main.cpp
 	Enums.cpp
+	Eula.cpp
 	Globals.cpp
 	IFTTT.cpp
 	International.cpp
