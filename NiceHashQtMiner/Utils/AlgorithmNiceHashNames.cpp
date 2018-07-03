@@ -4,7 +4,7 @@
 
 QString AlgorithmNiceHashNames::GetName(const Enums::AlgorithmType type)
 {
-	if ((Enums::AlgorithmType::INVALID<=type && type<=Enums::AlgorithmType::Lyra2z)
+	if ((Enums::AlgorithmType::INVALID<=type && type<=Enums::AlgorithmType::X16R)
 		|| (Enums::AlgorithmType::DaggerKeccak<=type && type<=Enums::AlgorithmType::DaggerPascal)
 		) {
 		return QMetaEnum::fromType<Enums::AlgorithmType>().valueToKey((int)type);

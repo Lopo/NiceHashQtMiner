@@ -87,6 +87,7 @@ const QString MinerPaths::Data::Ethminer=Bin+"/ethminer/ethminer";
 #if WITH_AMD
 const QString MinerPaths::Data::Sgminer560General=Bin+"/sgminer-5-6-0-general/sgminer";
 const QString MinerPaths::Data::SgminerGm=Bin+"/sgminer-gm/sgminer";
+const QString MinerPaths::Data::Avermore=Bin+"/avermore/sgminer";
 #endif
 const QString MinerPaths::Data::NhEqMiner=Bin+"/nheqminer_v0.4b/nheqminer";
 #if WITH_NVIDIA
@@ -274,6 +275,7 @@ QString MinerPaths::NvidiaGroups::CcminerSM5XOrSM6X(Enums::AlgorithmType algorit
 		case Enums::AlgorithmType::Skunk:
 		case Enums::AlgorithmType::Keccak:
 		case Enums::AlgorithmType::Lyra2z:
+		case Enums::AlgorithmType::X16R:
 			return Data.CcminerTPruvot;
 		case Enums::AlgorithmType::Sia:
 		case Enums::AlgorithmType::Nist5:
@@ -319,10 +321,15 @@ QString MinerPaths::NvidiaGroups::CcminerUnstablePath(Enums::AlgorithmType algor
 #if WITH_AMD
 QString MinerPaths::AmdGroup::SgminerPath(Enums::AlgorithmType type)
 {
-	if (type==Enums::AlgorithmType::CryptoNight || type==Enums::AlgorithmType::DaggerHashimoto) {
-		return Data.SgminerGm;
+	switch (type) {
+		case Enums::AlgorithmType::CryptoNight:
+		case Enums::AlgorithmType::DaggerHashimoto:
+			return Data.SgminerGm;
+		case Enums::AlgorithmType::X16R:
+			return Data.Avermore;
+		default:
+			return Data.Sgminer560General;
 		}
-	return Data.Sgminer560General;
 }
 #endif
 QString MinerPaths::AmdGroup::ClaymorePath(Enums::AlgorithmType type)
@@ -340,7 +347,6 @@ QString MinerPaths::AmdGroup::ClaymorePath(Enums::AlgorithmType type)
 		default:
 			return Data.None; // should not happen
 		}
-	return Data.None; // should not happen
 }
 #if WITH_NVIDIA
 QString MinerPaths::Experimental::GetPath(Enums::AlgorithmType algoType, Enums::DeviceGroupType devGroupType)

@@ -228,7 +228,8 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::CreateDefaultsF
 //					Enums::AlgorithmType::CryptoNight,
 					Enums::AlgorithmType::CryptoNightV7,
 					Enums::AlgorithmType::Pascal,
-					Enums::AlgorithmType::X11Gost
+					Enums::AlgorithmType::X11Gost,
+					Enums::AlgorithmType::X16R
 					});
 				toRemoveMinerTypes.append({
 					Enums::MinerBaseType::Claymore,

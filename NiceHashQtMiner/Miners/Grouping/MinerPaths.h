@@ -87,6 +87,8 @@ public:
 		static const QString Sgminer560General;
 
 		static const QString SgminerGm;
+
+		static const QString Avermore;
 #endif
 		static const QString NhEqMiner;
 #if WITH_NVIDIA

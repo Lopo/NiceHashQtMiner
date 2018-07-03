@@ -82,6 +82,9 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Amd()
 	a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::Keccak, "keccak");
 	a->ExtraLaunchParameters=RemDis+QStringList({"--intensity", "15"});
 	l->append(a);
+	a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::X16R, "x16r");
+	a->ExtraLaunchParameters=RemDis+QStringList({"-X", "256"});
+	l->append(a);
 	ret->insert(Enums::MinerBaseType::sgminer, l);
 	ret->insert(Enums::MinerBaseType::Claymore, new QList<Algorithm*>({
 		new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::CryptoNightV7, ""),
@@ -133,7 +136,8 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Nvidia()
 			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Sia, "sia"),
 			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Keccak, "keccak"),
 			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Skunk, "skunk"),
-			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Lyra2z, "lyra2z")
+			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Lyra2z, "lyra2z"),
+			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::X16R, "x16r")
 			})},
 		{Enums::MinerBaseType::ccminer_alexis, new QList<Algorithm*>({
 			new Algorithm(Enums::MinerBaseType::ccminer_alexis, Enums::AlgorithmType::X11Gost, "sib"),

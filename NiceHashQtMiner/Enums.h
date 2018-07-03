@@ -70,7 +70,8 @@ public:
 		Skunk=29,
 		CryptoNightV7=30,
 		CryptoNightHeavy=31,
-		Lyra2z=32
+		Lyra2z=32,
+		X16R=33
 		};
 	Q_ENUM(AlgorithmType)
 
