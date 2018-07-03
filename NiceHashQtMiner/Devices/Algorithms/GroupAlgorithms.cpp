@@ -259,10 +259,10 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::FilterMinerBase
 	return finalRet;
 }
 
-QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::FilterMinerAlgos(QMap<Enums::MinerBaseType, QList<Algorithm*>*>* minerAlgos, QList<Enums::AlgorithmType> toRemove, QList<Enums::MinerBaseType>* toRemoveBase)
+QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::FilterMinerAlgos(QMap<Enums::MinerBaseType, QList<Algorithm*>*>* minerAlgos, QList<Enums::AlgorithmType> toRemove, QList<Enums::MinerBaseType>* toRemoveBase/*=nullptr*/)
 {
 	QMap<Enums::MinerBaseType, QList<Algorithm*>*>* finalRet=new QMap<Enums::MinerBaseType, QList<Algorithm*>*>;
-	if (toRemoveBase==nullptr) { // all minerbasekeys
+	if (toRemoveBase==nullptr || !toRemoveBase->count()) { // all minerbasekeys
 		foreach (Enums::MinerBaseType kvp, minerAlgos->keys()) {
 			QList<Algorithm*>* algoList=new QList<Algorithm*>;
 			foreach (Algorithm* a, *minerAlgos->value(kvp)) {
@@ -283,7 +283,6 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* GroupAlgorithms::FilterMinerAlgo
 				foreach (Algorithm* a, *minerAlgos->value(kvp)) {
 					if (!toRemove.contains(a->NiceHashID)) {
 						algoList->append(a);
-						break;
 						}
 					}
 				if (algoList->count()>0) {
