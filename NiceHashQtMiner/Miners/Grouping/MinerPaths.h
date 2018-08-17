@@ -79,6 +79,7 @@ public:
 		static const QString CcminerCryptonight;
 		static const QString CcminerX11Gost;
 		static const QString CcminerKlausT;
+		static const QString CcminerX16R;
 #endif
 		// ethminers
 		static const QString Ethminer;
@@ -127,6 +128,7 @@ public:
 		static const QString Prospector;
 #if WITH_NVIDIA
 		static const QString Dtsm;
+		static const QString EthLargement;
 #endif
 		} Data;
 

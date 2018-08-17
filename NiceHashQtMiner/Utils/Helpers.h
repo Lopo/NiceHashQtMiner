@@ -10,6 +10,7 @@ class Helpers
 {
 public:
 	static bool Is64BitOperatingSystem();
+	static bool IsElevated();
 
 	static bool InternalCheckIsWow64();
 	static void ConsolePrint(QString grp, QString text);

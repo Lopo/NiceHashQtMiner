@@ -21,6 +21,7 @@
 #include "Configs/Data/MinerSystemVariablesConfig.h"
 #include "WinPort/Process.h"
 #include "Algorithms/DualAlgorithm.h"
+#include "Miners/Ethlargement.h"
 #include <QDir>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QApplication>
@@ -324,6 +325,9 @@ QProcess* Miner::BenchmarkStartProcess(QStringList commandLine)
 	connect(benchmarkHandle, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(BenchmarkStateChanged(QProcess::ProcessState)));
 	connect(benchmarkHandle, SIGNAL(started()), this, SLOT(BenchmarkStarted()));
 #endif
+
+	Ethlargement.CheckAndStart(miningSetup());
+
 	benchmarkHandle->start(QIODevice::Text|QIODevice::ReadOnly);
 	benchmarkHandle->waitForStarted(1000);
 	if (benchmarkHandle->state()!=QProcess::ProcessState::Running) {
@@ -746,6 +750,8 @@ NiceHashProcess* Miner::_Start()
 	if (!LastCommandLine.join("").length()) {
 		return nullptr;
 		}
+
+	Ethlargement.CheckAndStart(miningSetup());
 
 	NiceHashProcess* P=new NiceHashProcess;
 

@@ -82,6 +82,7 @@ const QString MinerPaths::Data::CcminerTPruvot=Bin+"/ccminer_tpruvot/ccminer";
 const QString MinerPaths::Data::CcminerCryptonight=Bin+"/ccminer_cryptonight/ccminer";
 const QString MinerPaths::Data::CcminerX11Gost=Bin+"/ccminer_x11gost/ccminer";
 const QString MinerPaths::Data::CcminerKlausT=Bin+"/ccminer_klaust/ccminer";
+const QString MinerPaths::Data::CcminerX16R=Bin+"/ccminer_x16r/ccminer";
 #endif
 const QString MinerPaths::Data::Ethminer=Bin+"/ethminer/ethminer";
 #if WITH_AMD
@@ -125,6 +126,7 @@ const QString MinerPaths::Data::Ewbf=Bin3rdParty+"/ewbf/miner";
 const QString MinerPaths::Data::Prospector=Bin3rdParty+"/prospector/prospector";
 #if WITH_NVIDIA
 const QString MinerPaths::Data::Dtsm=Bin3rdParty+"/dtsm/zm";
+const QString MinerPaths::Data::EthLargement=Bin3rdParty+"/ethlargement/OhGodAnETHlargementPill-r2";
 #endif
 
 QList<MinerPathPackage*>* MinerPaths::MinerPathPackages=new QList<MinerPathPackage*>;
@@ -275,12 +277,13 @@ QString MinerPaths::NvidiaGroups::CcminerSM5XOrSM6X(Enums::AlgorithmType algorit
 		case Enums::AlgorithmType::Skunk:
 		case Enums::AlgorithmType::Keccak:
 		case Enums::AlgorithmType::Lyra2z:
-		case Enums::AlgorithmType::X16R:
 			return Data.CcminerTPruvot;
 		case Enums::AlgorithmType::Sia:
 		case Enums::AlgorithmType::Nist5:
 		case Enums::AlgorithmType::NeoScrypt:
 			return Data.CcminerKlausT;
+		case Enums::AlgorithmType::X16R:
+			return Data.CcminerX16R;
 		default:
 			return Data.CcminerSp;
 		}

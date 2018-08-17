@@ -146,14 +146,7 @@ void MinerEtherum::_Stop(Enums::MinerStopType willswitch)
 		}
 	if ((willswitch==Enums::MinerStopType::FORCE_END || willswitch==Enums::MinerStopType::END) && ProcessHandle!=nullptr) {
 		IsPaused=false; // shutting down means it is not paused
-		try {
-			ProcessHandle->Kill();
-			}
-		catch (...) { }
-//		finally {
-		if (ProcessHandle!=nullptr) {delete ProcessHandle;};
-			ProcessHandle=nullptr;
-//			}
+		Stop_cpu_ccminer_sgminer_nheqminer(willswitch);
 		}
 }
 

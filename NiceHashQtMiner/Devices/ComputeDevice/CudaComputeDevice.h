@@ -14,6 +14,7 @@
 class CudaComputeDevice
 	: public ComputeDevice
 {
+	Q_OBJECT
 public:
 //	CudaComputeDevice(CudaDevice* cudaDevice, Enums::DeviceGroupType group, int gpuCount, struct NvPhysicalGpuHandle* nvHandle);
 	CudaComputeDevice(CudaDevice* cudaDevice, Enums::DeviceGroupType group, int gpuCount, nvmlDevice_t* nvHandle, ManagedCuda::Nvml::nvmlDevice* nvmlHandle);
@@ -23,9 +24,12 @@ public:
 	int FanSpeed() override;
 	double PowerUsage() override;
 
+	bool ShouldRunEthlargement() const { return ShouldRunEthlargement_;};
+
 protected:
 	int SMMajor;
 	int SMMinor;
+	bool ShouldRunEthlargement_;
 
 private:
 //	struct NvPhysicalGpuHandle* _nvHandle=nullptr;

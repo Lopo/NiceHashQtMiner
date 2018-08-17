@@ -14,6 +14,7 @@
 #include "International.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include "Properties/Resources.h"
+#include "Miners/Ethlargement.h"
 
 
 QColor Form_Benchmark::DisabledColor=Qt::darkGray;
@@ -472,6 +473,7 @@ void Form_Benchmark::EndBenchmark()
 {
 	_benchmarkingTimer->stop();
 	InBenchmark_=false;
+	Ethlargement.Stop();
 	Helpers::ConsolePrint("FormBenchmark", "EndBenchmark() benchmark routine finished");
 
 	BenchmarkStoppedGuiSettings();

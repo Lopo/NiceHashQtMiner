@@ -97,6 +97,7 @@ set(fl_Miners
 	ClaymoreBaseMiner
 	ClaymoreDual
 	CpuMiner
+	Ethlargement
 	Miner
 	MinerFactory
 	MinersApiPortsManager

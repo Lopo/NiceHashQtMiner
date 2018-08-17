@@ -11,6 +11,7 @@
 #ifdef HAVE_LIBCPUID
 #	include <libcpuid/libcpuid.h>
 #endif
+#include <unistd.h>
 
 
 extern QNetworkAccessManager* qnam;
@@ -18,6 +19,11 @@ extern QNetworkAccessManager* qnam;
 bool Helpers::Is64BitOperatingSystem()
 {
 	return is64BitProcess || InternalCheckIsWow64();
+}
+
+bool Helpers::IsElevated()
+{
+	return !geteuid();
 }
 
 bool Helpers::InternalCheckIsWow64()

@@ -1,7 +1,7 @@
 #include "Configs/Data/BenchmarkTimeLimitsConfig.h"
 
 
-const QVector<int> BenchmarkTimeLimitsConfig::DefaultCpuNvidia={10, 20, 60};
+const QVector<int> BenchmarkTimeLimitsConfig::DefaultCpuNvidia={20, 60, 120};
 #if WITH_AMD
 const QVector<int> BenchmarkTimeLimitsConfig::DefaultAmd={120, 180, 240};
 #endif

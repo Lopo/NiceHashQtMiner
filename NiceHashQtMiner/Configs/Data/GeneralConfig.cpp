@@ -66,6 +66,7 @@ void GeneralConfig::SetDefaults()
 	SwitchSmaTicksStable=Interval(2, 3);
 	SwitchSmaTicksUnstable=Interval(5, 13);
 	UseSmaCache=true;
+	UseEthlargement=false;
 }
 
 void GeneralConfig::FixSettingBounds()

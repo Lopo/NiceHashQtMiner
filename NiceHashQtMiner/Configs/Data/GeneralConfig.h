@@ -108,6 +108,7 @@ public:
 
 	double KwhPrice=0; // Cost of electricity in kW-h
 	bool UseSmaCache=true; // True if NHQM should try to cache SMA values for next launch
+	bool UseEthlargement=false;
 
 	void SetDefaults();
 	void FixSettingBounds();

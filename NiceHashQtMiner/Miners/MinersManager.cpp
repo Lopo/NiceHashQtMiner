@@ -1,6 +1,7 @@
 #include "Miners/MinersManager.h"
 #include "Devices/ComputeDeviceManager.h"
 #include "Miners/MiningSession.h"
+#include "Miners/Ethlargement.h"
 #include <QtConcurrent/QtConcurrentRun>
 
 
@@ -11,6 +12,9 @@ void MinersManager::StopAllMiners()
 {
 	if (_curMiningSession!=nullptr) {
 		_curMiningSession->StopAllMiners();
+		}
+	Ethlargement.Stop();
+	if (_curMiningSession!=nullptr) {
 		delete _curMiningSession;
 		_curMiningSession=nullptr;
 		}

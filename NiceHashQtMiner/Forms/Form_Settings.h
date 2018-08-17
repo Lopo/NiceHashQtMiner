@@ -174,6 +174,8 @@ private:
 	QLabel* pictureBox_TimeUnit=nullptr;
 	QLabel* label_TimeUnit=nullptr;
 	QComboBox* comboBox_TimeUnit=nullptr;
+	QLabel* pictureBox_RunEthlargement=nullptr;
+	QCheckBox* checkBox_RunEthlargement=nullptr;
 	void InitializeComponent();
 
 	bool _isInitFinished=false;
@@ -191,6 +193,7 @@ private:
 	bool _isStartupChanged=false;
 
 	void InitializeToolTip();
+	void SetToolTip(QString internationalKey, QList<QWidget*> controls);
 	void InitializeFormTranslations();
 	void InitializeGeneralTabTranslations();
 	void InitializeGeneralTabCallbacks();

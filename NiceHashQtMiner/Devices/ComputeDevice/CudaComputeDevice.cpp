@@ -82,4 +82,6 @@ CudaComputeDevice::CudaComputeDevice(CudaDevice* cudaDevice, Enums::DeviceGroupT
 
 	_nvHandle=nvHandle;
 	_nvmlDevice=nvmlHandle;
+
+	ShouldRunEthlargement_= cudaDevice->DeviceName.contains("1080") || cudaDevice->DeviceName.contains("Titan Xp");
 }

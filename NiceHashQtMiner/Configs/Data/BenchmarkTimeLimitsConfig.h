@@ -26,7 +26,7 @@ public:
 	int GetBenchmarktime(Enums::BenchmarkPerformanceType benchmarkPerformanceType, Enums::DeviceGroupType deviceGroupType);
 
 private:
-//	const QVector<int> DefaultCpuNvidia={10, 20, 60};
+//	const QVector<int> DefaultCpuNvidia={20, 60, 120};
 	static const QVector<int> DefaultCpuNvidia;
 #if WITH_AMD
 //	const QVector<int> DefaultAmd;
