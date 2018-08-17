@@ -19,7 +19,7 @@ class Algorithm
 	Q_PROPERTY(QString CurPayingRatio READ CurPayingRatio)
 	Q_PROPERTY(QString CurPayingRate READ CurPayingRate)
 public:
-	Algorithm(Enums::MinerBaseType minerBaseType, Enums::AlgorithmType niceHashID, QString minerName);
+	Algorithm(Enums::MinerBaseType minerBaseType, Enums::AlgorithmType niceHashID, QString minerName="", bool enabled=true);
 
 	QString AlgorithmName() const;
 	QString MinerBaseTypeName=""; // Friendly name for miner type

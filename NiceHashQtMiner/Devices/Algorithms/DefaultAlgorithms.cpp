@@ -6,11 +6,11 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::All()
 {
 	return new QMap<Enums::MinerBaseType, QList<Algorithm*>*>({
 		{Enums::MinerBaseType::XmrStak, new QList<Algorithm*>({
-			new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightV7, ""),
-			new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightHeavy, "")
+			new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightV7),
+			new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightHeavy)
 			})},
 		{Enums::MinerBaseType::Xmrig, new QList<Algorithm*>({
-			new Algorithm(Enums::MinerBaseType::Xmrig, Enums::AlgorithmType::CryptoNightV7, "")
+			new Algorithm(Enums::MinerBaseType::Xmrig, Enums::AlgorithmType::CryptoNightV7)
 			})}
 		});
 }
@@ -19,7 +19,7 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Gpu()
 {
 	return new QMap<Enums::MinerBaseType, QList<Algorithm*>*>({
 		{Enums::MinerBaseType::Claymore, new QList<Algorithm*>({
-			new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, ""),
+			new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto),
 			new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Decred),
 			new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Lbry),
 			new DualAlgorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Pascal),
@@ -61,22 +61,22 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Amd()
 	Algorithm* a;
 	QMap<Enums::MinerBaseType, QList<Algorithm*>*>* ret=new QMap<Enums::MinerBaseType, QList<Algorithm*>*>;
 	QList<Algorithm*>* l=new QList<Algorithm*>;
-	a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::NeoScrypt, "neoscrypt");
+	a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::NeoScrypt, "neoscrypt", false);
 	a->ExtraLaunchParameters=DefaultParam+QStringList({"--nfactor", "10", "--xintensity", "2", "--thread-concurrency", "8192", "--worksize", "64", "--gpu-threads", "4"});
 	l->append(a);
 	a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::DaggerHashimoto, "ethash");
 	a->ExtraLaunchParameters=RemDis+QStringList({"--xintensity", "512", "-w", "192", "-g", "1"});
 	l->append(a);
-	a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::Decred, "decred");
+	a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::Decred, "decred", false);
 	a->ExtraLaunchParameters=RemDis+QStringList({"--gpu-threads", "1", "--xintensity", "256", "--lookup-gap", "2", "--worksize", "64"});
 	l->append(a);
-	a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::Lbry, "lbry");
+	a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::Lbry, "lbry", false);
 	a->ExtraLaunchParameters=RemDis+QStringList({"--xintensity", "512", "--worksize", "128", "--gpu-threads", "2"});
 	l->append(a);
-	a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::Pascal, "pascal");
+	a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::Pascal, "pascal", false);
 	a->ExtraLaunchParameters=RemDis+QStringList({"--intensity", "21", "-w", "64", "-g", "2"});
 	l->append(a);
-	a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::X11Gost, "sibcoin-mod");
+	a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::X11Gost, "sibcoin-mod", false);
 	a->ExtraLaunchParameters=RemDis+QStringList({"--intensity", "16", "-w", "64", "-g", "2"});
 	l->append(a);
 	a=new Algorithm(Enums::MinerBaseType::sgminer, Enums::AlgorithmType::Keccak, "keccak");
@@ -87,15 +87,15 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Amd()
 	l->append(a);
 	ret->insert(Enums::MinerBaseType::sgminer, l);
 	ret->insert(Enums::MinerBaseType::Claymore, new QList<Algorithm*>({
-		new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::CryptoNightV7, ""),
+		new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::CryptoNightV7),
 		new Algorithm(Enums::MinerBaseType::Claymore, Enums::AlgorithmType::Equihash, "equihash")
 		}));
 	ret->insert(Enums::MinerBaseType::OptiminerAMD, new QList<Algorithm*>({
 		new Algorithm(Enums::MinerBaseType::OptiminerAMD, Enums::AlgorithmType::Equihash, "equihash")
 		}));
 	ret->insert(Enums::MinerBaseType::Prospector, new QList<Algorithm*>({
-		new Algorithm(Enums::MinerBaseType::Prospector, Enums::AlgorithmType::Skunk, "sigt"),
-		new Algorithm(Enums::MinerBaseType::Prospector, Enums::AlgorithmType::Sia, "sia")
+		new Algorithm(Enums::MinerBaseType::Prospector, Enums::AlgorithmType::Skunk, "sigt", false),
+		new Algorithm(Enums::MinerBaseType::Prospector, Enums::AlgorithmType::Sia, "sia", false)
 		}));
 	auto all=All();
 	foreach (Enums::MinerBaseType mbt, all->keys()) {
@@ -129,18 +129,18 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Nvidia()
 		{Enums::MinerBaseType::ccminer, new QList<Algorithm*>({
 			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::NeoScrypt, "neoscrypt"),
 			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Lyra2REv2, "lyra2v2"),
-			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Decred, "decred"),
-			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Lbry, "lbry"),
-			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::X11Gost, "sib"),
+			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Decred, "decred", false),
+			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Lbry, "lbry", false),
+			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::X11Gost, "sib", false),
 			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Blake2s, "blake2s"),
-			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Sia, "sia"),
+			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Sia, "sia", false),
 			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Keccak, "keccak"),
 			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Skunk, "skunk"),
 			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::Lyra2z, "lyra2z"),
 			new Algorithm(Enums::MinerBaseType::ccminer, Enums::AlgorithmType::X16R, "x16r")
 			})},
 		{Enums::MinerBaseType::ccminer_alexis, new QList<Algorithm*>({
-			new Algorithm(Enums::MinerBaseType::ccminer_alexis, Enums::AlgorithmType::X11Gost, "sib"),
+			new Algorithm(Enums::MinerBaseType::ccminer_alexis, Enums::AlgorithmType::X11Gost, "sib", false),
 			new Algorithm(Enums::MinerBaseType::ccminer_alexis, Enums::AlgorithmType::Keccak, "keccak")
 			})},
 		{Enums::MinerBaseType::ethminer, new QList<Algorithm*>({
@@ -150,10 +150,10 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Nvidia()
 			new Algorithm(Enums::MinerBaseType::nheqminer, Enums::AlgorithmType::Equihash, "equihash")
 			})},
 		{Enums::MinerBaseType::EWBF, new QList<Algorithm*>({
-			new Algorithm(Enums::MinerBaseType::EWBF, Enums::AlgorithmType::Equihash, "")
+			new Algorithm(Enums::MinerBaseType::EWBF, Enums::AlgorithmType::Equihash)
 			})},
 		{Enums::MinerBaseType::dtsm, new QList<Algorithm*>({
-			new Algorithm(Enums::MinerBaseType::dtsm, Enums::AlgorithmType::Equihash, "")
+			new Algorithm(Enums::MinerBaseType::dtsm, Enums::AlgorithmType::Equihash)
 			})},
 		{Enums::MinerBaseType::excavator, new QList<Algorithm*>({
 			new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::Equihash, "equihash"),

@@ -14,7 +14,7 @@ QString Algorithm::AlgorithmName() const
 	return AlgorithmName_;
 }
 
-Algorithm::Algorithm(Enums::MinerBaseType minerBaseType, Enums::AlgorithmType niceHashID, QString minerName)
+Algorithm::Algorithm(Enums::MinerBaseType minerBaseType, Enums::AlgorithmType niceHashID, QString minerName/*=""*/, bool enabled/*=true*/)
 {
 	NiceHashID=niceHashID;
 
@@ -27,10 +27,7 @@ Algorithm::Algorithm(Enums::MinerBaseType minerBaseType, Enums::AlgorithmType ni
 
 	ExtraLaunchParameters.clear();
 	LessThreads=0;
-	Enabled= !(
-			NiceHashID==Enums::AlgorithmType::Nist5
-			|| (NiceHashID==Enums::AlgorithmType::NeoScrypt && minerBaseType==Enums::MinerBaseType::sgminer)
-			);
+	Enabled=enabled;
 	BenchmarkStatus="";
 }
 
