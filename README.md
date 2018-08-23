@@ -37,7 +37,7 @@ bin/xmrig | [XMRigAmd](https://github.com/xmrig/xmrig-amd) | kDefaultDonateLevel
 bin/xmrig | [XMRigNvidia](https://github.com/xmrig/xmrig-nvidia) | kDefaultDonateLevel & kMinimumDonateLevel set to 0
 bin/ccminer_cryptonight | [ccminer](https://github.com/KlausT/ccminer-cryptonight) | untested
 bin/ccminer_decred | | unknown
-bin/excavator | [Excavator](https://github.com/nicehash/excavator/releases/tag/v1.5.4a) | 
+bin/excavator | [Excavator](https://github.com/nicehash/excavator/releases/tag/v1.5.11a) | tested with ver 1.5.11a
 bin_3rdparty/claymore_cryptonight | [Claymore](https://mega.co.nz/#F!e4JVEAIJ!l1iF4z10fMyJzY5-LnyC2A) | 
 bin_3rdparty/claymore_dual | [Claymore](https://mega.nz/#F!O4YA2JgD!n2b4iSHQDruEsYUvTQP5_w) | 
 bin_3rdparty/claymore_zcash | [Claymore](https://mega.nz/#F!P0ZjFDjC!Cmb-ZRqlbAnNrajRtp4zvA) | 

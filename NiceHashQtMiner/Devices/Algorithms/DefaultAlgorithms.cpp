@@ -159,18 +159,16 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Nvidia()
 			new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::Equihash, "equihash"),
 			new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::Pascal, "pascal"),
 			new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::Decred, "decred"),
-			new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::Sia, "sia"),
-			new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::Lbry, "lbry"),
 			new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::Blake2s, "blake2s"),
 			new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::DaggerHashimoto, "daggerhashimoto"),
 			new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::Lyra2REv2, "lyra2rev2"),
 			new DualAlgorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Decred),
-			new DualAlgorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Sia),
 			new DualAlgorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::DaggerHashimoto, Enums::AlgorithmType::Pascal),
 			new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::Keccak, "keccak"),
 			new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::NeoScrypt, "neoscrypt"),
 			new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::CryptoNightV7, "cryptonightV7"),
-			new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::Lyra2z, "lyra2z")
+			new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::Lyra2z, "lyra2z"),
+			new Algorithm(Enums::MinerBaseType::excavator, Enums::AlgorithmType::X16R, "x16r")
 			})}
 		});
 
