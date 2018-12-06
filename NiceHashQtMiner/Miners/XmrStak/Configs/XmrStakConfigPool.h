@@ -30,7 +30,7 @@ public:
 	void SetupPools(QStringList poolAddrs, QString wallet, bool isHeavy);
 
 	QList<XmrStakPoolItem> pool_list;
-	QString currency="monero7";
+	QString currency="monero";
 
 	QJsonObject asJsonObject() override;
 };

@@ -9,11 +9,12 @@ class Ewbf
 {
 	Q_OBJECT
 public:
-	Ewbf();
+	Ewbf(QString name="ewbf");
 	void Start(QString url, QString btcAdress, QString worker) override;
 	ApiData* GetSummaryAsync() override;
 
 protected:
+	virtual QStringList GetStartCommand(QString url, QString btcAddress, QString worker);
 	QStringList GetDevicesCommandString() override;
 	void KillMinerBase(QString exeName);
 	QStringList BenchmarkCreateCommandLine(Algorithm* algorithm, int time) override;
@@ -56,8 +57,6 @@ private:
 	const QString LookForStart="total speed: ";
 	const QString LookForEnd="sol/s";
 	const double DevFee=2.0;
-
-	QStringList GetStartCommand(QString url, QString btcAddress, QString worker);
 };
 
 #endif

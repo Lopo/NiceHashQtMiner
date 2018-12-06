@@ -18,6 +18,7 @@ private:
 	static Miner* CreateClaymore(Algorithm* algorithm);
 #if WITH_NVIDIA
 	static Miner* CreateExperimental(Enums::DeviceType deviceType, Enums::AlgorithmType algorithmType);
+	static Miner* CreateEwbf(Enums::AlgorithmType type);
 #endif
 };
 

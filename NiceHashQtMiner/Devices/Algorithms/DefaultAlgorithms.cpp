@@ -7,7 +7,8 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::All()
 	return new QMap<Enums::MinerBaseType, QList<Algorithm*>*>({
 		{Enums::MinerBaseType::XmrStak, new QList<Algorithm*>({
 			new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightV7),
-			new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightHeavy)
+			new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightHeavy),
+			new Algorithm(Enums::MinerBaseType::XmrStak, Enums::AlgorithmType::CryptoNightV8)
 			})},
 		{Enums::MinerBaseType::Xmrig, new QList<Algorithm*>({
 			new Algorithm(Enums::MinerBaseType::Xmrig, Enums::AlgorithmType::CryptoNightV7)
@@ -150,7 +151,8 @@ QMap<Enums::MinerBaseType, QList<Algorithm*>*>* DefaultAlgorithms::Nvidia()
 			new Algorithm(Enums::MinerBaseType::nheqminer, Enums::AlgorithmType::Equihash, "equihash")
 			})},
 		{Enums::MinerBaseType::EWBF, new QList<Algorithm*>({
-			new Algorithm(Enums::MinerBaseType::EWBF, Enums::AlgorithmType::Equihash)
+			new Algorithm(Enums::MinerBaseType::EWBF, Enums::AlgorithmType::Equihash),
+			new Algorithm(Enums::MinerBaseType::EWBF, Enums::AlgorithmType::ZHash)
 			})},
 		{Enums::MinerBaseType::dtsm, new QList<Algorithm*>({
 			new Algorithm(Enums::MinerBaseType::dtsm, Enums::AlgorithmType::Equihash)

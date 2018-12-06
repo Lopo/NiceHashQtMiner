@@ -45,6 +45,7 @@ public:
 	int worksize=8;
 	bool strided_index=true;
 	int mem_chunk=2;
+	int unroll=8;
 	bool comp_mode=true;
 	virtual QJsonObject asJsonObject();
 	static XmrStakAmdItem* fromJsonObject(QJsonObject obj);
@@ -73,7 +74,19 @@ public:
 	int block=60;
 	int bfactor=8;
 	int bsleep=100;
+	/** method used to synchronize the device
+	 * documentation: http://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html#group__CUDART__DEVICE_1g69e73c7dda3fc05306ae7c811a690fac
+	 * 0 = cudaDeviceScheduleAuto
+	 * 1 = cudaDeviceScheduleSpin - create a high load on one cpu thread per gpu
+	 * 2 = cudaDeviceScheduleYield
+	 * 3 = cudaDeviceScheduleBlockingSync(default)
+	 */
 	int sync_mode=3;
+	/** select the memory access pattern (this option has only a meaning for cryptonight_v8 and monero)
+	 * 0 = 64bit memory loads
+	 * 1 = 256bit memory loads 
+	 */
+	int mem_mode=1;
 
 	virtual QJsonObject asJsonObject();
 	static XmrStakNvidiaItem* fromJsonObject(QJsonObject obj);

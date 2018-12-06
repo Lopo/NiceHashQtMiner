@@ -1,6 +1,6 @@
-#include "Miners/Ewbf.h"
+#include "Miners/Equihash/Ewbf.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
-#include "Parsing/ExtraLaunchParametersParser.h"
+#include "Miners/Parsing/ExtraLaunchParametersParser.h"
 #include "WinPort/Process.h"
 #include "Utils/Helpers.h"
 #include "Globals.h"
@@ -16,8 +16,8 @@
 #include <csignal>
 
 
-Ewbf::Ewbf()
-	: Miner("ewbf", 60*1000*5)
+Ewbf::Ewbf(QString name/*="ewbf"*/)
+	: Miner(name, 60*1000*5)
 {
 	_ConectionType=Enums::NhmConectionType::NONE;
 //	IsNeverHideMiningWindow=true;
@@ -225,7 +225,7 @@ double Ewbf::GetNumber(QString outdata, QString lookForStart, QString lookForEnd
 			speed=speed.replace("m", "");
 			}
 		speed=speed.trimmed();
-		return (speed.toDouble()*mult)*(1.0-DevFee*0.01);
+		return (speed.toDouble()*mult);
 		}
 	catch (std::exception& ex) {
 		Helpers::ConsolePrint("GetNumber", QString(ex.what())+" | args => "+outdata+" | "+lookForEnd+" | "+lookForStart);

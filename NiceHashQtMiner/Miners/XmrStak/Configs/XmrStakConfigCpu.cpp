@@ -17,6 +17,7 @@ void XmrStakConfigCpu::Inti_cpu_threads_conf(bool low_power_mode, bool no_prefet
 			QJsonObject o;
 			o.insert("low_power_mode", low_power_mode);
 			o.insert("no_prefetch", no_prefetch);
+			o.insert("asm", "auto");
 			o.insert("affine_to_cpu", (i_cpu*2)+1);
 			cpu_threads_conf.append(o);
 			}
@@ -26,7 +27,8 @@ void XmrStakConfigCpu::Inti_cpu_threads_conf(bool low_power_mode, bool no_prefet
 			QJsonObject o;
 			o.insert("low_power_mode", low_power_mode);
 			o.insert("no_prefetch", no_prefetch);
-			o.insert("affine_to_cpu", false);
+			o.insert("asm", "auto");
+			o.insert("affine_to_cpu", affine_to_cpu? i_cpu : false);
 			cpu_threads_conf.append(o);
 			}
 		}

@@ -71,7 +71,9 @@ public:
 		CryptoNightV7=30,
 		CryptoNightHeavy=31,
 		Lyra2z=32,
-		X16R=33
+		X16R=33,
+		CryptoNightV8=34,
+		ZHash=36
 		};
 	Q_ENUM(AlgorithmType)
 

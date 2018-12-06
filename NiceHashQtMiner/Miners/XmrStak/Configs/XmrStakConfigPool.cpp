@@ -23,9 +23,9 @@ void XmrStakConfigPool::SetupPools(QStringList poolAddrs, QString wallet, bool i
 		i++;
 		}
 
-	if (isHeavy) {
-		currency="cryptonight_heavy";
-		}
+	currency= isHeavy
+		? "cryptonight_heavy"
+		: "monero";
 }
 
 QJsonObject XmrStakConfigPool::XmrStakPoolItem::asJsonObject()

@@ -173,10 +173,11 @@ if (WITH_NVIDIA)
 		)
 	list(APPEND fl_Miners
 		Equihash/Dtsm
+		Equihash/Ewbf
+		Equihash/Ewbf144
 		ethminer/MinerEtherumCUDA
 		Excavator
 		Ccminer
-		Ewbf
 		)
 endif ()
 

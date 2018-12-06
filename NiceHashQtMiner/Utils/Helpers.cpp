@@ -117,7 +117,7 @@ QString Helpers::FormatDualSpeedOutput(double primarySpeed, double secondarySpee
 		ret=FormatSpeedOutput(primarySpeed);
 		}
 
-	QString unit= algo==Enums::AlgorithmType::Equihash? "Sol/s " : "H/s ";
+	QString unit= (algo==Enums::AlgorithmType::Equihash || algo==Enums::AlgorithmType::ZHash)? "Sol/s " : "H/s ";
 	return ret+unit;
 }
 

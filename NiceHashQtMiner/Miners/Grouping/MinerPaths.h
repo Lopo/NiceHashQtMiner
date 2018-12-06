@@ -129,6 +129,7 @@ public:
 #if WITH_NVIDIA
 		static const QString Dtsm;
 		static const QString EthLargement;
+		static const QString Ewbf144;
 #endif
 		} Data;
 

@@ -127,6 +127,7 @@ const QString MinerPaths::Data::Prospector=Bin3rdParty+"/prospector/prospector";
 #if WITH_NVIDIA
 const QString MinerPaths::Data::Dtsm=Bin3rdParty+"/dtsm/zm";
 const QString MinerPaths::Data::EthLargement=Bin3rdParty+"/ethlargement/OhGodAnETHlargementPill-r2";
+const QString MinerPaths::Data::Ewbf144=Bin3rdParty+"/ewbf_144/miner";
 #endif
 
 QList<MinerPathPackage*>* MinerPaths::MinerPathPackages=new QList<MinerPathPackage*>;
@@ -198,7 +199,15 @@ QString MinerPaths::GetPathFor(Enums::MinerBaseType minerBaseType, Enums::Algori
 		case Enums::MinerBaseType::experimental:
 			return Experimental.GetPath(algoType, devGroupType);
 		case Enums::MinerBaseType::EWBF:
-			return Data.Ewbf;
+			switch (algoType) {
+				case Enums::AlgorithmType::Equihash:
+					return Data.Ewbf;
+				case Enums::AlgorithmType::ZHash:
+					return Data.Ewbf144;
+				default:
+					break;
+				}
+			break;
 #endif
 		case Enums::MinerBaseType::Prospector:
 			return Data.Prospector;

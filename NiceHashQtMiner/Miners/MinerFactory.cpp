@@ -7,7 +7,8 @@
 #	include "Miners/ethminer/MinerEtherumOCL.h"
 #endif
 #if WITH_NVIDIA
-#	include "Miners/Ewbf.h"
+#	include "Miners/Equihash/Ewbf.h"
+#	include "Miners/Equihash/Ewbf144.h"
 #	include "Miners/Excavator.h"
 #	include "Miners/Ccminer.h"
 #	include "Miners/Equihash/Dtsm.h"
@@ -66,6 +67,19 @@ Miner* MinerFactory::CreateExperimental(Enums::DeviceType deviceType, Enums::Alg
 }
 #endif
 
+Miner* MinerFactory::CreateEwbf(Enums::AlgorithmType type)
+{
+	switch (type) {
+		case Enums::AlgorithmType::Equihash:
+			return new Ewbf;
+		case Enums::AlgorithmType::ZHash:
+			return new Ewbf144;
+		default:
+			return nullptr;
+		}
+	return nullptr;
+}
+
 Miner* MinerFactory::CreateMiner(Enums::DeviceType deviceType, Algorithm* algorithm)
 {
 	switch (algorithm->MinerBaseType) {
@@ -99,7 +113,7 @@ Miner* MinerFactory::CreateMiner(Enums::DeviceType deviceType, Algorithm* algori
 		case Enums::MinerBaseType::experimental:
 			return CreateExperimental(deviceType, algorithm->NiceHashID);
 		case Enums::MinerBaseType::EWBF:
-			return new Ewbf;
+			return CreateEwbf(algorithm->NiceHashID);
 #endif
 		case Enums::MinerBaseType::Prospector:
 			return new Prospector;

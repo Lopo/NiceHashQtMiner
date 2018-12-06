@@ -57,6 +57,9 @@ void NHSmaData::Initialize()
 				paying=cacheDict.value(algo);
 				HasData_=true;
 				}
+#if FILLSMA
+			paying=1;
+#endif
 
 			NiceHashSma* nhs=new NiceHashSma;
 			nhs->Port=(int)algo+3333;
