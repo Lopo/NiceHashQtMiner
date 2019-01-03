@@ -18,6 +18,8 @@ public:
 	QString UDev;
 	QString SysFS_BusID;
 	QString modalias;
+	uint16_t vendor;
+	uint16_t subvendor;
 };
 
 

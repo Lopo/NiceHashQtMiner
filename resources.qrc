@@ -8,6 +8,11 @@
     <file alias="NHM_logo_xsmall_light">resources/NHM_logo_xsmall_light.png</file>
     <file alias="amd">resources/amd-red.ico</file>
     <file alias="nvidia">resources/nvidia.ico</file>
-    <file alias="cpu">resources/cpu-icon-13.jpg</file>
+    <file alias="cpu">resources/cpu32.png</file>
+    <file alias="asus">resources/asus.ico</file>
+    <file alias="gigabyte">resources/gigabyte.ico</file>
+    <file alias="msi">resources/msi.ico</file>
+    <file alias="sapphire">resources/sapphire.png</file>
+    <file alias="intel">resources/Intel64.png</file>
 </qresource>
 </RCC>

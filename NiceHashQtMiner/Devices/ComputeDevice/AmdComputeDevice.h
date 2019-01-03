@@ -11,7 +11,7 @@ class AmdComputeDevice
 	: public ComputeDevice
 {
 public:
-	AmdComputeDevice(AmdGpuDevice* amdDevice, int gpuCount, bool isDetectionFallback, int adl2Index);
+	AmdComputeDevice(AmdGpuDevice* amdDevice, int gpuCount, bool isDetectionFallback, int adl2Index, uint16_t vendor=0, uint16_t subvendor=0);
 
 	int FanSpeed() override;
 	float Temp() override;

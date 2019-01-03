@@ -1,6 +1,8 @@
 #include "Forms/Components/DevicesListViewEnableControlModel.h"
 #include "Devices/ComputeDevice/ComputeDevice.h"
 #include <QIcon>
+#include <QPainter>
+#include <libcpuid/libcpuid.h>
 
 
 DevicesListViewEnableControlModel::DevicesListViewEnableControlModel(QObject *parent)
@@ -29,15 +31,60 @@ QVariant DevicesListViewEnableControlModel::data(const QModelIndex& index, int r
 		case Qt::DisplayRole: // 0
 			return _data.at(row).Tag->GetFullName();
 		case Qt::DecorationRole: // 1
-			switch (_data.at(row).Tag->DeviceType) {
+			{
+			uint16_t isize=32;
+			QPixmap pxs(isize*2, isize);
+			pxs.fill(Qt::transparent);
+			QPainter p;
+			p.begin(&pxs);
+			QPixmap frst(isize, isize);
+			frst.fill(Qt::transparent);
+			QPixmap scnd(isize, isize);
+			scnd.fill(Qt::transparent);
+			ComputeDevice* cdev=_data.at(row).Tag;
+			switch (cdev->DeviceType) {
 				case Enums::DeviceType::CPU:
-					return QIcon(":/cpu");
-				case Enums::DeviceType::NVIDIA:
-					return QIcon(":/nvidia");
-				case Enums::DeviceType::AMD:
-					return QIcon(":/amd");
+					frst=QPixmap(":/cpu");
+					switch (cdev->vendor) { // cpu_vendor_t
+						case cpu_vendor_t::VENDOR_AMD:
+							scnd=QPixmap(":/amd");
+							break;
+						case cpu_vendor_t::VENDOR_INTEL:
+							scnd=QPixmap(":/intel");
+							break;
+						}
+					break;
+				case Enums::DeviceType::NVIDIA: // vendor 0x10de
+					frst=QPixmap(":/nvidia");
+					break;
+				case Enums::DeviceType::AMD: // vendor 0x1002
+					frst=QPixmap(":/amd");
+					break;
+				};
+			p.drawPixmap(0, 0, frst.scaled(isize, isize, Qt::KeepAspectRatio));
+			if (cdev->DeviceType!=Enums::DeviceType::CPU) {
+				switch (cdev->subVendor) { // pci dev
+					case 0x1002:
+						scnd=QPixmap(":/amd");
+						break;
+					case 0x1043: // ASUSTeK Computer Inc.
+						scnd=QPixmap(":/asus");
+						break;
+					case 0x1458: // Gigabyte Technology Co., Ltd
+						scnd=QPixmap(":/gigabyte");
+						break;
+					case 0x1462: // Micro-Star International Co., Ltd. [MSI]
+						scnd=QPixmap(":/msi");
+						break;
+					case 0x174b: // PC Partner Limited / Sapphire Technology
+						scnd=QPixmap(":/sapphire");
+						break;
+					};
 				}
-			return QVariant();
+			p.drawPixmap(isize, 0, scnd.scaled(isize, isize, Qt::KeepAspectRatio));
+			p.end();
+			return QIcon(pxs.copy(0, 0, isize*2, isize));
+			}
 		case Qt::EditRole: // 2
 			return QVariant::fromValue<ComputeDevice*>(_data.at(row).Tag);
 //		case Qt::FontRole: // 6

@@ -221,13 +221,14 @@ QList<OpenCLDevice*>* AmdQuery::AmdDeviceCreationFallback(QList<OpenCLDevice*>* 
 	for (int i=0; i<minCount; ++i) {
 		ComputeDeviceManager.Available.HasAmd=true;
 
-		QString deviceName=amdVideoControllers.value(i)->Name;
-		AmdGpuDevice* newAmdDev=new AmdGpuDevice(amdDevices->value(i), _driverOld.value(deviceName), amdVideoControllers.value(i)->InfSection, _noNeoscryptLyra2.value(deviceName));
+		VideoControllerData* avc=amdVideoControllers.value(i);
+		QString deviceName=avc->Name;
+		AmdGpuDevice* newAmdDev=new AmdGpuDevice(amdDevices->value(i), _driverOld.value(deviceName), avc->InfSection, _noNeoscryptLyra2.value(deviceName));
 		newAmdDev->DeviceName=deviceName;
 		newAmdDev->UUID="UNUSED";
 		bool isDisabledGroup=ConfigManager.generalConfig->DeviceDetection->DisableDetectionAMD;
 
-		ComputeDeviceManager.Available.Devices->append(new AmdComputeDevice(newAmdDev, ++ComputeDeviceManager.Query.GpuCount, true, -1));
+		ComputeDeviceManager.Available.Devices->append(new AmdComputeDevice(newAmdDev, ++ComputeDeviceManager.Query.GpuCount, true, -1, avc->vendor, avc->subvendor));
 		// just in case
 		try {
 			stringBuilder << QString("\t%1 device%2:").arg(isDisabledGroup? "SKIPED" : "ADDED");

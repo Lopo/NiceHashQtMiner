@@ -1,8 +1,10 @@
 #ifndef PINVOKE_CPUID_H_
 #define PINVOKE_CPUID_H_
 
+#include "config.h"
 #include <QString>
 //#include <QLibrary>
+#include <libcpuid/libcpuid.h>
 
 
 namespace NiceHashQtMiner {
@@ -13,6 +15,7 @@ public:
 //	static bool Init();
 
 	static QString GetCPUName();
+	static cpu_vendor_t GetCPUVendorID();
 	static QString GetCPUVendor();
 	static int SupportsSSE2();
 	static int SupportsAVX();

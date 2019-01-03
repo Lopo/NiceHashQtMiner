@@ -89,9 +89,11 @@ double AmdComputeDevice::PowerUsage()
 #endif
 }
 
-AmdComputeDevice::AmdComputeDevice(AmdGpuDevice* amdDevice, int gpuCount, bool isDetectionFallback, int adl2Index)
+AmdComputeDevice::AmdComputeDevice(AmdGpuDevice* amdDevice, int gpuCount, bool isDetectionFallback, int adl2Index, uint16_t vendor, uint16_t subvendor)
 	: ComputeDevice(amdDevice->DeviceID(), amdDevice->DeviceName, true, Enums::DeviceGroupType::AMD_OpenCL, amdDevice->IsEtherumCapable(), Enums::DeviceType::AMD, International::GetText("ComputeDevice_Short_Name_AMD_GPU").arg(gpuCount), amdDevice->DeviceGlobalMemory())
 {
+	this->vendor=vendor;
+	this->subVendor=subvendor;
 	Uuid_= isDetectionFallback
 		? GetUuid(ID, GroupNames::GetGroupName(DeviceGroupType, ID), Name, DeviceGroupType)
 		: amdDevice->UUID;

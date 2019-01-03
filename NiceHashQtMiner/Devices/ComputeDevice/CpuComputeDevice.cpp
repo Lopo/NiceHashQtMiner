@@ -6,7 +6,7 @@
 #include <QException>
 
 
-CpuComputeDevice::CpuComputeDevice(int id, QString group, QString name, int threads, ulong affinityMask, int cpuCount)
+CpuComputeDevice::CpuComputeDevice(int id, QString group, QString name, int threads, ulong affinityMask, int cpuCount, cpu_vendor_t vendor)
 	: ComputeDevice(id, name, true, Enums::DeviceGroupType::CPU, false, Enums::DeviceType::CPU, International::GetText("ComputeDevice_Short_Name_CPU").arg(cpuCount), 0)
 {
 	_Threads=threads;
@@ -14,6 +14,7 @@ CpuComputeDevice::CpuComputeDevice(int id, QString group, QString name, int thre
 	Uuid_=GetUuid(ID, GroupNames::GetGroupName(DeviceGroupType, ID), Name, DeviceGroupType);
 	AlgorithmSettings=GroupAlgorithms::CreateForDeviceList(this);
 	Index_=ID;
+	this->vendor=(uint16_t)vendor;
 
 //	_cpuCounter=new PerformanceCounter;
 //	_cpuCounter->CategoryName="Processor";

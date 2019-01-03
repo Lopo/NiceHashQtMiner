@@ -96,6 +96,7 @@ bool AMDOpenCLDeviceDetection::QueryDevices()
 							}
 
 						curDevice._CL_DEVICE_GLOBAL_MEM_SIZE=clDevs[i_devId].getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
+						curDevice._CL_DEVICE_VENDOR_ID=clDevs[i_devId].getInfo<CL_DEVICE_VENDOR_ID>();
 						curDevice._CL_DEVICE_VENDOR=StringnNullTerminatorFix(clDevs[i_devId].getInfo<CL_DEVICE_VENDOR>());
 						curDevice._CL_DEVICE_VERSION=StringnNullTerminatorFix(clDevs[i_devId].getInfo<CL_DEVICE_VERSION>());
 						curDevice._CL_DRIVER_VERSION=StringnNullTerminatorFix(clDevs[i_devId].getInfo<CL_DRIVER_VERSION>());
@@ -134,6 +135,9 @@ void AMDOpenCLDeviceDetection::PrintDevicesJson()
 	{
 		int devPlatformsComma=_devicesPlatformsDevices.size();
 		for (const auto &jsonLog : _devicesPlatformsDevices) {
+			if (!jsonLog.Devices.size()) {
+				continue;
+				}
 			cout << "\t{" << endl;
 			cout << "\t\t\"PlatformName\": \"" << jsonLog.PlatformName << "\"" << "," << endl;
 			cout << "\t\t\"PlatformNum\": " << jsonLog.PlatformNum << "," << endl;
@@ -147,6 +151,7 @@ void AMDOpenCLDeviceDetection::PrintDevicesJson()
 				cout << "\t\t\t\t\"" << "_CL_DEVICE_NAME" << "\" : \"" << dev._CL_DEVICE_NAME << "\"," << endl;
 				cout << "\t\t\t\t\"" << "_CL_DEVICE_TYPE" << "\" : \"" << dev._CL_DEVICE_TYPE << "\"," << endl; 
 				cout << "\t\t\t\t\"" << "_CL_DEVICE_GLOBAL_MEM_SIZE" << "\" : " << dev._CL_DEVICE_GLOBAL_MEM_SIZE << "," << endl; // num
+				cout << "\t\t\t\t\"" << "_CL_DEVICE_VENDOR_ID" << "\" : " << dev._CL_DEVICE_VENDOR_ID << "," << endl;
 				cout << "\t\t\t\t\"" << "_CL_DEVICE_VENDOR" << "\" : \"" << dev._CL_DEVICE_VENDOR << "\"," << endl;
 				cout << "\t\t\t\t\"" << "_CL_DEVICE_VERSION" << "\" : \"" << dev._CL_DEVICE_VERSION << "\"," << endl;
 				cout << "\t\t\t\t\"" << "_CL_DRIVER_VERSION" << "\" : \"" << dev._CL_DRIVER_VERSION << "\"" << endl;
@@ -181,6 +186,7 @@ void AMDOpenCLDeviceDetection::PrintDevicesJsonDirty()
 				cout << "\"" << "_CL_DEVICE_NAME" << "\" : \"" << dev._CL_DEVICE_NAME << "\",";
 				cout << "\"" << "_CL_DEVICE_TYPE" << "\" : \"" << dev._CL_DEVICE_TYPE << "\",";
 				cout << "\"" << "_CL_DEVICE_GLOBAL_MEM_SIZE" << "\" : " << dev._CL_DEVICE_GLOBAL_MEM_SIZE << ","; // num
+				cout << "\"" << "_CL_DEVICE_VENDOR_ID" << "\" : " << dev._CL_DEVICE_VENDOR_ID << ",";
 				cout << "\"" << "_CL_DEVICE_VENDOR" << "\" : \"" << dev._CL_DEVICE_VENDOR << "\",";
 				cout << "\"" << "_CL_DEVICE_VERSION" << "\" : \"" << dev._CL_DEVICE_VERSION << "\",";
 				cout << "\"" << "_CL_DRIVER_VERSION" << "\" : \"" << dev._CL_DRIVER_VERSION << "\"";

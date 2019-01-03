@@ -35,6 +35,8 @@ public:
 	bool Enabled=false;
 	Enums::DeviceGroupType DeviceGroupType;
 	Enums::DeviceType DeviceType; // CPU, NVIDIA, AMD
+	uint16_t vendor=0; // Intel, AMD, Nvidia, ...
+	uint16_t subVendor=0; // Asus, Gigabyte, MSI ...
 	inline QString Uuid() const { return Uuid_; };
 	inline int BusID() const { return BusID_; }; // used for Claymore indexing
 	int IDByBus=-1;

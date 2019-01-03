@@ -4,7 +4,6 @@
 #include <QDir>
 #include <QFile>
 #include <QProcess>
-#include <libcpuid/libcpuid.h>
 
 using namespace NiceHashQtMiner;
 
@@ -38,6 +37,20 @@ QString CPUID::GetCPUName()
 	return QString(data.brand_str);
 }
 
+cpu_vendor_t CPUID::GetCPUVendorID()
+{
+	if (!cpuid_present()) {
+		return cpu_vendor_t::VENDOR_UNKNOWN;
+		}
+
+	struct cpu_raw_data_t raw;
+	struct cpu_id_t data;
+	if (cpuid_get_raw_data(&raw)<0 || cpu_identify(&raw, &data)<0) {
+		return cpu_vendor_t::VENDOR_UNKNOWN;
+		}
+	return data.vendor;
+}
+
 QString CPUID::GetCPUVendor()
 {
 	if (!cpuid_present()) {
@@ -62,7 +75,7 @@ int CPUID::SupportsSSE2()
 	if (cpuid_get_raw_data(&raw)<0 || cpu_identify(&raw, &data)<0) {
 		return 0;
 		}
-	return data.flags[CPU_FEATURE_SSE];
+	return data.flags[CPU_FEATURE_SSE2];
 }
 
 int CPUID::SupportsAVX()

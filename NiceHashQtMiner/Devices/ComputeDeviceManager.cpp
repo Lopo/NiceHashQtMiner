@@ -47,9 +47,9 @@
 #include <QUrl>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <boost/integer_traits.hpp>
 #include <sys/sysinfo.h>
 #include <sys/resource.h>
-#include <boost/integer_traits.hpp>
 
 #if _udev_
 #include <libudev.h>
@@ -349,6 +349,8 @@ void ComputeDeviceManager::Query::WindowsDisplayAdapters::QueryVideoControllers(
 //		vidController->UDev=QString(hd->unix_dev_name);
 		vidController->SysFS_BusID=QString(hd->sysfs_bus_id);
 		vidController->modalias=QString(hd->modalias);
+		vidController->vendor=hd->vendor.id & 0xffff;
+		vidController->subvendor=hd->sub_vendor.id & 0xffff;
 
 		stringBuilder << "\thwinfo hd_list(hw_display) detected:";
 		stringBuilder << QString("\t\tName %1").arg(vidController->Name);
@@ -560,11 +562,11 @@ void ComputeDeviceManager::Query::Cpu::QueryCpus()
 
 	if (CPUUtils::IsCpuMiningCapable()) {
 		if (Available.CpusCount==1) {
-			Available.Devices->append(new CpuComputeDevice(0, "CPU0", CPUID::GetCPUName().trimmed(), threadsPerCpu, 0, ++CpuCount));
+			Available.Devices->append(new CpuComputeDevice(0, "CPU0", CPUID::GetCPUName().trimmed(), threadsPerCpu, 0, ++CpuCount, CPUID::GetCPUVendorID()));
 			}
 		else if (Available.CpusCount>1) {
 			for (int i=0; i<Available.CpusCount; i++) {
-				Available.Devices->append(new CpuComputeDevice(i, "CPU"+QString::number(i), CPUID::GetCPUName().trimmed(), threadsPerCpu, CPUID::CreateAffinityMask(i, threadsPerCpuMask), ++CpuCount));
+				Available.Devices->append(new CpuComputeDevice(i, "CPU"+QString::number(i), CPUID::GetCPUName().trimmed(), threadsPerCpu, CPUID::CreateAffinityMask(i, threadsPerCpuMask), ++CpuCount, CPUID::GetCPUVendorID()));
 				}
 			}
 		}
@@ -804,6 +806,7 @@ void ComputeDeviceManager::Query::OpenCL::QueryOpenCLDevices()
 					lDev->_CL_DEVICE_NAME=jDevO.value("_CL_DEVICE_NAME").toString();
 					lDev->_CL_DEVICE_TYPE=jDevO.value("_CL_DEVICE_TYPE").toString();
 					lDev->_CL_DEVICE_GLOBAL_MEM_SIZE=jDevO.value("_CL_DEVICE_GLOBAL_MEM_SIZE").toDouble();
+					lDev->_CL_DEVICE_VENDOR_ID=jDevO.value("_CL_DEVICE_VENDOR_ID").toDouble();
 					lDev->_CL_DEVICE_VENDOR=jDevO.value("_CL_DEVICE_VENDOR").toString();
 					lDev->_CL_DEVICE_VERSION=jDevO.value("_CL_DEVICE_VERSION").toString();
 					lDev->_CL_DRIVER_VERSION=jDevO.value("_CL_DRIVER_VERSION").toString();

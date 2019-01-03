@@ -31,7 +31,9 @@ int main(int argc, char *argv[])
 	QCoreApplication::addLibraryPath("./");
 
 	qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
-//	QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#if QT_VERSION > 0x050100
+	QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#endif
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
 	// #1 first initialize config
