@@ -5,4 +5,4 @@ add_custom_target(QtSingleApplication ALL ./configure -library
 	COMMENT "building QtSingleApplication library"
 	)
 set(QtSingleApplication_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src" CACHE PATH "")
-set(QtSingleApplication_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libQtSolutions_SingleApplication-head.so" CACHE FILEPATH "")
+set(QtSingleApplication_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libQt5Solutions_SingleApplication-head.so" CACHE FILEPATH "")

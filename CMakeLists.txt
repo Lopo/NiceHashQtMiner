@@ -199,7 +199,7 @@ endif ()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBXSS xscrnsaver)
 
-find_package(Qt5
+find_package(Qt5 5.12
 	COMPONENTS
 		Core
 		Gui

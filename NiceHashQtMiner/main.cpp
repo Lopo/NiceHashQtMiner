@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 	// #1 first initialize config
 	ConfigManager.InitializeConfig();
 
-	QtSingleApplication a(argc, argv);
+	QtSingleApplication a(qApp->applicationName(), argc, argv);
 	a.setAttribute(Qt::AA_NativeWindows);
 	QFontDatabase fntDb;
 	QString curFam(QApplication::font().family());
