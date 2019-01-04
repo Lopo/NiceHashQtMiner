@@ -6,10 +6,14 @@
 #include "Devices/ComputeDeviceManager.h"
 #include "Devices/AmdGpuDevice.h"
 #include "Devices/ComputeDevice/AmdComputeDevice.h"
-#include "3rdParty/ADL.h"
+#if ADL_LIBWORKS
+#	include "3rdParty/ADL.h"
+#endif
 #include <QVersionNumber>
 
+#if ADL_LIBWORKS
 using namespace ATI::ADL;
+#endif
 
 
 AmdQuery::AmdQuery(QList<VideoControllerData*>* availControllers)
