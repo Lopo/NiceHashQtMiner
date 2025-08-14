@@ -1,5 +1,10 @@
 # NiceHashQtMiner
 
+> **⚠️ PROJECT ARCHIVED**
+> Ethereum moved to Proof-of-Stake in September 2022, effectively ending GPU mining profitability.
+> This project is no longer maintained and is kept for historical/educational purposes only.
+
+## Original Description
 
 NiceHash Qt Miner is a try for Linux port of [NiceHash Miner Legacy](https://github.com/nicehash/NiceHashMinerLegacy)
 
